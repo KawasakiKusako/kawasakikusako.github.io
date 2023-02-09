@@ -29,7 +29,7 @@ Some Websites' Link(for @Csmt)
 [VirtualWindows 7](https://win7simu.visnalize.com)
 [VirtualWindows 11](https://win11.blueedge.me/)
 
-教室内网：
+教室内网：(192.168.10.4)
 
 [LAN-RDC](http://192.168.10.4:11000)
 [LAN-MET](http://192.168.10.4:8087)
