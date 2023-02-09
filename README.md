@@ -17,6 +17,7 @@ LINKS
 
 Some Websites' Link(for @Csmt)
 
+通用网络：
 [百度](https://www.baidu.com)
 [bilibili](https://www.bilibili.com)
 
@@ -26,6 +27,7 @@ Some Websites' Link(for @Csmt)
 [VirtualWindows 7](https://win7simu.visnalize.com)
 [VirtualWindows 11](https://win11.blueedge.me/)
 
+教室内网：
 [LAN-RDC](http://192.168.10.4:11000)
 [LAN-KOD](http://192.168.10.4:8095)
 [LAN-YPM](http://192.168.10.4:35861)
