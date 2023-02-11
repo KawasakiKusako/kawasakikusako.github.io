@@ -28,6 +28,7 @@ Some Websites' Link(for @Csmt)
 
 [VirtualWindows 7](https://win7simu.visnalize.com)
 [VirtualWindows 11](https://win11.blueedge.me/)
+[VirtualWindows 9x/me](https://emupedia.net/beta/emuos/)
 
 教室内网：(192.168.10.4)
 
