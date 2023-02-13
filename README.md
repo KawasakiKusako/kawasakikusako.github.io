@@ -24,6 +24,7 @@ Some Websites' Link(for @Csmt)
 [YPM hexo](https://music.hexo.icu)
 
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
+[WikiMirror](https://zh.wikipedia.wmmirror.live/wiki/Wikipedia:首页)
 [加强计算器](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
 [VirtualWindows 7](https://win7simu.visnalize.com)
