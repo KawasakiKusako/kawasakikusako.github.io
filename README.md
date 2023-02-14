@@ -20,16 +20,16 @@ Some Websites' Link(for @Csmt)
 通用网络：
 
 [百度](nhttps://www.baidu.com)
-[bilibili](nhttps://www.bilibili.com)
+[bilibili](https://www.bilibili.com)
 [YPM hexo](https://music.hexo.icu)
 
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 [WikiMirror](https://zh.wikipedia.wmmirror.live/wiki/Wikipedia:首页)
 [加强计算器](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
-[VirtualWindows 7](nhttps://win7simu.visnalize.com)
-[VirtualWindows 11](nhttps://win11.blueedge.me/)
-[VirtualWindows 9x/me](nhttps://emupedia.net/beta/emuos/)
+[VirtualWindows 7](https://win7simu.visnalize.com)
+[VirtualWindows 11](https://win11.blueedge.me/)
+[VirtualWindows 9x/me](https://emupedia.net/beta/emuos/)
 
 教室内网：(192.168.10.4)
 
