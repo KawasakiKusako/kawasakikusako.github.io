@@ -19,7 +19,7 @@ Some Websites' Link(for @Csmt)
 
 通用网络：
 
-[百度](nhttps://www.baidu.com)
+[百度](https://www.baidu.com)
 [bilibili](https://www.bilibili.com)
 [YPM hexo](https://music.hexo.icu)
 
