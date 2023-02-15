@@ -12,24 +12,24 @@ Include：
   If you have sth, you could email me --- jzg2423498348@outlook.com
 
 -
-LINKS
+LINKS!
 -
 
 Some Websites' Link(for @Csmt)
 
 通用网络：
 
-[百度](https://www.baidu.com)
+[百度](http://www.eastedu.com)
 [bilibili](https://www.bilibili.com)
 [YPM hexo](https://music.hexo.icu)
 
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 [WikiMirror](https://zh.wikipedia.wmmirror.live/wiki/Wikipedia:首页)
-[加强计算器](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
+[加强计算器](http://www.eastedu.com)
 
-[VirtualWindows 7](https://win7simu.visnalize.com)
-[VirtualWindows 11](https://win11.blueedge.me/)
-[VirtualWindows 9x/me](https://emupedia.net/beta/emuos/)
+[VirtualWindows 7](http://www.eastedu.com)
+[VirtualWindows 11](http://www.eastedu.com)
+[VirtualWindows 9x/me](http://www.eastedu.com)
 
 教室内网：(192.168.10.4)
 
