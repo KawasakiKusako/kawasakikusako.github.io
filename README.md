@@ -18,7 +18,8 @@ KAGAHA!
 
 ![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w2.jpeg)
 
-[realR series](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpeg)
+[realR series rw1](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpeg)
+[realR series rw2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)
 
 -
 KAWASAKI!
