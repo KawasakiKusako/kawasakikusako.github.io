@@ -1,5 +1,7 @@
 # kawasakikusako.github.io
-My Personal Web Test Server  
+
+##JUST A NORMAL WEB. Really!
+
 -
 Include：
 
