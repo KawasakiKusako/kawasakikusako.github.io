@@ -14,7 +14,7 @@ Include：
   If you have sth, you could email me --- jzg2423498348@outlook.com
   
 -
-KAGAHA!
+KAGA!
 -
 ![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w1.jpeg)
 
@@ -22,6 +22,8 @@ KAGAHA!
 
 [realR series rw1](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpeg)
 [realR series rw2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)
+
+Twitter  [jmdd55](http://www.twitter.com/jmdd5t)
 
 -
 KAWASAKI!
