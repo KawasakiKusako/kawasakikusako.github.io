@@ -10,9 +10,18 @@ Include：
   3...
   
   If you have sth, you could email me --- jzg2423498348@outlook.com
+  
+-
+KAGAHA!
+-
+![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w1.jpeg)
+
+![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w2.jpeg)
+
+[realR series](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpeg)
 
 -
-LINKS!
+KAWASAKI!
 -
 
 Some Websites' Link(for @Csmt)
