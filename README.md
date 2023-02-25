@@ -14,36 +14,9 @@ If you have some idea you could email me.
 
 # Local Weather Express
 
-<div>
-    <iframe src="http://m.nmc.cn/publish/forecast//ASC/jiuzhaigou.html" width="500" height="700" name="Local_weather" scrolling="no">
- </iframe>
-</div>
-
-<div id="he-plugin-simple"></div>
-<script>
-WIDGET = {
-  "CONFIG": {
-    "modules": "01234",
-    "background": "1",
-    "tmpColor": "FFFFFF",
-    "tmpSize": "16",
-    "cityColor": "FFFFFF",
-    "citySize": "16",
-    "aqiColor": "FFFFFF",
-    "aqiSize": "16",
-    "weatherIconSize": "24",
-    "alertIconSize": "18",
-    "padding": "10px 10px 10px 10px",
-    "shadow": "0",
-    "language": "auto",
-    "fixed": "false",
-    "vertical": "top",
-    "horizontal": "left",
-    "key": "253cdecef1b54ba2bd74cb1d756fab1c"
-  }
-}
-</script>
-<script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script>
+[NMC](http://m.nmc.cn/publish/forecast//ASC/jiuzhaigou.html)
+[NMCRadar](http://m.nmc.cn/publish/tianqishikuang/leidatu/danzhanleida/gansu/longnan/index.html)
+[Qweather](https://widget-page.qweather.net/h5/index.html?md=0123456&bg=1&lc=auto&key=e5e62109b8a440b28aa55fbd0e10bd1f&v=_1677352538484)
 
 # Fast Explorer
   ## General Network Envir:
