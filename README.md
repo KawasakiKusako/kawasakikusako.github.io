@@ -1,51 +1,51 @@
-# kawasakikusako.github.io
+# [KawasakiKusako IO](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 
-##JUST A NORMAL WEB. Really!
+Just a normal website. REALLY!
 
--
-Include：
+### Include：
 
-  1.Meteorological Navigation
-  
-  2.General image chance
-  
-  3...
-  
-  If you have sth, you could email me --- jzg2423498348@outlook.com
-  
--
-KAGA!
--
-![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w1.jpeg)
+- 1.Meteorological Navigation
 
-![image](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/w2.jpeg)
+- 2.General image chance
 
-[realR series rw1](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpeg)
-[realR series rw2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)
+- 3...
 
-Twitter  [jmdd55](http://www.twitter.com/jmdd5t)
+If you have some idea you could email me. 
 
--
-KAWASAKI!
--
+# Local Weather Express
 
-Some Websites' Link(for @Csmt)
+<div>
+    <iframe src="http://m.nmc.cn/publish/forecast//ASC/jiuzhaigou.html" width="500" height="700" name="Local_weather" scrolling="no">
+ </iframe>
+</div>
 
-通用网络：
+# Fast Explorer
+  ## General Network Envir:
 
+General Link :
+[Baidu](https://www.baidu.com)
+[Bing](https://cn.bing.com)
 [bilibili](https://www.bilibili.com)
-[YPM hexo](https://music.hexo.icu)
+[YPM-hexo](https://music.hexo.icu)
 
+
+Meteorological Service ：
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
-[加强计算器](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
-
 [CMA](http://www.nmc.cn)
 [JMA](http://www.jma.go.jp)
 [KMA](http://www.kma.go.kr)
 [NOAA](http://www.noaa.gov)
 [ECMWF](http://www.ecmwf.int)
 
-教室内网：(192.168.10.4)
+Educational Link :
+[YoudaoWebDict](https://www.youdao.com/result?word=hello%20world&lang=en)
+[YoudaoWebTrans](https://fanyi.youdao.com)
+[BaiduWebTrans](https://fanyi.baidu.com)
+[Enhanced-Calculator](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
+
+
+ ## Education Network LAN 
+ ( LAN-X Only in specific network environment )
 
 [LAN-RDC](http://192.168.10.4:11000)
 [LAN-MET](http://192.168.10.4:8087)
@@ -53,3 +53,17 @@ Some Websites' Link(for @Csmt)
 [LAN-NEM](http://192.168.10.4:3000)
 [LAN-KOD](http://192.168.10.4:8095)
 [LAN-YPM](http://192.168.10.4:35861)
+
+[EDU-OPS](https://cdqz-login.open-school.com.cn/)
+[EDU-ULN](https://u-learning.eastedu.com/)
+[EDU-ZXU](https://www.zhixue.com/)
+[EDU-ESU](https://www.eastedu.com/)
+[EDU-MPL](http://manage-portal.eastedu.com)
+[EDU-LSL](http://cloud.linspirer.com:880/)
+
+
+PS: Only by Youdao Dict and other general Bowser could encode.
+
+# 
+# F**K U Linspirer
+## Kawasaki Kusako © 2020-2023
