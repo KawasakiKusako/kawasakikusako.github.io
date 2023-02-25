@@ -42,6 +42,12 @@ Educational Link :
 [BaiduWebTrans](https://fanyi.baidu.com)
 [Enhanced-Calculator](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
+Desktop Simulators :
+[SimWindows7](https://win7simu.visnalize.com)
+[SimWindows11](https://win11.blueedge.me/)
+[SimWindows9x](https://emupedia.net/beta/emuos/)
+(DesktopSimulators are based on HTML and Ajax. You cloud't save anything without cookie on it.)
+
 
  ## Education Network LAN 
  ( LAN-X Only in specific network environment )
