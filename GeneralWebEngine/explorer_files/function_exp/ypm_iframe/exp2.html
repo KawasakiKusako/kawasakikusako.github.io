@@ -68,6 +68,73 @@ $(function () {
 </script>
 </head>
 <body>
+    <script>
+        $(function () {
+
+        var frame = $('<iframe width="320" height="480"></iframe>');
+
+        frame.hide();
+
+        $('#container').append(frame);
+
+        var contentWindow = frame[0].contentWindow || frame[0].contentDocument;
+
+        var setUA = function() {
+
+            if (Object.defineProperty) {
+
+                Object.defineProperty(contentWindow.navigator, 'userAgent', {
+
+                    configurable: true,
+
+                    get: function () {
+
+                        return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36';
+
+                    }
+
+                });
+
+            } else if (Object.prototype.__defineGetter__) {
+
+                contentWindow.navigator.__defineGetter__('userAgent', function () {
+
+                        return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36';
+
+                });
+
+            } else {
+
+                alert('browser not supported');
+
+            }
+
+        };
+
+        $.ajax({
+
+            cache: false,
+
+            url: '/home/get',
+
+            success: function (html) {
+
+                contentWindow.document.open();
+
+                setUA();
+
+                contentWindow.document.write(html);
+
+                contentWindow.document.close();
+
+                frame.fadeIn();
+
+            }
+
+        });
+
+    });
+    </script>
 <iframe height='1400px' width='100%' src="https://www.baidu.com" ></iframe>
 </body>
 </html>
