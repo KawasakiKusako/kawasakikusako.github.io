@@ -52,7 +52,7 @@ Desktop Simulators :
  ## Education Network LAN 
  ( LAN-X Only in specific network environment )
 
-[LAN-RDC](http://192.168.10.4:11000)
+[LAN-RDC](https://192.168.10.4:11000)
 [LAN-MET](http://192.168.10.4:8087)
 [LAN-API](http://192.168.10.4:8093)
 [LAN-NEM](http://192.168.10.4:3000)
