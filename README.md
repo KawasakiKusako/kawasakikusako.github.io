@@ -75,8 +75,8 @@ PS: Only by Youdao Dict and other general Bowser could encode.
 (Experimenta function modules for developers. )
 
 [VS Code](https://vscode.dev)
-[iframe_exp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
-[iframe_exp1](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/exp1.html)
+[iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
+[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/exp2.html)
 
 #
 # F**K U Linspirer
