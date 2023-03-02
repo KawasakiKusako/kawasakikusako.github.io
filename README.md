@@ -25,7 +25,7 @@ General Link :
 [Baidu](https://www.baidu.com)
 [Bing](https://cn.bing.com)
 [bilibili](https://www.bilibili.com)
-[YPM-hexo](http://music.hexo.icu)
+[YPM-hexo](https://music.hexo.icu)
 
 
 Meteorological Service ：
