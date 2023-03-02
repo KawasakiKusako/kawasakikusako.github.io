@@ -25,22 +25,22 @@ General Link :
 [Baidu](https://www.baidu.com)
 [Bing](https://cn.bing.com)
 [bilibili](https://www.bilibili.com)
-[YPM-hexo](https://music.hexo.icu)
+[YPM-hexo](http://music.hexo.icu)
 
 
 Meteorological Service ：
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
-[CMA](http://www.nmc.cn)
-[JMA](http://www.jma.go.jp)
-[KMA](http://www.kma.go.kr)
-[NOAA](http://www.noaa.gov)
-[ECMWF](http://www.ecmwf.int)
+[CMA](https://www.cma.gov.cn)
+[JMA](https://www.jma.go.jp)
+[KMA](https://www.kma.go.kr)
+[NOAA](https://www.noaa.gov)
+[ECMWF](https://www.ecmwf.int)
 
 Educational Link :
 [YoudaoWebDict](https://www.youdao.com/result?word=hello%20world&lang=en)
 [YoudaoWebTrans](https://fanyi.youdao.com)
 [BaiduWebTrans](https://fanyi.baidu.com)
-[Enhanced-Calculator](http://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
+[Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
 Desktop Simulators :
 [SimWindows7](https://win7simu.visnalize.com)
