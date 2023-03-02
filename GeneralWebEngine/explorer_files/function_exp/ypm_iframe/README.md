@@ -1,4 +1,4 @@
 # iframe framework experimental pool
 
-[direct](http://music.hexo.icu)
+[direct](https://music.hexo.icu)
 [iframe](http://www.nmc.cn)
