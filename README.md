@@ -10,9 +10,7 @@ Just a normal website. REALLY!
 
 - 3...
 
-If you have some idea you could email me. 
-
-# [九中大烟馆](https://music.hexo.icu)
+If you have some idea you could email me.
 
 # Local Weather Express
 
@@ -27,6 +25,7 @@ General Link :
 [Baidu](https://www.baidu.com)
 [Bing](https://cn.bing.com)
 [bilibili](https://www.bilibili.com)
+[YPMhexo](https://github.com/KawasakiKusako/jzdyg-JiuZhongDaYanGuan)
 
 
 Meteorological Service ：
