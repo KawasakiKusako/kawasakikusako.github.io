@@ -12,6 +12,19 @@ Just a normal website. REALLY!
 
 If you have some idea you could email me.
 
+
+# Experimenta Function
+
+(Experimenta function modules for developers. )
+
+[VS Code](https://vscode.dev)
+
+[iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
+
+[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/exp2.html)
+
+[WebQQ(under construction)](http://www.nmc.cn)
+
 # Local Weather Express
 
 [NMC](http://m.nmc.cn/publish/forecast//ASC/jiuzhaigou.html)
@@ -66,17 +79,6 @@ Desktop Simulators :
 [EDU-MPL](http://manage-portal.eastedu.com)
 [EDU-LSL](http://cloud.linspirer.com:880/)
 
-
-PS: Only by Youdao Dict and other general Bowser could encode.
-
-
-# Experimenta Function
-
-(Experimenta function modules for developers. )
-
-[VS Code](https://vscode.dev)
-[iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
-[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/exp2.html)
 
 #
 # F**K U Linspirer
