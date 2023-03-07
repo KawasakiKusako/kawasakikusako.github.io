@@ -38,7 +38,7 @@ General Link :
 [Baidu](https://www.baidu.com)
 [Bing](https://cn.bing.com)
 [bilibili](https://www.bilibili.com)
-[南坪烟草专卖局](https://github.com/KawasakiKusako/jzdyg-JiuZhongDaYanGuan)
+[南坪烟草专卖局](https://music.hexo.icu)
 
 
 Meteorological Service ：
