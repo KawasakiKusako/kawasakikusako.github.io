@@ -18,6 +18,29 @@ If you have some idea you could email me.
 
 # Experimenta Function
 
+```JavaScript
+setUserAgent(
+   document.querySelector('iframe').contentWindow,
+   'Aakash Chakravarthy Mobile Agent'
+);
+function setUserAgent(window, userAgent) {
+   if (window.navigator.userAgent != userAgent) {
+      var userAgentProp = {
+         get: function() {
+            return userAgent;
+         }
+      };
+      try {
+         Object.defineProperty(window.navigator, 'userAgent', userAgentProp);
+      } catch (e) {
+         window.navigator = Object.create(navigator, {
+            userAgent: userAgentProp
+         });
+      }
+   }
+}
+```
+
 (Experimenta function modules for developers. )
 
 [VS Code](https://vscode.dev)
