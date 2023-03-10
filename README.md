@@ -64,7 +64,7 @@ function setUserAgent(window, userAgent) {
   
   ```
   ⚠️KAGA ADVICE⚠️ 
-  屏幕亮度 音量大小 窗外生物
+  屏幕亮度 音量大小 窗外生物［若察觉其存在不要与之对视并立即打开绿色图标软件］
   
   🎧
   ⚠️Kawasaki Warning⚠️ 
@@ -80,7 +80,7 @@ General Link :
 [Baidu](https://www.12339.gov.cn)
 [Bing](https://www.gov.cn)
 [bilibili](https://www.12339.gov.cn)
-[南坪烟草专卖局🚬](https://www.gov.cn)
+[南坪烟草专卖局🚬](https://www.Alicesoft.com)
 
 
 Meteorological Service ：
