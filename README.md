@@ -21,7 +21,7 @@ If you have some idea you could email me.
 
 [iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
 
-[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/exp2.html)
+[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0)
 
@@ -35,9 +35,9 @@ If you have some idea you could email me.
   ## General Network Envir:
 
 General Link :
-[Baidu](https://www.baidu.com)
-[Bing](https://cn.bing.com)
-[bilibili](https://www.bilibili.com)
+[Baidu](https://www.12339.gov.cn)
+[Bing](https://www.12339.gov.cn)
+[bilibili](https://www.12339.gov.cn)
 [南坪烟草专卖局](https://music.hexo.icu)
 
 
@@ -56,7 +56,7 @@ Educational Link :
 [Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
 Desktop Simulators :
-[SimWindows7](https://win7simu.visnalize.com)
+[SimWindows7](https://www.12339.gov.cn)
 [SimWindows11](https://win11.blueedge.me/)
 [SimWindows9x](https://emupedia.net/beta/emuos/)
 (DesktopSimulators are based on HTML and Ajax. You cloud't save anything without cookie on it.)
