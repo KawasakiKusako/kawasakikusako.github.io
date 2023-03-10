@@ -27,6 +27,8 @@ If you have some idea you could email me.
 
 [iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
 
+[iframe_bing](http://cn.bing.com)
+
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0)
 
 # Local Weather Express
