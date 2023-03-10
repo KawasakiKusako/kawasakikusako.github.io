@@ -66,6 +66,8 @@ function setUserAgent(window, userAgent) {
   ⚠️KAGA ADVICE⚠️ 
   屏幕亮度 音量大小 窗外生物［若察觉其存在不要与之对视并立即打开绿色图标软件］
   
+  ［当发现非所在空间常驻生物推开直立活动金属板进入您所在空间时 请以自然的方式摘下佩戴于双耳（单耳）的音频发生装置 之后或与之对视］
+  
   🎧
   ⚠️Kawasaki Warning⚠️ 
   您当前处于 #Level九中# 中。
