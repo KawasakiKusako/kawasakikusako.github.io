@@ -42,6 +42,8 @@ If you have some idea you could email me.
 
 # Fast Explorer
   ## General Network Envir:
+  ⚠️⚠️KAGA ADVICE⚠️⚠️
+  屏幕亮度 音量大小 窗外生物
 
 General Link :
 [Baidu](https://www.12339.gov.cn)
