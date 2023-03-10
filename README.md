@@ -39,11 +39,18 @@ If you have some idea you could email me.
 # Fast Explorer
   ## General Network Envir:
   
-  '''
-  ⚠️KAGA ADVICE⚠️ 屏幕亮度 音量大小 窗外生物
+  ```
+  ⚠️KAGA ADVICE⚠️ 
+  屏幕亮度 音量大小 窗外生物
   
-  🎧⚠️Kawasaki Warning⚠️ 您当前处于 Level九中 中。请注意窗外的实体危险。当你瞥见一头油腻长发彳亍时，请你一定保持镇定，然后。。。。。
-  '''
+  🎧
+  ⚠️Kawasaki Warning⚠️ 
+  您当前处于 #Level九中# 中。
+  请注意窗外的实体危险。
+  当你瞥见一头油腻长发彳亍时，
+  请你一定保持镇定，
+  ta也许已经发现你了。。。
+  ```
   
 
 General Link :
