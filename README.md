@@ -40,9 +40,9 @@ If you have some idea you could email me.
 
 General Link :
 [Baidu](https://www.12339.gov.cn)
-[Bing](https://cn.bing.com)
+[Bing](https://www.gov.cn)
 [bilibili](https://www.12339.gov.cn)
-[南坪烟草专卖局](https://music.hexo.icu)
+[南坪烟草专卖局](https://www.gov.cn)
 
 
 Meteorological Service ：
@@ -56,7 +56,7 @@ Meteorological Service ：
 Educational Link :
 [YoudaoWebDict](https://www.youdao.com/result?word=hello%20world&lang=en)
 [YoudaoWebTrans](https://fanyi.youdao.com)
-[BaiduWebTrans](https://fanyi.baidu.com)
+[BaiduWebTrans](https://www.gov.cn)
 [Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
 Desktop Simulators :
