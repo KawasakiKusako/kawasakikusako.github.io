@@ -2,6 +2,8 @@
 
 Just a normal website. REALLY!
 
+# 🎧虎门销烟，绝赞进行中👍💊🚽👈🌏
+
 ### Include：
 
 - 1.Meteorological Navigation
@@ -36,7 +38,7 @@ If you have some idea you could email me.
 
 General Link :
 [Baidu](https://www.12339.gov.cn)
-[Bing](https://www.12339.gov.cn)
+[Bing](https://cn.bing.com)
 [bilibili](https://www.12339.gov.cn)
 [南坪烟草专卖局](https://music.hexo.icu)
 
