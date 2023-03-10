@@ -2,11 +2,7 @@
 
 Just a normal website. REALLY!
 
-# 🎧虎门销烟，雨林攒劲中🔥🔥🔥
-
-🍂🍃川崎老板带着他的鸦片逃跑了🍃🍂
-
-😅kawasaki boss escaped with his opium😅
+# 🎧虎门销烟，雨林[攒劲](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw1.jpg)中🔥🔥🔥
 
 
 ### Include：
