@@ -35,5 +35,5 @@ setUserAgent(document.querySelector('iframe').contentWindow, 'MANnDAaR Fake Agen
 
 test links
 
-[direct](https://music.hexo.icu)
+[direct](https://www.gov.cn)
 [iframe](http://www.nmc.cn)
