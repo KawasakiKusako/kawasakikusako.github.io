@@ -6,7 +6,7 @@ Just a normal website. REALLY!
 
 🍂🍃川崎老板带着他的鸦片逃跑了🍃🍂
 
-😅kawasaki boss escaped with hisopium😅
+😅kawasaki boss escaped with his opium😅
 
 
 ### Include：
