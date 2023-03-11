@@ -89,7 +89,7 @@ General Link :
 [Baidu](https://www.12339.gov.cn)
 [Bing](https://www.gov.cn)
 [bilibili](https://www.12339.gov.cn)
-[南](https://www.youdao.com/result?word=hello%20world&lang=en)[坪烟草专卖](https://www.gov.cn)[局](https://fanyi.youdao.com)
+[南](https://www.youdao.com/result?word=hello%20world&lang=en)[坪烟草专卖](https://www.gov.cn)[局](https://fanyi.youdao.com)。
 
 
 Meteorological Service ：
