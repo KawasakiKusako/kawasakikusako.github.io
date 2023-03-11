@@ -76,7 +76,7 @@ function setUserAgent(window, userAgent) {
   当你瞥见一头油腻长发彳亍时，
   请你一定保持镇定，
   务必保持镇定！
-  ta也许已经发现你了[。](https://www.youdao.com/result?word=hello%20world&lang=en)[。](https://fanyi.youdao.com)[。](https://www.baidu.com)
+  ta也许已经发现你了。。。
   
   但是，请相信
   我们，一定会胜利！
