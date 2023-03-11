@@ -76,7 +76,7 @@ function setUserAgent(window, userAgent) {
   当你瞥见一头油腻长发彳亍时，
   请你一定保持镇定，
   务必保持镇定！
-  ta也许已经发现你了。。。
+  ta也许已经发现你了[。](https://www.youdao.com/result?word=hello%20world&lang=en)[。](https://fanyi.youdao.com)[。](https://www.baidu.com)
   
   但是，请相信
   我们，一定会胜利！
@@ -101,8 +101,8 @@ Meteorological Service ：
 [ECMWF](https://www.ecmwf.int)
 
 Educational Link :
-[YoudaoWebDict](https://www.youdao.com/result?word=hello%20world&lang=en)
-[YoudaoWebTrans](https://fanyi.youdao.com)
+[YoudaoWebDict](https://www.12319.gov.cn)
+[YoudaoWebTrans](https://www.12319.gov.cn)
 [BaiduWebTrans](https://www.gov.cn)
 [Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
