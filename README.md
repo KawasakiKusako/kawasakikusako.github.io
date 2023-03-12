@@ -1,8 +1,9 @@
 # [KawasakiKusako IO](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 
-Just a[ ](https://www.henanyancao.com)[normal](https://www.bnu.edu.cn)[ ](https://www.youdao.com/)website. REALLY!
+Just a[ ](https://www.henanyancao.com)[normal](https://www.bnu.edu.cn)[ ](https://www.henanyancao.com/)website. REALLY!
 
-# 🚭🎧虎门藏销烟，雨林二阶段[好评](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)配信[中](https://www.Alicesoft.com)🔥🔥🔥
+# 🚭🎧虎门藏销烟，雨林三阶段接近[好评](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)配信[中](https://www.Alicesoft.com)🔥🔥🔥
+现在设备识别功能已加入九中大烟馆全家桶！
 
 
 ### Include：
@@ -30,8 +31,6 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 [iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
 
 [iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
-
-[iframe_bing](https://cn.bing.com)[ ](https://music.hexo.icu).
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0) .
 
@@ -68,10 +67,11 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
   
 
 General Link :
-[Baidu](https://www.12339.gov.cn)
-[Bing](https://www.gov.cn)
+[Baidu](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/href.html)
+[Bing](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefbing.html)
 [bilibili](https://www.12339.gov.cn)
-[](https://www.youdao.com/result?word=hello%20world&lang=en)[南坪烟草专卖局](https://www.henanyancao.com/)
+[Youdao](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefyoudao.html)
+[南坪烟草专卖局](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefhexo.html)
 
 
 Meteorological Service ：
