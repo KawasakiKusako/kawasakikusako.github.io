@@ -1,6 +1,6 @@
 # [KawasakiKusako IO](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 
-Just a[ ](https://music.hexo.icu)[normal](https://www.bnu.edu.cn)[ ](https://www.youdao.com/)website. REALLY!
+Just a[ ](https://www.henanyancao.com)[normal](https://www.bnu.edu.cn)[ ](https://www.youdao.com/)website. REALLY!
 
 # 🚭🎧虎门藏销烟，雨林二阶段[好评](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)配信[中](https://www.Alicesoft.com)🔥🔥🔥
 
@@ -31,8 +31,7 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 
 [iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
 
-[iframe_bing](https://www.12339.gov.cn
-)
+[iframe_bing](https://cn.bing.com)   [ ](https://music.hexo.icu)
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0)
 
@@ -72,7 +71,7 @@ General Link :
 [Baidu](https://www.12339.gov.cn)
 [Bing](https://www.gov.cn)
 [bilibili](https://www.12339.gov.cn)
-[](https://www.youdao.com/result?word=hello%20world&lang=en)[南坪烟草专卖局](https://www.henanyancao.com/hnyc/index.html)
+[](https://www.youdao.com/result?word=hello%20world&lang=en)[南坪烟草专卖局](https://www.henanyancao.com/)
 
 
 Meteorological Service ：
