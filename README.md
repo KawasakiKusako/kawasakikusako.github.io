@@ -31,7 +31,7 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 
 [iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html)
 
-[iframe_bing](https://cn.bing.com)   [ ](https://music.hexo.icu)
+[iframe_bing](https://cn.bing.com)[ ](https://music.hexo.icu)
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0)
 
