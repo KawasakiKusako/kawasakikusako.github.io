@@ -19,26 +19,8 @@ If you have some idea you could email me.
 # Experimenta Function
 
 ```JavaScript
-setUserAgent(
-   document.querySelector('iframe').contentWindow,
-   'Aakash Chakravarthy Mobile Agent'
-);
-function setUserAgent(window, userAgent) {
-   if (window.navigator.userAgent != userAgent) {
-      var userAgentProp = {
-         get: function() {
-            return userAgent;
-         }
-      };
-      try {
-         Object.defineProperty(window.navigator, 'userAgent', userAgentProp);
-      } catch (e) {
-         window.navigator = Object.create(navigator, {
-            userAgent: userAgentProp
-         });
-      }
-   }
-}
+//for user-agent
+Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/98.0.4758.102 MQQBrowser/6.2 TBS/046331 Mobile Safari/537.36 app/tencent_wemeet os_name/Android os_version/26 app_version/3.14.8.403 c_district/0 app_sdk_id/0300000000 app_lang/zh-cn app_instance_id/3
 ```
 
 (Experimenta function modules for developers. )
