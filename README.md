@@ -25,15 +25,15 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 
 (Experimenta function modules for developers. )
 
-[VS Code](https://vscode.dev).
+[VS Code](https://vscode.dev) .
 
-[iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html).
+[iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
 
-[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html).
+[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
 
 [iframe_bing](https://cn.bing.com)[ ](https://music.hexo.icu).
 
-[WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0).
+[WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0) .
 
 # Local Weather Express
 
