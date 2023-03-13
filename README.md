@@ -12,9 +12,7 @@
 
 If you have some idea you could email me.
 
-# Experimenta Function
-
-(Experimenta function modules for developers. )
+# Something strange.
 
 [VS Code](https://vscode.dev) .
 
@@ -24,9 +22,9 @@ If you have some idea you could email me.
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0) .
 
-# Local Weather Express
-
 [Qweather](https://widget-page.qweather.net/h5/index.html?md=0123456&bg=1&lc=auto&key=e5e62109b8a440b28aa55fbd0e10bd1f&v=_1677352538484)
+
+[Qweather2](https://www.qweather.com)
 
 # Fast Explorer
   ## General Network Envir
