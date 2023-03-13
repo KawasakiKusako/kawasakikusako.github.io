@@ -69,7 +69,7 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 General Link :
 [Baidu](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefbaidu.html)
 [Bing](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefbing.html)
-[bilibili](https://cn.bing.com)
+[bilibili](https://www.growing.u-learning.com)
 [Youdao](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefyoudao.html)
 [南坪烟草专卖局](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefhexo.html)
 
