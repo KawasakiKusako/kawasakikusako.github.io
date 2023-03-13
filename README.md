@@ -1,10 +1,6 @@
 # [KawasakiKusako IO](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
 
-Just a[ ](https://www.henanyancao.com)[normal](https://www.bnu.edu.cn)[ ](https://www.henanyancao.com/)website. REALLY!
-
-# 🚭🎧虎门藏销烟，雨林三阶段接近[好评](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/Chace/PicUploadChance/realR/rw2.jpeg)配信[中](https://www.Alicesoft.com)🔥🔥🔥
-现在设备识别功能已加入九中大烟馆全家桶！
-
+#For meteorological career.
 
 ### Include：
 
@@ -16,13 +12,7 @@ Just a[ ](https://www.henanyancao.com)[normal](https://www.bnu.edu.cn)[ ](https:
 
 If you have some idea you could email me.
 
-
 # Experimenta Function
-
-```JavaScript
-//for user-agent
-Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/98.0.4758.102 MQQBrowser/6.2 TBS/046331 Mobile Safari/537.36 app/tencent_wemeet os_name/Android os_version/26 app_version/3.14.8.403 c_district/0 app_sdk_id/0300000000 app_lang/zh-cn app_instance_id/3
-```
 
 (Experimenta function modules for developers. )
 
@@ -36,43 +26,13 @@ Mozilla/5.0 (Linux; Android 8.0.0; BZT-AL00 Build/HUAWEIBZT-AL00; wv) AppleWebKi
 
 # Local Weather Express
 
-[NMC](http://m.nmc.cn/publish/forecast//ASC/jiuzhaigou.html)
-[NMCRadar](http://m.nmc.cn/publish/tianqishikuang/leidatu/danzhanleida/gansu/longnan/index.html)
 [Qweather](https://widget-page.qweather.net/h5/index.html?md=0123456&bg=1&lc=auto&key=e5e62109b8a440b28aa55fbd0e10bd1f&v=_1677352538484)
 
 # Fast Explorer
-  ## General Network Envir:
-  
-  ```
-  ⚠️KAGA ADVICE⚠️ 
-  屏幕亮度 音量大小 窗外有害实体（生物）
-  ［若察觉其存在不要与之对视并立即打开绿色图标软件］
-  ［当发现非所在空间常驻生物推开直立活动金属板进入您所在空间时 
-    或与之对视并请以自然的方式摘下佩戴于双耳（单耳）的音频发生装置 ］
-  
-  🎧
-  ⚠️Kawasaki Warning⚠️ 
-  您当前处于 #Level九中# 中。
-  请注意窗外的实体危险。
-  当你瞥见一头油腻长发彳亍时，
-  请你一定保持镇定，
-  务必保持镇定！
-  ta也许已经发现你了。。。
-  
-  但是，请相信
-  我们，一定会胜利！
-  这是属于我们勇气与不屈的赞歌！
-  🌏
-  ```
-  
+  ## General Network Envir
 
 General Link :
-[Baidu](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefbaidu.html)
-[Bing](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefbing.html)
-[bilibili](https://www.growing.u-learning.com)
-[Youdao](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefyoudao.html)
-[南坪烟草专卖局](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/control/hrefhexo.html)
-
+[tsubakikitsuneExp](https://github.com/tsubakikitsune)
 
 Meteorological Service ：
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
@@ -82,10 +42,9 @@ Meteorological Service ：
 [NOAA](https://www.noaa.gov)
 [ECMWF](https://www.ecmwf.int)
 
-Educational Link :
-[YoudaoWebDict](https://www.12339.gov.cn)
-[YoudaoWebTrans](https://www.12319.gov.cn)
-[BaiduWebTrans](https://www.gov.cn)
+Educational Link 
+[YoudaoWebDict](https://www.youdao.com)
+[BaiduWebTrans](https://fanyi.baidu.com)
 [Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
 Desktop Simulators :
@@ -112,7 +71,10 @@ Desktop Simulators :
 [EDU-MPL](http://manage-portal.eastedu.com)
 [EDU-LSL](http://cloud.linspirer.com:880/)
 
+[GEN-BDU](https://www.baidu.com)
+[GEN-BIL](https://www.bilibili.com)
+[GEN-YPM](https://music.hexo.icu)
+[GEN-BIN](https://cn.bing.com)
 
 #
 # F**K U Linspirer
-## Kawasaki Kusako © 2020-2023
