@@ -32,7 +32,7 @@ If you have some idea you could email me.
 General Link :
 [tsubakikitsuneExp](https://github.com/tsubakikitsune) ❗️❗️⭕️❌💓smoke? Sir, this way!
 
-🌹🌹🌹😎😍😍😍😚😚❤️😎👯👉👌👈👯😎❤️😚😚😍😍😍😎🌹🌹🌹
+💎🎉🌹😎😍😚❤️😎👯👉👌👈👯😎❤️😚😍😎🌹🎉💎
 
 Meteorological Service ：
 [MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)
