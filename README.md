@@ -2,6 +2,19 @@
 
 # For meteorological career.
 
+``` html
+<script>
+    var sites = [        
+        'http://www.example.com',
+    ];
+    function randomSite() {
+        var i = parseInt(Math.random() * sites.length);
+        location.href = sites[i];
+    }
+</script>
+<a href="#" onclick="randomSite();">Random</a>
+```
+
 ### Include：
 
 - 1.Meteorological Navigation
@@ -75,6 +88,8 @@ Desktop Simulators :
 [GEN-YPM](https://music.hexo.icu)
 [GEN-BIN](https://cn.bing.com)
 
-# [社会](https://www.bnu.edu.cn)性死亡- 在MeteoExp中（最下方）
+# [社会](https://www.bnu.edu.cn)性死亡
+
+## 在[MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)中（最下方）
 
 # F**K U Linspirer
