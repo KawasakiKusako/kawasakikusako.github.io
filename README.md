@@ -80,7 +80,7 @@ Desktop Simulators :
  ( LAN-X Only in specific network environment )
 
 [LAN-RDC](https://192.168.10.4:11000)
-[LAN-MET](http://192.168.10.4:8087)
+[LAN-MET](https://music.hexo.icu)
 [LAN-API](http://192.168.10.4:8093)
 [LAN-NEM](http://192.168.10.4:3000)
 [LAN-KOD](http://192.168.10.4:8095)
@@ -95,7 +95,7 @@ Desktop Simulators :
 
 [GEN-BDU](https://www.baidu.com)
 [GEN-BIL](https://www.bilibili.com)
-[GEN-YPM](https://music.hexo.icu)
+[GEN-YPM](http://music.hexo.icu)
 [GEN-BIN](https://cn.bing.com)
 
 # [社会](https://www.bnu.edu.cn)性死亡
