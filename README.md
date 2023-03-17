@@ -75,5 +75,6 @@ Desktop Simulators :
 [GEN-YPM](https://music.hexo.icu)
 [GEN-BIN](https://cn.bing.com)
 
-#
+# [社会](https://www.bnu.edu.cn)[性死亡](https://comic.kokoiro.xyz)
+
 # F**K U Linspirer
