@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>欢迎回家</title>
+  </head>
+  <body>
+     <script>
+    var sites = [
+        'https://cn.bing.com',
+        'https://music.hexo.icu',
+        'https://www.eastedu.com',
+        'https://www.baidu.com'
+        'https://www.nhk.or.jp'
+        'https://www.growing.u-learning.com'
+        'https://www.12306.cn'
+        'https://www.gov.cn'
+    ];
+    function randomSite() {
+        var i = parseInt(Math.random() * sites.length);
+        location.href = sites[i];
+    }
+</script>
+<a href="#" onclick="randomSite();">random link</a>
+  </body>
+</html>
