@@ -3,22 +3,24 @@
     <title>欢迎回家</title>
   </head>
   <body>
-     <script>
-    var sites = [
-        'https://cn.bing.com',
-        'https://music.hexo.icu',
-        'https://www.eastedu.com',
-        'https://www.baidu.com'
-        'https://www.nhk.or.jp'
-        'https://www.growing.u-learning.com'
-        'https://www.12306.cn'
-        'https://www.gov.cn'
-    ];
-    function randomSite() {
-        var i = parseInt(Math.random() * sites.length);
-        location.href = sites[i];
-    }
+    <a href="javascript:openSite()">Click to go to a happy house</a>
+<script>
+var links = [
+              "www.baidu.com",
+              "www.nhk.or.jp",
+              "www.eastedu.com",
+              "www.growing.u-learning.com"
+              "music.hexo.icu"
+              "www.4399.com"]
+           var openSite = function() {
+              // get a random number between 0 and the number of links
+              var randIdx = Math.random() * links.length;
+              // round it, so it can be used as array index
+              randIdx = parseInt(randIdx, 10);
+              // construct the link to be opened
+              var link = 'https://' + links[randIdx];
+     return link;
+    };
 </script>
-<a href="#" onclick="randomSite();">random link</a>
   </body>
 </html>
