@@ -39,6 +39,16 @@ If you have some idea you could email me.
 
 [Qweather2](https://www.qweather.com)
 
+[YPM links 1](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/public_api/random.html)
+
+[YPM links 2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/public_api/randomlinks.html)
+
+```
+随机化链接公用地址
+自  动：https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/public_api/random.html
+半自动：https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/public_api/randomlinks.html
+```
+
 # Fast Explorer
   ## General Network Envir
 
