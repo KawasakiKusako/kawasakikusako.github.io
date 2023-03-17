@@ -18,7 +18,7 @@ If you have some idea you could email me.
 
 [iframe_exp_index](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
 
-[iframe_exp2](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/index.html) .
+[iframe_randomlink](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/ypm_iframe/randomlink.html) .
 
 [WebQQ(demo version)](https://stapxs.github.io/Stapxs-QQ-Lite-2.0) .
 
