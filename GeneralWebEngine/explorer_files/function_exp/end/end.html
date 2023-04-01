@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The last latter</title>
+    <link rel="stylesheet" href="登录.css">
+</head>
+<style>
+    body {
+    background: rgb(233, 239, 252);
+    background-size:100% 100%;
+ 
+}
+ 
+body{   
+    width: 100%;   
+    height: 100%;   
+    /* font-family: 'Open Sans',sans-serif;    */
+    margin: 0; 
+    /* background-color: rgb(232, 175, 175);  */
+}   
+.login {
+    position: absolute;
+    top: 50%;   
+    left:50%;   
+    margin: -150px 0 0 -150px;   
+    width: 300px;   
+    height: 300px; 
+}
+.login h1{   
+    color: rgb(8, 57, 100);    
+    letter-spacing: 1px;   
+    text-align: center;
+    font-size: 2em;   
+    margin: 0.67em 0;     
+}
+#uname,#pwd{   
+    width: 278px;   
+    height: 18px;   
+    margin-bottom: 10px;   
+    outline: none;   
+    padding: 10px;   
+    font-size: 13px;   
+    color: #fff;   
+    border-top: 1px solid #3c5a75;   
+    border-left: 1px solid #385587;   
+    border-right: 1px solid #335577;   
+    border-bottom: 1px solid #335275;   
+    border-radius: 4px;   
+    background-color: #ffffff;   
+}   
+#but{   
+    width: 300px;   
+    min-height: 20px; 
+    display: block;   
+    background-color: #4a77d4;   
+    border: 1px solid #3762bc;   
+    color: #fff;   
+    padding: 9px 14px;   
+    font-size: 15px;   
+    line-height: normal;   
+    border-radius: 5px;   
+    margin: 0;   
+}
+</style>
+<body>
+    <div class="login">
+        <h1>你好啊！♪(^∇^*)</h1>
+        <form action="https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/function_exp/end/last.docx"> 
+            <!-- <label for="username">用户名</label> -->
+            <!--input type="text" id="uname" value="" placeholder="用户名gy"/><br-->
+            <input type="password" id="pwd" value="" placeholder="输入密钥"/><br>
+            <input type="submit" id="but" value="打开" onclick="return checkuser()"/> 
+            <!-- 返回了true就会打开页面  -->
+        </form> 
+    </div>
+    <a>Copyright © Kawasaki Kusako 2005-2023</a>
+    <p></p>
+</body> 
+ 
+<script type="text/javascript"> 
+    function getValue(id) { 
+        return document.getElementById(id).value; 
+        // 查找元素
+    } 
+    function checkuser() { 
+        //if(getValue('uname') == "gy" && getValue('pwd') == "123") { 
+        if(getValue('pwd') == "19d0e34b24eb067552720d0ccd82946c") { 
+            return true; 
+        }else { 
+            alert("通行密钥错误！")
+            return false; 
+        } 
+    } 
+</script> 
+</html>
