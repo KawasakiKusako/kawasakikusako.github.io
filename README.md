@@ -63,7 +63,7 @@ Meteorological Service ：
 [KMA](https://www.kma.go.kr)
 [NOAA](https://www.noaa.gov)
 [ECMWF](https://www.ecmwf.int)
-[CMA PSC](https://www.weather.com.cn)
+[CMA-PSC](https://www.weather.com.cn/)
 
 Educational Link 
 [YoudaoWebDict](https://www.youdao.com)
