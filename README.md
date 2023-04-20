@@ -70,8 +70,8 @@ Educational Link
 [BaiduWebTrans](https://fanyi.baidu.com)
 [Enhanced-Calculator](https://tools-vue.zuoyebang.com/static/hy/tools-vue/calculator.html)
 
-Desktop Simulators :
-[SimWindows7](https://www.12339.gov.cn)
+Desktop Simulators ：
+
 [SimWindows11](https://win11.blueedge.me/)
 [SimWindows9x](https://emupedia.net/beta/emuos/)
 (DesktopSimulators are based on HTML and Ajax. You cloud't save anything without cookie on it.)
@@ -98,6 +98,8 @@ Desktop Simulators :
 [GEN-BIL](https://www.bilibili.com)
 [GEN-YPM](http://music.hexo.icu)
 [GEN-BIN](https://cn.bing.com)
+[GEN-STM](https://www.steampowered.com)
+[GEN-GTJ](https://www.gtja.com)
 
 # [社会](https://www.bnu.edu.cn)性死亡
 
