@@ -101,6 +101,10 @@ Desktop Simulators ：
 [GEN-STM](https://www.steampowered.com)
 [GEN-GTJ](https://www.gtja.com)
 
+[GPT-RNK](https://kk.rknk.net)
+[GPT-ATH](https://www.aitianhu.cn)
+[GPT-YQC](https://dev.yqcloud.top)
+
 # [社会](https://www.bnu.edu.cn)性死亡
 
 ## 在[MeteoExp](https://kawasakikusako.github.io/GeneralWebEngine/explorer_files/meteo_exp/MeteoExplorer.html)中（最下方）
