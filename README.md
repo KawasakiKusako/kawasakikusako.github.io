@@ -106,7 +106,7 @@ Desktop Simulators ：
 Including GPT3.5(FREE)&GPT4
 
 [GPT-RNK](https://kk.rknk.net)
-[GPT-TDC](http://www.tdchat.vip)
+[GPT-TDC](https://www.tdchat.vip)
 [GPT-CDF](https://ai-toolbox.codefuture.top)
 
 # [社会](https://www.bnu.edu.cn)性死亡
