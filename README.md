@@ -101,9 +101,13 @@ Desktop Simulators ：
 [GEN-STM](https://www.steampowered.com)
 [GEN-GTJ](https://www.gtja.com)
 
+## GPT LINKS 
+
+Including GPT3.5(FREE)&GPT4
+
 [GPT-RNK](https://kk.rknk.net)
-[GPT-ATH](https://www.aitianhu.cn)
-[GPT-YQC](https://dev.yqcloud.top)
+[GPT-TDC](http://www.tdchat.vip)
+[GPT-CDF](https://ai-toolbox.codefuture.top)
 
 # [社会](https://www.bnu.edu.cn)性死亡
 
