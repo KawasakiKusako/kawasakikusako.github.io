@@ -92,7 +92,7 @@ Desktop Simulators ：
 [EDU-ZXU](https://www.zhixue.com/)
 [EDU-ESU](https://www.eastedu.com/)
 [EDU-MPL](http://manage-portal.eastedu.com)
-[EDU-LSL](http://cloud.linspirer.com:880/)
+[EDU-DLG](https://www.duolingo.com)
 
 [GEN-BDU](https://www.baidu.com)
 [GEN-BIL](https://www.bilibili.com)
