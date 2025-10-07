@@ -200,9 +200,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>*2. 请简要说明您支持该方案的理由（字数不少于50字，强制输入）：</label>
+                <label>*2. 请简要说明您支持该方案的理由（字数不少于20字，强制输入）：</label>
                 <textarea id="reasonInput" placeholder="例如：我支持方案一，因为...（请详细说明理由）" required></textarea>
-                <p style="color:#7f8c8d; font-size:14px;">当前字数：<span id="wordCount">0</span> / 最少50字</p>
+                <p style="color:#7f8c8d; font-size:14px;">当前字数：<span id="wordCount">0</span> / 最少20字</p>
             </div>
             <div class="btn-group">
                 <button class="btn" onclick="showPage(3)">上一步</button>
@@ -220,7 +220,7 @@
             <p style="margin-top:20px;">请您认真阅读上述反馈信息，后续将基于此反馈开展相关测量。</p>
             <div class="btn-group">
                 <button class="btn" onclick="showPage(4)">上一步：修改意见</button>
-                <button class="btn" onclick="alert('核心操纵环节完成，即将进入机制测量环节（因变量与中介变量测量）')">下一步：机制测量</button>
+                <button class="btn" onclick="alert('您已完成本节，感谢您的参与！'); window.close()">下一步：返回问卷作答</button>
             </div>
         </div>
     </div>
@@ -243,7 +243,7 @@
             const count = reasonInput.value.trim().length;
             wordCount.textContent = count;
             // 字数不足时提示
-            if (count < 50) {
+            if (count < 20) {
                 wordCount.style.color = '#e74c3c';
             } else {
                 wordCount.style.color = '#27ae60';
