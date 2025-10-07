@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>“青川通办”AI治理反馈实验系统</title>
     <style>
+        /* 保持原有样式不变 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -98,6 +99,7 @@
             border-radius: 6px;
             background-color: #f8f9fa;
             margin-top: 15px;
+            line-height: 1.8;
         }
         .scale-group {
             display: flex;
@@ -108,9 +110,47 @@
             text-align: center;
             width: 14%;
         }
+
+        /* 加载页面样式 */
+        .loading-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        .loading-text {
+            font-size: 18px;
+            color: #34495e;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <!-- 加载页面 -->
+    <div class="loading-page" id="loadingPage">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载，请稍候...</div>
+    </div>
+
     <div class="container">
         <!-- 1. 系统启动 - 背景设定页面 -->
         <div class="page active" id="page1">
@@ -124,57 +164,25 @@
             </div>
         </div>
 
-        <!-- 2. 系统启动 - 初始信任测量页面 
-        <div class="page" id="page2">
-            <h1>系统启动：初始政府信任测量（基线）</h1>
-            <p>在体验“青川通办”平台前，请您根据自身实际感受，对以下问题进行评价（采用1-7分制，1分表示“非常不信任”，7分表示“非常信任”）。</p>
-            <div class="form-group">
-                <label for="initial-trust">问题：在本次实验开始前，您对政府管理公共事务的总体信任度如何？</label>
-                <div class="scale-group">
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust1" value="1" required>
-                        <label for="trust1">1<br>非常不信任</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust2" value="2">
-                        <label for="trust2">2</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust3" value="3">
-                        <label for="trust3">3</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust4" value="4">
-                        <label for="trust4">4<br>一般信任</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust5" value="5">
-                        <label for="trust5">5</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust6" value="6">
-                        <label for="trust6">6</label>
-                    </div>
-                    <div class="scale-item">
-                        <input type="radio" name="initialTrust" id="trust7" value="7">
-                        <label for="trust7">7<br>非常信任</label>
-                    </div>
-                </div>
-            </div>
-            <div class="btn-group">
-                <button class="btn" onclick="showPage(1)">上一步</button>
-                <button class="btn" onclick="showPage(3)">下一步：公共议题场景呈现</button>
-            </div>
-        </div>
-        -->
+        <style>
+        /*设置img的样式*/
+        img {
+            width: 80%;
+            height: auto;
+            margin: 20px 0;
+        }
+        </style>
+
         <!-- 3. 需求输入 - 场景呈现页面 -->
         <div class="page" id="page3">
             <h1>需求输入：公园翻新公共议题场景</h1>
             <p>青川市计划对市中心某老旧公园进行翻新改造，目前拟定两种核心翻新方案，现通过“青川通办”平台广泛收集市民意见，以下是两种方案的详细说明：</p>
             <h2>方案一：生态优先型</h2>
             <p>重点提升公园生态环境质量，具体包括：增加30%绿植种植面积（以本地原生植物为主）、打造小型人工湿地（兼具生态净化与景观功能）、设置生态科普展示区（介绍本地动植物知识）；同时保留现有休闲设施并进行基础维护，新增10组木质休闲座椅和2条环形步行栈道（宽度1.2米）。</p>
+            <p><img src="img2.png"></p>
             <h2>方案二：休闲功能型</h2>
             <p>以满足市民多元休闲需求为核心，具体包括：新建儿童游乐区（配备安全塑胶地面与中小型游乐设施）、老年健身区（安装15组健身器材）、露天活动广场（面积约800㎡，可举办小型社区活动）；增设5个大型遮阳棚和8座休息凉亭；对现有绿化进行适度调整，保留核心景观树，扩大活动空间占比至60%。</p>
+            <p><img src="img1.png"></p>
             <p>请您认真阅读两种方案内容，接下来需提交您的选择及支持理由。</p>
             <div class="btn-group">
                 <button class="btn" onclick="showPage(1)">上一步</button>
@@ -215,7 +223,7 @@
             <h1>核心操纵：“青川通办”AI反馈结果</h1>
             <p>尊敬的参与者，您提交的关于青川市公园翻新方案的意见已成功接收，以下是“青川通办”AI系统为您生成的定制化反馈信息：</p>
             <div class="feedback-box" id="feedbackContent">
-                <!-- 此处将通过JS随机生成8组反馈中的1组，对应实验设计中的8个分组 -->
+                <!-- 反馈内容通过JS动态生成 -->
             </div>
             <p style="margin-top:20px;">请您认真阅读上述反馈信息，后续将基于此反馈开展相关测量。</p>
             <div class="btn-group">
@@ -226,14 +234,19 @@
     </div>
 
     <script>
-        // 页面切换函数
+        // 页面切换函数（添加加载效果）
         function showPage(pageNum) {
-            // 隐藏所有页面
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            // 显示目标页面
-            document.getElementById(`page${pageNum}`).classList.add('active');
+            const loadingPage = document.getElementById('loadingPage');
+            loadingPage.style.display = 'flex';
+            
+            // 模拟加载延迟
+            setTimeout(() => {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(`page${pageNum}`).classList.add('active');
+                loadingPage.style.display = 'none';
+            }, 800);
         }
 
         // 意见提交字数统计
@@ -242,59 +255,157 @@
         reasonInput.addEventListener('input', () => {
             const count = reasonInput.value.trim().length;
             wordCount.textContent = count;
-            // 字数不足时提示
-            if (count < 20) {
-                wordCount.style.color = '#e74c3c';
-            } else {
-                wordCount.style.color = '#27ae60';
-            }
+            wordCount.style.color = count < 20 ? '#e74c3c' : '#27ae60';
         });
 
-        // 提交意见并生成随机分组反馈
+        // 提交意见并生成随机分组反馈（核心修改部分）
         function submitOpinion() {
             const planChoice = document.querySelector('input[name="planChoice"]:checked');
             const reason = reasonInput.value.trim();
             
-            // 验证必填项
             if (!planChoice || reason.length < 20) {
                 alert('请完成所有必填项：1. 选择支持的方案；2. 理由字数不少于20字');
                 return;
             }
 
-            // 实验设计中的8组反馈内容（对应8个被试间分组）
+            const loadingPage = document.getElementById('loadingPage');
+            loadingPage.style.display = 'flex';
+
+            // 进一步丰富的8组反馈内容（350-400字/组）
             const feedbackGroups = [
                 // 组1：即时、透明、个性化
-                '感谢您，王先生/女士。您的反馈已即时处理。基于市政条例§4.2(优先绿地原则)，您的意见已分类至“生态优化”类别。系统记录您曾关注过城市绿化新闻。（分组1）',
+                `感谢您，王先生/女士。您于${new Date().toLocaleTimeString()}提交的关于"${planChoice.value}"的意见已完成AI审核与分类处理。
+                系统处理详情如下：
+                1. 内容解析：基于NLP语义分析，提取核心诉求为"${reason.substring(0, 20)}..."，匹配市政服务分类编码"P-03-02"（公园规划-市民建议-功能偏好类）；
+                2. 法规依据：根据《青川市公园管理条例》§4.2（优先绿地保护条款）及《城市公共空间改造听证办法》第11条，您的意见符合公众参与法定流程；
+                3. 处理状态：已同步至市园林和林业局规划科（接收人：张科长，接收时间：${new Date().toLocaleTimeString()}），当前状态为"待复核"；
+                4. 个性化服务：检测到您近3个月曾浏览"城市绿化保护""社区生态建设"等政策文件（浏览记录ID：H-2023-${Math.floor(Math.random()*1000)}），系统已自动为您开启"公园改造进度追踪"服务，将通过平台消息中心（每日9:00/15:00）推送实时进展；
+                5. 查询方式：您可通过平台首页"我的办件-意见反馈-编号GY-2023-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}"查看完整处理轨迹。
+                （分组1）`,
+
                 // 组2：即时、透明、标准化
-                '感谢您的反馈。您的反馈已即时处理。基于市政条例§4.2(优先绿地原则)，您的意见已分类至“生态优化”类别，并递交给市园林规划部。（分组2）',
+                `感谢您的反馈。您提交的关于"${planChoice.value}"的意见已通过系统即时处理，相关信息如下：
+                1. 受理信息：提交时间${new Date().toLocaleTimeString()}，受理编号：GYSP-${Math.random().toString(36).substring(2,9).toUpperCase()}，当前状态：已受理；
+                2. 分类依据：根据《青川市公众意见分类标准（2023版）》第3.2条，该意见归类为"生态优化类-市民建议"（一级类目：城市建设，二级类目：公园规划）；
+                3. 流转流程：
+                   - 已推送至市园林和林业局规划科（处理时限：2个工作日）
+                   - 同步抄送市自然资源和规划局市政工程科（备案编号：SZ-2023-${Math.floor(Math.random()*1000)}）
+                4. 处理规则：将依据《青川市重大事项公众参与办法》第5章进行量化评估，评估指标包括公众支持度、生态效益、财政预算匹配度等；
+                5. 查询方式：您可在平台首页"意见查询"模块输入受理编号，实时查看处理进度（每日更新时段：18:00-20:00）；
+                6. 反馈渠道：若对处理结果有异议，可在结果公示后3个工作日内通过"复议申请"功能提交补充意见。
+                （分组2）`,
+
                 // 组3：即时、黑箱、个性化
-                '感谢您，王先生/女士。您的反馈已由“青川通办”系统即时处理。系统记录您曾关注过城市绿化新闻。（分组3）',
+                `感谢您，王先生/女士。您于${new Date().toLocaleTimeString()}提交的公园翻新意见已完成系统处理。
+                基于您的平台使用行为分析（近6个月数据）：
+                - 您曾参与3次城市绿化相关议题讨论（话题ID：T-20230415、T-20230622、T-20230805）
+                - 偏好浏览"社区环境治理""公共空间优化"类资讯（点击偏好度78%）
+                - 历史反馈多聚焦生态保护方向（语义相似度82%）
+                系统为您提供以下个性化服务：
+                1. 已将您的意见纳入"生态保护偏好群体"统计样本库，该群体当前有效样本量为1,243份；
+                2. 为您匹配3个相似观点的市民讨论组（"城市绿肺保护者""社区生态联盟""公园优化议事厅"），可在"我的参与-兴趣群组"中申请加入；
+                3. 基于您的反馈内容，推荐阅读《青川市公园生态保护三年行动计划（2023-2025）》精简版（已存入"我的收藏"）；
+                4. 您的意见将在本周六10:00的"公园改造线上听证会"中作为典型观点展示（匿名处理）。
+                （分组3）`,
+
                 // 组4：即时、黑箱、标准化
-                '感谢您的反馈。您的反馈已由“青川通办”系统即时处理。（分组4）',
+                `感谢您的反馈。您提交的公园翻新方案意见已由"青川通办"AI系统完成处理，相关说明如下：
+                1. 处理状态：已收录（系统流水号：AIFB-${Math.floor(Math.random()*1000000).toString().padStart(6,'0')}）；
+                2. 数据应用：该意见将作为市民反馈大数据的组成部分，用于公园翻新方案的综合评估模型训练；
+                3. 参与记录：本次反馈已计入您的"城市治理参与积分"（+5分，当前总积分：${Math.floor(Math.random()*200)+50}分），积分可在"市民中心-积分商城"兑换政务服务便利权益；
+                4. 结果通知：方案最终确定后，将通过平台公告、短信（尾号****${Math.floor(Math.random()*10000).toString().slice(-4)}）及社区公告栏同步公示；
+                5. 相关服务：您可通过"个人中心-我的反馈记录"查看历史提交内容（保存期限：3年）；
+                6. 系统提示：同类议题反馈周期为30天，若需补充意见，请在2023年${(new Date().getMonth()+2).toString().padStart(2,'0')}月${new Date().getDate().toString().padStart(2,'0')}日前提交。
+                （分组4）`,
+
                 // 组5：延迟、透明、个性化
-                '感谢您，王先生/女士。我们已收到您的反馈。系统将在24小时内进行处理。届时将基于市政条例进行分类并递交相关部门。系统记录您曾关注过城市绿化新闻。（分组5）',
+                `感谢您，王先生/女士。我们已收到您提交的关于"${planChoice.value}"的意见（接收时间：${new Date().toLocaleTimeString()}，接收编号：GYLC-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}）。
+                根据《青川市政务处理规范（2023修订版）》第7章规定，涉及城市公共空间改造的意见需执行三级处理流程：
+                1. 第一阶段（0-8小时）：AI初筛与语义分析，提取核心诉求并匹配相关法规条款；
+                2. 第二阶段（8-16小时）：人工复核（由市园林局规划科2名以上工作人员交叉审核）；
+                3. 第三阶段（16-24小时）：部门流转与结果生成，同步录入政务公开系统；
+                您的意见特殊处理说明：
+                - 检测到您是"青川市公共事务积极参与者"（年度参与次数≥12次），将享受复核优先级提升服务（提前2小时完成）；
+                - 基于您的历史偏好（曾3次参与绿化议题听证），处理完成后将额外推送《公园改造生态评估报告》简版；
+                - 结果通知方式：将按您的习惯设置（短信+平台推送，尾号****${Math.floor(Math.random()*10000).toString().slice(-4)}的手机号）；
+                - 查询提示：24小时后可通过"进度查询-输入接收编号"查看详细处理轨迹，包含各阶段操作人、处理时长等信息。
+                （分组5）`,
+
                 // 组6：延迟、透明、标准化
-                '感谢您的反馈。我们已收到您的反馈。系统将在24小时内进行处理。届时将基于市政条例进行分类并递交相关部门。（分组6）',
+                `感谢您的反馈。您提交的公园翻新方案意见已成功接收（接收编号：GYSQ-${Math.floor(Math.random()*10000).toString().padStart(4,'0')}），现将处理安排说明如下：
+                一、处理周期：自接收时间（${new Date().toLocaleTimeString()}）起24小时内完成全流程处理
+                二、处理步骤：
+                1. 类目划分（0-6小时）：依据《青川市公众意见分类标准》第4.3节，确定所属政务分类；
+                2. 合规性审核（6-12小时）：检查是否符合《城市规划公众参与条例》第5条规定的有效意见标准；
+                3. 部门分办（12-18小时）：推送至市自然资源和规划局与园林局联合工作组（主办部门：园林局规划科）；
+                4. 结果生成（18-24小时）：形成《公众意见处理回执》并录入系统；
+                三、查询方式：
+                - 网页端：平台首页"政务服务-意见反馈-查询"输入接收编号
+                - 移动端："青川通办"APP-我的-办件查询
+                四、公开说明：所有有效意见的汇总分析结果将在方案公示阶段（预计2023年${(new Date().getMonth()+2).toString().padStart(2,'0')}月）通过市政府官网公布，包含各类意见占比、采纳情况说明等；
+                五、注意事项：若24小时后未查询到结果，请拨打政务服务热线400-XXX-XXXX并提供接收编号咨询。
+                （分组6）`,
+
                 // 组7：延迟、黑箱、个性化
-                '感谢您，王先生/女士。我们已收到您的反馈。“青川通办”系统将在24小时内进行处理。系统记录您曾关注过城市绿化新闻。（分组7）',
+                `感谢您，王先生/女士。我们已收到您关于公园翻新方案的反馈，系统将在24小时内进行处理。
+                基于您的平台使用特征分析：
+                - 登录习惯：每周五19:00-21:00（占总登录时长62%），系统将优先在该时段为您推送处理结果；
+                - 兴趣标签：根据您的历史浏览记录，已为您自动添加"公园改造""生态保护"兴趣标签（可在"个人中心-偏好设置"修改）；
+                - 关联推荐：您此前关注的"社区公共设施优化"议题（2023年7月）与本次反馈相关度达72%，处理完成后将为您展示两者关联分析；
+                - 参与机会：您有78%的匹配度符合"公园改造市民监督小组"招募条件，处理结果中将包含报名通道（限30个名额）；
+                温馨提示：
+                您的反馈内容已加密存储（加密算法：SM4），仅授权处理人员可见；
+                若您希望加快处理进度，可在"我的反馈"中点击"加急处理"（需消耗100市民积分）；
+                历史反馈对比功能已为您开启，可查看本次与2023年3月提交的公园意见差异分析。
+                （分组7）`,
+
                 // 组8：延迟、黑箱、标准化
-                '感谢您的反馈。我们已收到您的反馈。“青川通办”系统将在24小时内进行处理。（分组8）',
+                `感谢您的反馈。您提交的关于公园翻新方案的意见已被"青川通办"系统接收，相关说明如下：
+                1. 接收确认：系统已于${new Date().toLocaleTimeString()}成功接收您的意见，数据已存入政务云数据库（存储期限：5年）；
+                2. 处理说明：将在24小时内按照政务信息系统既定规则完成全流程处理，处理逻辑符合《青川市政务AI系统管理办法》要求；
+                3. 结果告知：处理完成后，将通过平台消息中心发送通知，通知保留期限为15天；
+                4. 数据用途：您的意见将与其他市民反馈合并，用于公园翻新方案的决策辅助，个人信息将做匿名化处理；
+                5. 系统功能：您可通过以下路径管理反馈记录：
+                   - 查看历史：个人中心 > 我的反馈 > 全部记录
+                   - 补充说明：找到对应记录 > 点击"补充意见"
+                   - 删除记录：仅可删除提交后24小时内且未进入处理流程的反馈
+                6. 服务提示：同类议题当前累计接收反馈1,876条，系统将在处理完成后展示总体参与情况统计（不含个人信息）。
+                （分组8）`
             ];
 
-            // 随机选择1组反馈（模拟被试随机分组）
+            // 随机选择1组反馈
             const randomIndex = Math.floor(Math.random() * feedbackGroups.length);
             const selectedFeedback = feedbackGroups[randomIndex];
-            // 显示反馈内容
-            document.getElementById('feedbackContent').textContent = selectedFeedback;
-            // 跳转至反馈页面
-            showPage(5);
+            const groupNumber = randomIndex + 1;
 
-            // 记录分组信息（用于后续数据分析，此处仅控制台输出模拟）
-            console.log(`被试随机分组：第${randomIndex + 1}组`);
-            console.log(`反馈类型：${getFeedbackType(randomIndex + 1)}`);
+            // 根据分组设置不同的加载延迟
+            const delayTime = groupNumber <= 4 ? 1000 : 8000;
+
+            // 动态更新加载提示文字
+            document.querySelector('.loading-text').textContent = 
+                groupNumber <= 4 ? "正在快速处理您的意见..." : "正在处理您的意见，可能需要稍长时间...";
+
+            // 应用相应的延迟
+            setTimeout(() => {
+                // 将换行符转换为<br>标签以保持格式
+                document.getElementById('feedbackContent').innerHTML = selectedFeedback.replace(/\n/g, '<br>');
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById('page5').classList.add('active');
+                loadingPage.style.display = 'none';
+                
+                // 恢复加载文字默认值
+                document.querySelector('.loading-text').textContent = "正在加载，请稍候...";
+
+                // 记录分组信息
+                console.log(`被试随机分组：第${groupNumber}组`);
+                console.log(`加载延迟：${delayTime}ms`);
+                console.log(`反馈类型：${getFeedbackType(groupNumber)}`);
+            }, delayTime);
         }
 
-        // 辅助函数：根据分组序号获取反馈类型（速度、清晰度、个性化）
+        // 辅助函数：根据分组序号获取反馈类型
         function getFeedbackType(groupNum) {
             const typeMap = {
                 1: '速度=即时，清晰度=透明，个性化=是',
