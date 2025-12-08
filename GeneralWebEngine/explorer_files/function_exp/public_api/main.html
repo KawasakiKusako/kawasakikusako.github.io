@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔丸拟合</title>
+    <!-- 引入 Tailwind CSS 进行样式美化和响应式布局 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义样式 */
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .quiz-container { max-width: 900px; margin: auto; min-height: 100vh; }
+        .fill-in-input {
+            display: inline-block; width: auto; min-width: 100px; margin: 0 4px; padding: 4px 8px;
+            border: 2px dashed #6b7280; border-radius: 6px; background-color: #fff; text-align: center;
+            font-weight: 500; transition: all 0.2s ease-in-out;
+        }
+        .fill-in-input:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        .correct-answer { background-color: #d1fae5; border-color: #10b981; color: #065f46; }
+        .incorrect-answer { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        .option-item { cursor: pointer; transition: background-color 0.15s; }
+        .option-item:hover { background-color: #f3f4f6; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div id="app" class="quiz-container">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">数据仓库与数据挖掘题库练习</h1>
+            <p class="mt-2 text-lg text-gray-500">魔丸拟合-在线练习魔丸题库</p>
+        </header>
+
+        <main class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
+            <!-- 题目区域 -->
+            <div id="question-area" class="min-h-[150px]">
+                <p id="loading-message" class="text-center text-xl font-semibold text-indigo-600">正在加载题库文件...</p>
+                <!-- 题目内容将通过 JavaScript 渲染到这里 -->
+            </div>
+
+            <!-- 操作按钮区域 -->
+            <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="check-btn" onclick="checkAnswer()" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 ease-in-out disabled:bg-indigo-400" disabled>
+                    检查答案
+                </button>
+                <button id="next-btn" onclick="loadNextQuestion()" class="w-full sm:w-auto px-6 py-3 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-150 ease-in-out disabled:bg-gray-400" disabled>
+                    下一题
+                </button>
+            </div>
+
+            <!-- 结果反馈区域 -->
+            <div id="result-area" class="mt-6 p-4 rounded-lg hidden">
+                <p id="result-text" class="text-lg font-bold"></p>
+                <div id="correct-answer-display" class="mt-2 text-sm text-gray-700"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let quizData = [];
+        let currentQuestion = null;
+        let questionIndex = 0;
+        const BLANK_PLACEHOLDER = "_BLANK_";
+
+        // 文件路径配置
+        const FILE_PATHS = [
+            { type: 'fill_in_the_blank', path: './static/tiankong.csv', headers: ['题号', '题目', '答案'] },
+            { type: 'multiple_choice', path: './static/xuanze.csv', headers: ['题号', '题目', '选项A', '选项B', '选项C', '选项D', '答案'] },
+            { type: 'true_false', path: './static/panduan.csv', headers: ['题号', '题目', '答案'] }
+        ];
+
+        // DOM 元素
+        const questionArea = document.getElementById('question-area');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultArea = document.getElementById('result-area');
+        const resultText = document.getElementById('result-text');
+        const correctAnswerDisplay = document.getElementById('correct-answer-display');
+        const loadingMessage = document.getElementById('loading-message');
+
+        /**
+         * 简单 CSV 解析器：将 CSV 文本转换为对象数组。
+         * 假设第一行为表头。
+         */
+        function parseCSV(csvText, requiredHeaders) {
+            const lines = csvText.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            if (lines.length <= 1) return [];
+
+            // 使用逗号分割第一行作为实际的表头
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+
+            // 检查表头是否符合要求
+            if (!requiredHeaders.every(h => headers.includes(h))) {
+                throw new Error(`CSV 文件表头不匹配。要求: ${requiredHeaders.join(', ')}`);
+            }
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentLine = lines[i];
+                // 简单的逗号分割，这假设数据中不包含被双引号包裹的逗号。
+                const values = currentLine.split(',').map(v => v.trim());
+                if (values.length !== headers.length) {
+                     console.warn(`行 ${i + 1} 列数不匹配，跳过。`);
+                     continue;
+                }
+                
+                let item = {};
+                headers.forEach((header, index) => {
+                    item[header] = values[index];
+                });
+
+                data.push(item);
+            }
+            return data;
+        }
+
+        /**
+         * 将原始解析的 CSV 数据转换为标准题库格式。
+         */
+        function normalizeQuizData(rawData, type) {
+            return rawData.map((item, index) => {
+                const standardizedItem = {
+                    id: `${type}-${item['题号'] || index + 1}`,
+                    type: type,
+                    question: item['题目'],
+                    answer: item['答案'].trim(),
+                };
+
+                if (type === 'fill_in_the_blank') {
+                    // 填空题：答案以分号分隔，转换为数组
+                    standardizedItem.answer = standardizedItem.answer.split(';').map(a => a.trim()).filter(a => a.length > 0);
+                } else if (type === 'multiple_choice') {
+                    // 选择题：提取选项并格式化
+                    standardizedItem.options = [
+                        `A. ${item['选项A']}`,
+                        `B. ${item['选项B']}`,
+                        `C. ${item['选项C']}`,
+                        `D. ${item['选项D']}`
+                    ];
+                }
+                // 判断题：答案保持 'True' 或 'False' 字符串
+
+                return standardizedItem;
+            }).filter(item => item.question && item.answer); // 过滤掉无效题目
+        }
+
+        /**
+         * 从文件中加载所有题库数据。
+         */
+        async function loadAllQuizData() {
+            try {
+                // 使用 Promise.all 并行加载所有文件
+                const loadPromises = FILE_PATHS.map(fileInfo =>
+                    fetch(fileInfo.path)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`无法加载文件: ${fileInfo.path}. 请确保文件已放置在 static 目录下。`);
+                            }
+                            return response.text();
+                        })
+                        .then(csvText => {
+                            const rawData = parseCSV(csvText, fileInfo.headers);
+                            return normalizeQuizData(rawData, fileInfo.type);
+                        })
+                );
+
+                const results = await Promise.all(loadPromises);
+                
+                // 合并所有题型的结果
+                quizData = results.flat(); 
+
+                if (quizData.length === 0) {
+                    throw new Error("所有文件中均未发现有效题目。");
+                }
+                
+                // 启动答题
+                loadingMessage.classList.add('hidden');
+                loadNextQuestion();
+
+            } catch (error) {
+                console.error("加载题库失败:", error);
+                loadingMessage.textContent = `❌ 加载题库失败：${error.message}`;
+                // 禁用按钮
+                checkBtn.disabled = true;
+                nextBtn.disabled = true;
+                questionArea.innerHTML = `<p class="text-center text-xl text-red-600 mt-4">加载错误：${error.message}</p>`;
+            }
+        }
+
+        /**
+         * 从题库中随机选取一个问题。
+         */
+        function selectRandomQuestion() {
+            if (quizData.length === 0) return null;
+            const randomIndex = Math.floor(Math.random() * quizData.length);
+            return quizData[randomIndex];
+        }
+
+        /**
+         * 获取题型对应的中文名称
+         */
+        function getQuestionTypeLabel(type) {
+            switch (type) {
+                case 'fill_in_the_blank': return '填空题';
+                case 'multiple_choice': return '选择题';
+                case 'true_false': return '判断题';
+                default: return '未知题型';
+            }
+        }
+
+        /**
+         * 渲染当前问题到页面上。
+         */
+        function renderQuestion(question) {
+            currentQuestion = question;
+            resultArea.classList.add('hidden');
+            checkBtn.disabled = false;
+            nextBtn.disabled = true;
+            questionIndex++;
+
+            const typeLabel = getQuestionTypeLabel(question.type);
+            let questionHtml = `<div class="text-xl font-medium text-gray-700 leading-relaxed mb-4">${question.question}</div>`;
+            
+            // 根据题型渲染不同的输入或选择控件
+            switch (question.type) {
+                case 'fill_in_the_blank':
+                    questionHtml = `<div class="text-xl font-medium text-gray-700 leading-relaxed">`;
+                    const parts = question.question.split(BLANK_PLACEHOLDER);
+                    
+                    parts.forEach((part, index) => {
+                        questionHtml += part.trim();
+                        if (index < question.answer.length) { 
+                            questionHtml += `<input type="text" data-blank-index="${index}" placeholder="请填写" class="fill-in-input focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">`;
+                        }
+                    });
+                    questionHtml += `</div>`;
+                    break;
+
+                case 'multiple_choice':
+                    questionHtml += `<div class="mt-4 space-y-3">`;
+                    question.options.forEach((option) => {
+                        const optionValue = option.charAt(0); 
+                        questionHtml += `
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg option-item">
+                                <input type="radio" name="choice" value="${optionValue}" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500">
+                                <span class="ml-3 text-base text-gray-800">${option}</span>
+                            </label>
+                        `;
+                    });
+                    questionHtml += `</div>`;
+                    break;
+                
+                case 'true_false':
+                    questionHtml += `<div class="mt-4 flex space-x-6">`;
+                    const tfOptions = [{ label: '正确 (True)', value: 'True' }, { label: '错误 (False)', value: 'False' }];
+                    tfOptions.forEach(option => {
+                        questionHtml += `
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg option-item min-w-[150px]">
+                                <input type="radio" name="choice" value="${option.value}" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500">
+                                <span class="ml-3 text-base text-gray-800">${option.label}</span>
+                            </label>
+                        `;
+                    });
+                    questionHtml += `</div>`;
+                    break;
+            }
+
+            // 更新显示区域
+            questionArea.innerHTML = `
+                <p class="text-sm text-indigo-600 mb-2">第 ${questionIndex} 题 (${typeLabel})</p>
+                ${questionHtml}
+            `;
+        }
+
+        /**
+         * 检查用户的答案是否正确。
+         */
+        function checkAnswer() {
+            if (!currentQuestion) return;
+            
+            let allCorrect = true;
+            let userAnswerDisplay = '';
+
+            switch (currentQuestion.type) {
+                case 'fill_in_the_blank':
+                    const inputs = questionArea.querySelectorAll('input[type="text"]');
+                    const correctAnswers = currentQuestion.answer;
+                    const userAnswers = [];
+
+                    inputs.forEach((input, index) => {
+                        const userAnswer = input.value.trim();
+                        const correctAnswer = correctAnswers[index].trim();
+                        userAnswers.push(userAnswer);
+                        const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+
+                        if (isCorrect) {
+                            input.classList.add('correct-answer');
+                        } else {
+                            input.classList.add('incorrect-answer');
+                            allCorrect = false;
+                        }
+                        input.disabled = true;
+                    });
+
+                    userAnswerDisplay = `
+                        <p class="font-semibold text-gray-800">正确答案：</p>
+                        <ul class="list-disc list-inside mt-1 space-y-1">
+                            ${correctAnswers.map((ans, i) => 
+                                `<li class="${userAnswers[i].toLowerCase() === ans.toLowerCase() ? 'text-green-700' : 'text-red-600'}">
+                                    填空 ${i + 1}: ${ans} (您的答案: ${userAnswers[i] || '未作答'})
+                                </li>`
+                            ).join('')}
+                        </ul>
+                    `;
+                    break;
+
+                case 'multiple_choice':
+                case 'true_false':
+                    const selectedInput = questionArea.querySelector('input[name="choice"]:checked');
+                    const correctAnswerMC = String(currentQuestion.answer).trim();
+                    const selectedValue = selectedInput ? selectedInput.value : '';
+                    const selectedLabel = selectedInput ? selectedValue : '未作答';
+                    
+                    const allOptions = questionArea.querySelectorAll('input[name="choice"]');
+                    allOptions.forEach(input => {
+                        input.disabled = true;
+                        const label = input.closest('label');
+                        if (input.value === correctAnswerMC) {
+                            label.classList.add('correct-answer', 'border-green-500');
+                        } else if (input.checked && input.value !== correctAnswerMC) {
+                            label.classList.add('incorrect-answer', 'border-red-500');
+                        }
+                    });
+
+                    if (!selectedInput || selectedValue !== correctAnswerMC) {
+                        allCorrect = false;
+                    }
+                    
+                    const answerText = currentQuestion.type === 'multiple_choice' ? 
+                                       currentQuestion.options.find(opt => opt.startsWith(correctAnswerMC)) || correctAnswerMC : 
+                                       correctAnswerMC;
+
+                    userAnswerDisplay = `
+                        <p class="font-semibold text-gray-800">正确答案：<span class="text-green-700 font-normal">${answerText}</span></p>
+                        <p class="font-semibold text-gray-800">您的选择：<span class="${allCorrect ? 'text-green-700' : 'text-red-600'} font-normal">${selectedLabel}</span></p>
+                    `;
+                    break;
+            }
+
+            // --- 通用结果反馈 ---
+            resultArea.classList.remove('hidden');
+            checkBtn.disabled = true;
+            nextBtn.disabled = false;
+
+            if (allCorrect) {
+                resultArea.className = 'mt-6 p-4 rounded-lg bg-green-100 border border-green-500';
+                resultText.textContent = '✅ 恭喜！回答完全正确。';
+                resultText.classList.remove('text-red-600');
+                resultText.classList.add('text-green-700');
+                correctAnswerDisplay.innerHTML = '';
+            } else {
+                resultArea.className = 'mt-6 p-4 rounded-lg bg-red-100 border border-red-500';
+                resultText.textContent = '❌ 很遗憾，回答不正确。';
+                resultText.classList.remove('text-green-700');
+                resultText.classList.add('text-red-600');
+                correctAnswerDisplay.innerHTML = userAnswerDisplay;
+            }
+        }
+
+        /**
+         * 加载下一道随机问题。
+         */
+        function loadNextQuestion() {
+             if (quizData.length === 0) {
+                 questionArea.innerHTML = '<p class="text-center text-xl text-red-600">题库为空！请检查 CSV 文件是否正确加载。</p>';
+                 checkBtn.disabled = true;
+                 nextBtn.disabled = true;
+                 return;
+             }
+             
+            const nextQuestion = selectRandomQuestion();
+            if (nextQuestion) {
+                renderQuestion(nextQuestion);
+            } else {
+                questionArea.innerHTML = '<p class="text-center text-xl text-gray-500">所有题目已作答完毕！</p>';
+                checkBtn.disabled = true;
+                nextBtn.disabled = true;
+            }
+        }
+        
+        // 页面加载后立即尝试加载题库
+        window.onload = function() {
+            loadAllQuizData(); 
+        };
+    </script>
+</body>
+</html>
