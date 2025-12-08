@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>魔丸拟合</title>
+    <title>数据仓库与数据挖掘在线答题</title>
     <!-- 引入 Tailwind CSS 进行样式美化和响应式布局 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -31,10 +31,35 @@
         </header>
 
         <main class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
+            <!-- 模式和题型选择区域 -->
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p class="text-lg font-semibold text-gray-700 mb-3">选择练习模式：</p>
+                
+                <!-- 模式选择 -->
+                <div class="flex flex-wrap gap-4 mb-4" id="mode-selection">
+                    <label class="flex items-center space-x-2">
+                        <input type="radio" name="practiceMode" value="random" checked onchange="handleModeChange(this.value)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">随机练题 (所有题型)</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="radio" name="practiceMode" value="sequential" onchange="handleModeChange(this.value)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">顺序练题 (按题型)</span>
+                    </label>
+                </div>
+
+                <!-- 题型选择 (仅在顺序模式下显示) -->
+                <div id="type-selection" class="hidden">
+                    <label for="question-type" class="block text-sm font-medium text-gray-700 mb-1">选择题型：</label>
+                    <select id="question-type" onchange="resetSequentialMode()" class="mt-1 block w-full sm:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                        <!-- 选项将由 JS 加载后动态添加 -->
+                    </select>
+                </div>
+            </div>
+
+
             <!-- 题目区域 -->
             <div id="question-area" class="min-h-[150px]">
                 <p id="loading-message" class="text-center text-xl font-semibold text-indigo-600">正在加载题库文件...</p>
-                <!-- 题目内容将通过 JavaScript 渲染到这里 -->
             </div>
 
             <!-- 操作按钮区域 -->
@@ -52,7 +77,13 @@
                 <p id="result-text" class="text-lg font-bold"></p>
                 <div id="correct-answer-display" class="mt-2 text-sm text-gray-700"></div>
             </div>
+            
         </main>
+
+        <div>
+            <p>       </p>    
+            <p id="result-text" class="mt-2 text-lg text-gray-500">Github @ Kawasaki Kusako</p>
+        </div>
     </div>
 
     <script>
@@ -60,12 +91,17 @@
         let currentQuestion = null;
         let questionIndex = 0;
         const BLANK_PLACEHOLDER = "_BLANK_";
+        
+        // 新增状态管理
+        let currentMode = 'random'; // 'random' 或 'sequential'
+        let typeIndexMap = {}; // 顺序模式下，记录每种题型当前的索引
+        let availableTypes = []; // 已加载的题型列表
 
         // 文件路径配置
         const FILE_PATHS = [
-            { type: 'fill_in_the_blank', path: './static/tiankong.csv', headers: ['题号', '题目', '答案'] },
-            { type: 'multiple_choice', path: './static/xuanze.csv', headers: ['题号', '题目', '选项A', '选项B', '选项C', '选项D', '答案'] },
-            { type: 'true_false', path: './static/panduan.csv', headers: ['题号', '题目', '答案'] }
+            { type: 'fill_in_the_blank', path: 'static/tiankong.csv', headers: ['题号', '题目', '答案'], label: '填空题' },
+            { type: 'multiple_choice', path: 'static/xuanze.csv', headers: ['题号', '题目', '选项A', '选项B', '选项C', '选项D', '答案'], label: '选择题' },
+            { type: 'true_false', path: 'static/panduan.csv', headers: ['题号', '题目', '答案'], label: '判断题' }
         ];
 
         // DOM 元素
@@ -76,27 +112,26 @@
         const resultText = document.getElementById('result-text');
         const correctAnswerDisplay = document.getElementById('correct-answer-display');
         const loadingMessage = document.getElementById('loading-message');
+        const typeSelectionDiv = document.getElementById('type-selection');
+        const questionTypeSelect = document.getElementById('question-type');
+
 
         /**
          * 简单 CSV 解析器：将 CSV 文本转换为对象数组。
-         * 假设第一行为表头。
          */
         function parseCSV(csvText, requiredHeaders) {
             const lines = csvText.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0);
             if (lines.length <= 1) return [];
 
-            // 使用逗号分割第一行作为实际的表头
             const headers = lines[0].split(',').map(h => h.trim());
             const data = [];
 
-            // 检查表头是否符合要求
             if (!requiredHeaders.every(h => headers.includes(h))) {
                 throw new Error(`CSV 文件表头不匹配。要求: ${requiredHeaders.join(', ')}`);
             }
 
             for (let i = 1; i < lines.length; i++) {
                 const currentLine = lines[i];
-                // 简单的逗号分割，这假设数据中不包含被双引号包裹的逗号。
                 const values = currentLine.split(',').map(v => v.trim());
                 if (values.length !== headers.length) {
                      console.warn(`行 ${i + 1} 列数不匹配，跳过。`);
@@ -126,10 +161,8 @@
                 };
 
                 if (type === 'fill_in_the_blank') {
-                    // 填空题：答案以分号分隔，转换为数组
                     standardizedItem.answer = standardizedItem.answer.split(';').map(a => a.trim()).filter(a => a.length > 0);
                 } else if (type === 'multiple_choice') {
-                    // 选择题：提取选项并格式化
                     standardizedItem.options = [
                         `A. ${item['选项A']}`,
                         `B. ${item['选项B']}`,
@@ -137,57 +170,110 @@
                         `D. ${item['选项D']}`
                     ];
                 }
-                // 判断题：答案保持 'True' 或 'False' 字符串
-
                 return standardizedItem;
-            }).filter(item => item.question && item.answer); // 过滤掉无效题目
+            }).filter(item => item.question && item.answer);
         }
 
+        /**
+         * 初始化题型选择下拉菜单
+         */
+        function initializeTypeSelect() {
+            questionTypeSelect.innerHTML = '';
+            availableTypes.forEach(typeInfo => {
+                const option = document.createElement('option');
+                option.value = typeInfo.type;
+                option.textContent = `${typeInfo.label} (${typeInfo.count} 题)`;
+                questionTypeSelect.appendChild(option);
+                // 初始化顺序索引
+                typeIndexMap[typeInfo.type] = 0;
+            });
+            // 默认选中第一个题型，并加载题目
+            if (availableTypes.length > 0) {
+                 loadNextQuestion();
+            }
+        }
+        
         /**
          * 从文件中加载所有题库数据。
          */
         async function loadAllQuizData() {
             try {
-                // 使用 Promise.all 并行加载所有文件
                 const loadPromises = FILE_PATHS.map(fileInfo =>
                     fetch(fileInfo.path)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`无法加载文件: ${fileInfo.path}. 请确保文件已放置在 static 目录下。`);
+                                throw new Error(`无法加载文件: ${fileInfo.path}.`);
                             }
                             return response.text();
                         })
                         .then(csvText => {
                             const rawData = parseCSV(csvText, fileInfo.headers);
-                            return normalizeQuizData(rawData, fileInfo.type);
+                            const normalizedData = normalizeQuizData(rawData, fileInfo.type);
+                            // 记录有效题型及其数量
+                            if (normalizedData.length > 0) {
+                                availableTypes.push({
+                                    type: fileInfo.type,
+                                    label: fileInfo.label,
+                                    count: normalizedData.length
+                                });
+                            }
+                            return normalizedData;
                         })
                 );
 
                 const results = await Promise.all(loadPromises);
-                
-                // 合并所有题型的结果
                 quizData = results.flat(); 
 
                 if (quizData.length === 0) {
                     throw new Error("所有文件中均未发现有效题目。");
                 }
                 
-                // 启动答题
                 loadingMessage.classList.add('hidden');
-                loadNextQuestion();
-
+                initializeTypeSelect(); // 必须在加载数据后初始化题型选择
+                
             } catch (error) {
                 console.error("加载题库失败:", error);
-                loadingMessage.textContent = `❌ 加载题库失败：${error.message}`;
-                // 禁用按钮
+                loadingMessage.textContent = `❌ 加载题库失败：${error.message}. 请确保文件路径正确且文件内容符合格式。`;
                 checkBtn.disabled = true;
                 nextBtn.disabled = true;
-                questionArea.innerHTML = `<p class="text-center text-xl text-red-600 mt-4">加载错误：${error.message}</p>`;
             }
         }
 
         /**
-         * 从题库中随机选取一个问题。
+         * 处理模式切换
+         */
+        function handleModeChange(mode) {
+            currentMode = mode;
+            // 重置题号计数
+            questionIndex = 0;
+            // 重置所有题型的顺序索引
+            availableTypes.forEach(typeInfo => {
+                typeIndexMap[typeInfo.type] = 0;
+            });
+            
+            if (mode === 'sequential') {
+                typeSelectionDiv.classList.remove('hidden');
+            } else {
+                typeSelectionDiv.classList.add('hidden');
+            }
+            
+            // 切换模式后，自动加载下一题
+            loadNextQuestion();
+        }
+
+        /**
+         * 顺序模式下题型改变，重置该题型的索引
+         */
+        function resetSequentialMode() {
+            // 重置当前选中的题型索引
+            const selectedType = questionTypeSelect.value;
+            typeIndexMap[selectedType] = 0;
+            questionIndex = 0;
+            loadNextQuestion();
+        }
+
+        /**
+         * 随机模式：从整个题库中随机选取。
          */
         function selectRandomQuestion() {
             if (quizData.length === 0) return null;
@@ -196,15 +282,36 @@
         }
 
         /**
+         * 顺序模式：按题型和索引顺序选取。
+         */
+        function getSequentialQuestion() {
+            const selectedType = questionTypeSelect.value;
+            const filteredQuestions = quizData.filter(q => q.type === selectedType);
+
+            if (filteredQuestions.length === 0) return null;
+
+            const currentIndex = typeIndexMap[selectedType];
+            
+            if (currentIndex >= filteredQuestions.length) {
+                // 已达到题库末尾，循环回到第一题
+                typeIndexMap[selectedType] = 0;
+                questionIndex = 0; // 重置题号
+                return getSequentialQuestion(); // 递归调用以加载第一题
+            }
+
+            const questionToLoad = filteredQuestions[currentIndex];
+            // 准备加载下一题时，索引才自增
+            typeIndexMap[selectedType] = currentIndex + 1; 
+
+            return questionToLoad;
+        }
+
+        /**
          * 获取题型对应的中文名称
          */
         function getQuestionTypeLabel(type) {
-            switch (type) {
-                case 'fill_in_the_blank': return '填空题';
-                case 'multiple_choice': return '选择题';
-                case 'true_false': return '判断题';
-                default: return '未知题型';
-            }
+            const typeInfo = FILE_PATHS.find(f => f.type === type);
+            return typeInfo ? typeInfo.label : '未知题型';
         }
 
         /**
@@ -220,6 +327,16 @@
             const typeLabel = getQuestionTypeLabel(question.type);
             let questionHtml = `<div class="text-xl font-medium text-gray-700 leading-relaxed mb-4">${question.question}</div>`;
             
+            let currentQuestionNumberDisplay;
+            if (currentMode === 'sequential') {
+                const selectedType = questionTypeSelect.value;
+                const filteredQuestions = quizData.filter(q => q.type === selectedType);
+                const currentSequentialIndex = typeIndexMap[selectedType] > 0 ? typeIndexMap[selectedType] : filteredQuestions.length; // 如果 index=0 表示从最后一题循环回来，显示总数
+                currentQuestionNumberDisplay = `(${typeLabel}) 第 ${currentSequentialIndex}/${filteredQuestions.length} 题`;
+            } else {
+                currentQuestionNumberDisplay = `(随机 ${typeLabel}) 第 ${questionIndex} 题`;
+            }
+
             // 根据题型渲染不同的输入或选择控件
             switch (question.type) {
                 case 'fill_in_the_blank':
@@ -266,7 +383,7 @@
 
             // 更新显示区域
             questionArea.innerHTML = `
-                <p class="text-sm text-indigo-600 mb-2">第 ${questionIndex} 题 (${typeLabel})</p>
+                <p class="text-sm text-indigo-600 mb-2">${currentQuestionNumberDisplay}</p>
                 ${questionHtml}
             `;
         }
@@ -280,6 +397,7 @@
             let allCorrect = true;
             let userAnswerDisplay = '';
 
+            // ... (检查答案逻辑保持不变，因为它与模式无关)
             switch (currentQuestion.type) {
                 case 'fill_in_the_blank':
                     const inputs = questionArea.querySelectorAll('input[type="text"]');
@@ -367,7 +485,7 @@
         }
 
         /**
-         * 加载下一道随机问题。
+         * 根据当前模式加载下一道问题。
          */
         function loadNextQuestion() {
              if (quizData.length === 0) {
@@ -377,13 +495,27 @@
                  return;
              }
              
-            const nextQuestion = selectRandomQuestion();
+            let nextQuestion = null;
+            if (currentMode === 'random') {
+                nextQuestion = selectRandomQuestion();
+            } else {
+                nextQuestion = getSequentialQuestion();
+            }
+
             if (nextQuestion) {
                 renderQuestion(nextQuestion);
             } else {
-                questionArea.innerHTML = '<p class="text-center text-xl text-gray-500">所有题目已作答完毕！</p>';
+                let endMessage = '';
+                if (currentMode === 'sequential') {
+                     // 顺序模式下，如果没有下一题，说明该题型已循环一圈
+                     endMessage = `当前题型已练习一轮，将从第一题重新开始。`;
+                } else {
+                     endMessage = '题库加载失败或已清空。';
+                }
+                
+                questionArea.innerHTML = `<p class="text-center text-xl text-gray-500">${endMessage}</p>`;
                 checkBtn.disabled = true;
-                nextBtn.disabled = true;
+                nextBtn.disabled = false; // 允许用户点击下一题重新开始循环
             }
         }
         
