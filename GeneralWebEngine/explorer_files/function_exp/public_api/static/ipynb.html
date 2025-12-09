@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 Highlight.js CSS 文件 (使用 vs2015 主题，适配深色背景) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <!-- 引入 Highlight.js JavaScript 文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- 引入 Python 语言支持 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+
+    <style>
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; /* gray-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; /* gray-400 */
+        }
+        
+        /* 覆盖 Highlight.js 默认样式，适配整体设计 */
+        pre {
+            /* 确保背景色由 Highlight.js 主题控制，此处仅保留容器样式 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            line-height: 1.4;
+            font-size: 0.875rem; /* sm */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            /* 移除 pre 的默认背景，让 highlight.js 的主题背景生效 */
+            background-color: transparent !important; 
+        }
+
+        /* 用户的代码输入区域 (textarea) */
+        .user-code-input {
+            min-height: 150px; /* 增加高度以便输入 */
+            width: 100%;
+            border: 1px solid #d1d5db; /* gray-300 */
+            background-color: #ffffff; /* 白色背景 */
+            padding: 1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            resize: vertical; /* 允许用户垂直调整大小 */
+            box-sizing: border-box; 
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            font-size: 0.875rem;
+        }
+        .user-code-input:focus {
+            outline: none;
+            border-color: #4f46e5; /* indigo-600 */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5);
+        }
+        
+        /* 自定义 Tailwind 颜色，使用 Inter 字体 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#1e40af',
+                        'secondary-gray': '#f3f4f6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 sm:p-8">
+
+    <!-- 头部标题 -->
+    <header class="max-w-4xl mx-auto mb-10 p-6 bg-white shadow-xl rounded-xl">
+        <h1 class="text-4xl font-extrabold text-primary-blue border-b-4 border-primary-blue pb-2">
+            代码编程
+        </h1>
+        <p class="mt-2 text-lg text-gray-600">
+            
+        </p>
+    </header>
+
+    <!-- 主内容区 -->
+    <main id="exercise-container" class="max-w-4xl mx-auto space-y-8">
+        <!-- 题目列表将由 JavaScript 插入 -->
+    </main>
+
+    <footer class="max-w-4xl mx-auto mt-10 p-4 text-center text-gray-500 text-sm">
+        <p>来自题库15题</p>
+    </footer>
+
+    <script>
+        // 1. 数据结构：包含所有 15 个题目信息
+        const exercises = [
+            {
+                id: 1,
+                title: "决策树实现与可视化 (分类问题)",
+                requirements: [
+                    "加载数据并按**7:3**的比例划分训练集和测试集。",
+                    "使用`DecisionTreeClassifier`进行训练，并设置`max_depth=3`和`random_state=42`。",
+                    "在测试集上进行预测，并输出模型的**准确率**、**精确率**、**召回率**和**F1-score**（宏平均）。",
+                    "**（选做）**使用`plot_tree`函数将训练好的决策树可视化。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.tree import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+
+iris = load_iris()
+X, y = iris.data, iris.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 2. 创建并训练模型
+dt_clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+dt_clf.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = dt_clf.predict(X_test)
+print(f"准确率: {accuracy_score(y_test, y_pred):.4f}")
+print("\\n分类报告 (宏平均):")
+print(classification_report(y_test, y_pred, target_names=iris.target_names, zero_division=0))
+
+# 4. 可视化 (选做)
+# 注意：在浏览器环境中运行Python代码需要额外的环境支持，
+# 此处代码仅作参考，需在Jupyter或本地环境运行。
+# plt.figure(figsize=(15, 10))
+# plot_tree(dt_clf, filled=True, feature_names=iris.feature_names, class_names=iris.target_names, rounded=True)
+# plt.title("决策树可视化")
+# plt.show()
+`
+            },
+            {
+                id: 2,
+                title: "支持向量机（SVM）分类 (分类问题)",
+                requirements: [
+                    "加载数据并按**8:2**的比例划分训练集和测试集。",
+                    "使用`SVC`进行训练，设置`kernel='rbf'`和`random_state=42`。",
+                    "在测试集上进行预测，并输出模型的**准确率**、**精确率**、**召回率**和**F1-score**（加权平均）。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.svm import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
+
+cancer = load_breast_cancer()
+X, y = cancer.data, cancer.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. 创建并训练模型
+svm_clf = SVC(kernel='rbf', random_state=42)
+svm_clf.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = svm_clf.predict(X_test)
+print(f"准确率: {accuracy_score(y_test, y_pred):.4f}")
+
+report = classification_report(y_test, y_pred, target_names=cancer.target_names, output_dict=True, zero_division=0)
+print(f"\\n加权平均精确率: {report['weighted avg']['precision']:.4f}")
+print(f"加权平均召回率: {report['weighted avg']['recall']:.4f}")
+print(f"加权平均F1-score: {report['weighted avg']['f1-score']:.4f}")
+`
+            },
+            {
+                id: 3,
+                title: "K-近邻（KNN）分类 (分类问题)",
+                requirements: [
+                    "加载数据并按**7.5:2.5**的比例划分训练集和测试集。",
+                    "使用`KNeighborsClassifier`进行训练，设置邻居数`n_neighbors=5`。",
+                    "在测试集上进行预测，并输出模型的**准确率**。",
+                    "**（选做）**通过循环测试`k`值从1到10，并绘制准确率随`k`值变化的曲线图。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.neighbors import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import numpy as np
+
+wine = load_wine()
+X, y = wine.data, wine.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# 2. 创建并训练模型
+knn_clf = KNeighborsClassifier(n_neighbors=5)
+knn_clf.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = knn_clf.predict(X_test)
+print(f"n_neighbors=5 时的准确率: {accuracy_score(y_test, y_pred):.4f}")
+
+# 4. 选做：绘制k值变化曲线
+# k_range = range(1, 11)
+# accuracies = []
+# for k in k_range:
+#     knn = KNeighborsClassifier(n_neighbors=k)
+#     knn.fit(X_train, y_train)
+#     y_pred_k = knn.predict(X_test)
+#     accuracies.append(accuracy_score(y_test, y_pred_k))
+
+# plt.figure(figsize=(10, 6))
+# plt.plot(k_range, accuracies, marker='o')
+# plt.title('KNN 准确率随 K 值变化曲线')
+# plt.xlabel('K (邻居数)')
+# plt.ylabel('测试集准确率')
+# plt.xticks(k_range)
+# plt.grid(True)
+# plt.show()
+`
+            },
+            {
+                id: 4,
+                title: "K-均值聚类实现 (聚类问题)",
+                requirements: [
+                    "使用`make_blobs`生成**300个样本**，**4个簇中心**，`random_state=42`。",
+                    "使用`KMeans`进行聚类，设置`n_clusters=4`，`random_state=42`。",
+                    "计算并输出聚类模型的**SSE**（误差平方和，即`inertia_`）。",
+                    "**（选做）**使用肘方法（Elbow Method），计算k从1到10时的SSE，并绘制曲线图，以确定最佳k值。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.cluster import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 生成数据
+X, y = make_blobs(n_samples=300, centers=4, random_state=42, cluster_std=0.8)
+
+# 2. K-Means聚类
+# n_init=10 在较新版本的sklearn中是默认值，但建议显式设置以避免警告
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+kmeans.fit(X)
+
+# 3. 输出SSE
+print(f"KMeans (k=4) 的 SSE (Inertia): {kmeans.inertia_:.2f}")
+
+# 4. 选做：肘方法确定最佳k
+# sse = []
+# k_range = range(1, 11)
+# for k in k_range:
+#     kmeans_k = KMeans(n_clusters=k, random_state=42, n_init=10)
+#     kmeans_k.fit(X)
+#     sse.append(kmeans_k.inertia_)
+
+# # 绘制肘方法曲线
+# plt.figure(figsize=(10, 6))
+# plt.plot(k_range, sse, marker='o')
+# plt.title('肘方法 (Elbow Method) 确定最佳 K 值')
+# plt.xlabel('K (簇数)')
+# plt.ylabel('SSE (误差平方和)')
+# plt.xticks(k_range)
+# plt.grid(True)
+# plt.show()
+`
+            },
+            {
+                id: 5,
+                title: "层次聚类实现 (聚类问题)",
+                requirements: [
+                    "使用`make_blobs`生成**50个样本**，**4个簇中心**，`random_state=42`。",
+                    "使用`scipy.cluster.hierarchy`的`linkage`函数进行层次聚类，设置`method='ward'`，`metric='euclidean'`。",
+                    "绘制层次聚类的**树状图**（Dendrogram）。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from scipy.cluster.hierarchy import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import make_blobs
+from scipy.cluster.hierarchy import linkage, dendrogram
+import matplotlib.pyplot as plt
+
+# 生成数据
+X, y = make_blobs(n_samples=50, centers=4, random_state=42, cluster_std=0.8)
+
+# 2. 执行层次聚类
+Z = linkage(X, method='ward', metric='euclidean')
+
+# 3. 绘制树状图
+# plt.figure(figsize=(15, 8))
+# plt.title('层次聚类树状图 (Dendrogram)')
+# plt.xlabel('样本索引')
+# plt.ylabel('距离')
+# # 截断模式：只显示最后10个合并步骤
+# dendrogram(Z,
+#            truncate_mode='lastp',
+#            p=10,
+#            show_leaf_counts=True,
+#            leaf_rotation=90.,
+#            leaf_font_size=12.,
+#            show_contracted=True)
+# plt.show()
+print("层次聚类已执行，结果存储在变量 Z 中。绘制图形需在本地环境进行。")
+`
+            },
+            {
+                id: 6,
+                title: "DBSCAN聚类实现 (聚类问题)",
+                requirements: [
+                    "使用`make_moons`生成**200个样本**，`noise=0.05`，`random_state=42`。",
+                    "使用`DBSCAN`进行聚类，设置`eps=0.3`，`min_samples=5`。",
+                    "输出聚类结果的簇标签（`labels_`）。",
+                    "**（选做）**可视化结果，将核心点、边界点和噪声点用不同颜色和标记表示。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.cluster import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.cluster import DBSCAN
+from sklearn.datasets import make_moons
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 生成数据
+X, y = make_moons(n_samples=200, noise=0.05, random_state=42)
+
+# 2. DBSCAN聚类
+dbscan = DBSCAN(eps=0.3, min_samples=5)
+dbscan.fit(X)
+labels = dbscan.labels_
+
+# 输出簇标签
+print("DBSCAN 聚类标签 (标签 -1 表示噪声点):\\n", labels)
+
+# 3. 选做：可视化结果
+# core_samples_mask = np.zeros_like(dbscan.labels_, dtype=bool)
+# core_samples_mask[dbscan.core_sample_indices_] = True
+
+# n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+# unique_labels = set(labels)
+# colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, len(unique_labels))]
+
+# # ... 绘图代码 ...
+# plt.title(f'DBSCAN 聚类结果: 发现簇数: {n_clusters}')
+# plt.show()
+print("可视化代码已略去，请在本地环境运行完整的绘图代码。")
+`
+            },
+            {
+                id: 7,
+                title: "Apriori关联规则挖掘 (关联规则)",
+                requirements: [
+                    "创建一个包含**5个事务**和**4个商品（A, B, C, D）**的简单事务数据集（请自行设计数据，确保能产生规则）。",
+                    "使用`apriori`函数找出**支持度（Support）大于等于0.6**的所有频繁项集。",
+                    "基于频繁项集，使用`association_rules`函数找出**置信度（Confidence）大于等于0.7**的关联规则。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from mlxtend.frequent_patterns import... )",
+                referenceCode: `# 1. 导入库和数据
+import pandas as pd
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+from mlxtend.preprocessing import TransactionEncoder
+
+# 简单事务数据集
+data = [['A', 'B', 'C'],
+        ['A', 'C'],
+        ['A', 'D'],
+        ['B', 'C', 'D'],
+        ['A', 'B', 'C', 'D']]
+
+# 转换为One-Hot编码
+te = TransactionEncoder()
+te_ary = te.fit(data).transform(data)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+
+# 2. Apriori算法：找出频繁项集
+frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+print("频繁项集 (min_support=0.6):\\n", frequent_itemsets)
+
+# 3. 关联规则：找出置信度大于等于0.7的规则
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.7)
+print("\\n关联规则 (min_confidence=0.7):\\n", rules)
+`
+            },
+            {
+                id: 8,
+                title: "FP-Growth关联规则挖掘 (关联规则)",
+                requirements: [
+                    "使用与第7题相同的简单事务数据集（A, B, C, D）。",
+                    "使用`fpgrowth`函数找出**支持度（Support）大于等于0.6**的所有频繁项集。",
+                    "基于频繁项集，使用`association_rules`函数找出**提升度（Lift）大于1.0**的关联规则，并按照提升度降序排列。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from mlxtend.frequent_patterns import... )",
+                referenceCode: `# 1. 导入库和数据
+import pandas as pd
+from mlxtend.frequent_patterns import fpgrowth
+from mlxtend.frequent_patterns import association_rules
+from mlxtend.preprocessing import TransactionEncoder
+
+# 简单事务数据集
+data = [['A', 'B', 'C'],
+        ['A', 'C'],
+        ['A', 'D'],
+        ['B', 'C', 'D'],
+        ['A', 'B', 'C', 'D']]
+
+# 转换为One-Hot编码
+te = TransactionEncoder()
+te_ary = te.fit(data).transform(data)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+
+# 2. FP-Growth算法：找出频繁项集
+frequent_itemsets = fpgrowth(df, min_support=0.6, use_colnames=True)
+print("频繁项集 (min_support=0.6):\\n", frequent_itemsets)
+
+# 3. 关联规则：找出提升度大于1.0的规则
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.0)
+# 按提升度降序排列
+rules_sorted = rules.sort_values('lift', ascending=False)
+print("\\n关联规则 (min_lift=1.0, 按提升度降序):\\n", rules_sorted)
+`
+            },
+            {
+                id: 9,
+                title: "线性回归模型构建与评估 (回归问题)",
+                requirements: [
+                    "加载数据并按**8:2**的比例划分训练集和测试集。",
+                    "使用`LinearRegression`进行训练。",
+                    "在测试集上进行预测，并计算模型的**均方误差（MSE）**和**$R^2$得分**。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.linear_model import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+# 使用 make_regression() 生成模拟数据
+from sklearn.datasets import make_regression
+X, y = make_regression(n_samples=200, n_features=10, noise=5.0, random_state=42)
+
+# 数据划分
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. 创建并训练模型
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = lr.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"线性回归模型的系数 (Weights):\\n{lr.coef_}")
+print(f"均方误差 (MSE): {mse:.2f}")
+print(f"R^2 得分: {r2:.4f}")
+`
+            },
+            {
+                id: 10,
+                title: "岭回归模型构建与评估 (回归问题)",
+                requirements: [
+                    "使用`Ridge`进行训练，设置正则化强度`alpha=1.0`和`random_state=42`。",
+                    "在测试集上进行预测，并计算模型的**均方误差（MSE）**和**$R^2$得分**。",
+                    "比较其系数与线性回归模型的系数变化。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.linear_model import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+# 使用 make_regression() 生成模拟数据
+from sklearn.datasets import make_regression
+X, y = make_regression(n_samples=200, n_features=10, noise=5.0, random_state=42)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. 创建并训练模型
+ridge_reg = Ridge(alpha=1.0, random_state=42)
+ridge_reg.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = ridge_reg.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"岭回归模型 (alpha=1.0) 的系数 (Weights):\\n{ridge_reg.coef_}")
+print(f"均方误差 (MSE): {mse:.2f}")
+print(f"R^2 得分: {r2:.4f}")
+`
+            },
+            {
+                id: 11,
+                title: "Lasso回归模型构建与评估 (回归问题)",
+                requirements: [
+                    "使用`Lasso`进行训练，设置正则化强度`alpha=0.1`和`random_state=42`。",
+                    "在测试集上进行预测，并计算模型的**均方误差（MSE）**和**$R^2$得分**。",
+                    "观察其系数与线性回归模型的系数变化，特别是系数是否被压缩至零。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.linear_model import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+# 使用 make_regression() 生成模拟数据
+from sklearn.datasets import make_regression
+X, y = make_regression(n_samples=200, n_features=10, noise=5.0, random_state=42)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. 创建并训练模型
+# 增加 max_iter 保证收敛
+lasso_reg = Lasso(alpha=0.1, random_state=42, max_iter=10000)
+lasso_reg.fit(X_train, y_train)
+
+# 3. 预测与评估
+y_pred = lasso_reg.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Lasso回归模型 (alpha=0.1) 的系数 (Weights):\\n{lasso_reg.coef_}")
+print(f"被压缩至零的系数数量: {np.sum(lasso_reg.coef_ == 0)}")
+print(f"均方误差 (MSE): {mse:.2f}")
+print(f"R^2 得分: {r2:.4f}")
+`
+            },
+            {
+                id: 12,
+                title: "主成分分析（PCA）降维 (降维问题)",
+                requirements: [
+                    "加载数字（Digits）数据集。使用`StandardScaler`对数据进行**标准化**。",
+                    "使用`PCA`进行降维，设置`n_components=0.95`（保留**95%的方差**）。",
+                    "输出降维后的特征维度数量。",
+                    "**（选做）**绘制累积贡献率曲线图，以直观查看不同主成分数量下的方差保留情况。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.decomposition import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import load_digits
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 加载数据集
+digits = load_digits()
+X, y = digits.data, digits.target
+
+# 2. 数据标准化
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 3. PCA 降维 (保留 95% 方差)
+pca = PCA(n_components=0.95)
+X_reduced = pca.fit_transform(X_scaled)
+
+# 输出降维后的维度数量
+print(f"原始特征维度: {X.shape[1]}")
+print(f"保留 95% 方差后特征维度: {X_reduced.shape[1]}")
+
+# 4. 选做：绘制累积贡献率曲线
+# pca_full = PCA().fit(X_scaled)
+# cumulative_variance = np.cumsum(pca_full.explained_variance_ratio_)
+
+# # ... 绘图代码 ...
+# plt.title('PCA 累积贡献率曲线')
+# plt.show()
+print("可视化代码已略去，请在本地环境运行完整的绘图代码。")
+`
+            },
+            {
+                id: 13,
+                title: "t-SNE非线性降维与可视化 (降维问题)",
+                requirements: [
+                    "加载数字（Digits）数据集，只取**前500个样本**进行降维（以加速计算）。",
+                    "使用`TSNE`进行降维，设置`n_components=2`，`random_state=42`。",
+                    "将降维后的2维数据点在二维图上进行可视化，并根据其原始标签（0-9）进行着色。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.manifold import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.datasets import load_digits
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 加载数据集并限制样本数量
+digits = load_digits()
+X, y = digits.data, digits.target
+N = 500 # 限制样本数量
+X_subset = X[:N]
+y_subset = y[:N]
+
+# 2. t-SNE 降维
+# 注意：t-SNE计算量大，推荐在本地环境运行
+# tsne = TSNE(n_components=2, random_state=42, init='pca', learning_rate='auto')
+# X_tsne = tsne.fit_transform(X_subset)
+
+# # 3. 可视化
+# plt.figure(figsize=(10, 8))
+# scatter = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y_subset, cmap='viridis', s=50, alpha=0.8)
+# plt.colorbar(scatter, label='数字标签')
+# plt.title(f't-SNE 降维可视化 (N={N})')
+# plt.show()
+print("t-SNE 已跳过，请在本地环境运行完整的降维和绘图代码。")
+`
+            },
+            {
+                id: 14,
+                title: "K-S检验与Q-Q图 (统计检验)",
+                requirements: [
+                    "生成均值为0，标准差为1的**100个样本**的正态分布随机数。",
+                    "使用`scipy.stats`的`kstest`进行Kolmogorov-Smirnov（K-S）检验，输出其**统计量和p值**。",
+                    "使用`statsmodels.api`绘制**Q-Q图**（Quantile-Quantile Plot），以直观判断数据的正态性。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from scipy import stats; import statsmodels.api as sm... )",
+                referenceCode: `# 1. 导入库和数据
+import numpy as np
+from scipy import stats
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+
+# 生成正态分布随机数
+np.random.seed(42)
+data = np.random.normal(loc=0, scale=1, size=100)
+
+# 2. K-S 检验
+ks_statistic, p_value = stats.kstest(data, 'norm')
+print("Kolmogorov-Smirnov (K-S) 检验结果:")
+print(f"统计量 (Statistic): {ks_statistic:.4f}")
+print(f"P 值 (P-value): {p_value:.4f}")
+
+# 3. 绘制 Q-Q 图
+# fig = plt.figure(figsize=(8, 8))
+# ax = fig.add_subplot(111)
+# sm.qqplot(data, line='45', ax=ax)
+# ax.set_title("Q-Q Plot (正态性检验)")
+# plt.grid(True)
+# plt.show()
+print("Q-Q图绘制代码已略去，请在本地环境运行完整的绘图代码。")
+`
+            },
+            {
+                id: 15,
+                title: "局部异常因子（LOF）检测 (异常检测)",
+                requirements: [
+                    "使用`make_blobs`生成**300个样本**（2个簇），然后**添加10个随机异常点**。",
+                    "使用`LocalOutlierFactor`进行异常检测，设置`n_neighbors=20`，`contamination=0.03`。",
+                    "计算每个样本的LOF得分（`negative_outlier_factor_`的负值越大越可能是异常）。",
+                    "可视化结果，用不同颜色和大小表示正常点和异常点。",
+                    "通过决策函数找出**前5个最异常的样本**。"
+                ],
+                userCodePlaceholder: "# 在这里写你的代码 (例如： from sklearn.neighbors import... )",
+                referenceCode: `# 1. 导入库和数据
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.datasets import make_blobs
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. 生成数据
+X, y_true = make_blobs(n_samples=300, centers=2, cluster_std=0.8, random_state=42)
+# 添加异常点
+rng = np.random.RandomState(42)
+X_outliers = rng.uniform(low=-8, high=8, size=(10, 2))
+X = np.vstack([X, X_outliers])
+
+# 2. 使用LOF进行异常检测
+lof = LocalOutlierFactor(n_neighbors=20, contamination=0.03)
+y_pred = lof.fit_predict(X)  # 1为正常，-1为异常
+lof_scores = -lof.negative_outlier_factor_  # LOF得分 (负值越大越异常)
+
+# 3. 找出前5个最异常的样本
+scores = lof.negative_outlier_factor_
+# argsort() 找出得分最低（最负，即LOF得分最高）的样本的索引
+outlier_indices = scores.argsort()[:5]
+
+print("局部异常因子 (LOF) 检测已执行。")
+print(f"被识别的异常点数量: {np.sum(y_pred == -1)}")
+print("\\n前 5 个最异常的样本索引 (基于最低 negative_outlier_factor_):\\n", outlier_indices)
+print("对应的 LOF 得分 (越高越异常):\\n", -scores[outlier_indices])
+# 可视化代码已略去，请在本地环境运行完整的绘图代码。
+`
+            }
+        ];
+
+        // 2. 辅助函数：生成题目卡片 HTML
+        function generateExerciseCard(exercise) {
+            const requirementsHtml = exercise.requirements.map(req => `<li>${req.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+
+            // 注意：参考答案的代码被包裹在 <pre><code class="language-python"> 中
+            return `
+                <div id="q-${exercise.id}" class="bg-white p-6 shadow-lg rounded-xl transition duration-300 hover:shadow-2xl border border-gray-100">
+                    <!-- 题目和要求 -->
+                    <h2 class="text-2xl font-bold text-gray-900 mb-3 border-b-2 border-indigo-200 pb-1">
+                        ${exercise.id}. ${exercise.title}
+                    </h2>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-indigo-700 mb-2">题目要求：</h3>
+                        <ul class="list-disc ml-6 space-y-1 text-gray-700">
+                            ${requirementsHtml}
+                        </ul>
+                    </div>
+
+                    <!-- 用户代码区域 -->
+                    <div class="mt-6 mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">3. 你的代码区域 (用户自写)</h3>
+                        <textarea class="user-code-input rounded-lg" spellcheck="false">${exercise.userCodePlaceholder}</textarea>
+                    </div>
+
+                    <!-- 参考答案按钮 -->
+                    <button 
+                        class="toggle-answer-btn w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        data-target-id="answer-${exercise.id}"
+                    >
+                        点击查看/隐藏参考答案
+                    </button>
+
+                    <!-- 参考答案区域 (默认隐藏) -->
+                    <div id="answer-${exercise.id}" class="reference-answer mt-4 p-4 rounded-lg hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">4. 参考答案 (Python)</h3>
+                        <!-- 使用 pre code 标签包裹代码并指定语言，用于 Highlight.js -->
+                        <pre><code class="language-python">${exercise.referenceCode}</code></pre>
+                        <p class="mt-3 text-sm text-red-600 font-medium">
+                            注意：所有涉及**绘图 (如 matplotlib, plt.show())** 的代码在浏览器环境中无法直接运行，需在本地 **Jupyter Notebook** 或 Python 环境中执行。
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. 渲染所有题目
+        function renderExercises() {
+            const container = document.getElementById('exercise-container');
+            container.innerHTML = exercises.map(generateExerciseCard).join('');
+        }
+
+        // 4. 绑定点击事件：切换参考答案的显示/隐藏
+        function bindToggleEvents() {
+            document.querySelectorAll('.toggle-answer-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target-id');
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement.classList.contains('hidden')) {
+                        targetElement.classList.remove('hidden');
+                        this.textContent = '点击隐藏参考答案';
+                        this.classList.replace('bg-indigo-600', 'bg-red-600');
+                        this.classList.replace('hover:bg-indigo-700', 'hover:bg-red-700');
+                        this.classList.replace('focus:ring-indigo-500', 'focus:ring-red-500');
+                    } else {
+                        targetElement.classList.add('hidden');
+                        this.textContent = '点击查看/隐藏参考答案';
+                        this.classList.replace('bg-red-600', 'bg-indigo-600');
+                        this.classList.replace('hover:bg-red-700', 'hover:bg-indigo-700');
+                        this.classList.replace('focus:ring-red-500', 'focus:ring-indigo-500');
+                    }
+                });
+            });
+        }
+
+        // 5. 初始化
+        window.onload = () => {
+            renderExercises();
+            bindToggleEvents();
+            // 关键：对所有代码块应用高亮
+            hljs.highlightAll();
+        };
+
+    </script>
+</body>
+</html>
