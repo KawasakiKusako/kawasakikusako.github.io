@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据仓库与数据挖掘在线答题</title>
+    <title>数据仓库与数据挖掘在线答题及代码练习</title>
     <!-- 引入 Tailwind CSS 进行样式美化和响应式布局 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -26,23 +26,29 @@
         .incorrect-answer { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
         .option-item { cursor: pointer; transition: background-color 0.15s; }
         .option-item:hover { background-color: #f3f4f6; }
+
+        /* 确保 iframe 样式良好 */
+        .code-iframe {
+            min-height: 400px; /* 最小高度，保证内容可见 */
+            width: 100%;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
     <div id="app" class="quiz-container">
         <header class="text-center mb-10">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">数据仓库与数据挖掘题库练习</h1>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">数据仓库与数据挖掘题库练习 (多模式增强)</h1>
             <p class="mt-2 text-lg text-gray-500">魔丸拟合-在线练习魔丸题库</p>
         </header>
 
-        <main class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
-            <!-- 模式和题型选择区域 -->
-            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <!-- 模式和题型选择区域 - 包含新的“代码练习”模式 -->
+        <div class="mb-10 p-6 bg-white rounded-xl shadow-2xl">
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <p class="text-lg font-semibold text-gray-700 mb-3">选择练习模式：</p>
                 
                 <!-- 模式选择 -->
-                <div class="flex flex-wrap gap-4 mb-4" id="mode-selection">
+                <div class="flex flex-wrap gap-4" id="mode-selection">
                     <label class="flex items-center space-x-2">
                         <input type="radio" name="practiceMode" value="random" checked onchange="handleModeChange(this.value)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
                         <span class="text-sm font-medium text-gray-700">随机练题 (所有题型)</span>
@@ -51,27 +57,52 @@
                         <input type="radio" name="practiceMode" value="sequential" onchange="handleModeChange(this.value)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
                         <span class="text-sm font-medium text-gray-700">顺序练题 (按题型)</span>
                     </label>
-                </div>
-
-                <!-- 题型选择 (仅在顺序模式下显示) -->
-                <div id="type-selection" class="hidden">
-                    <label for="question-type" class="block text-sm font-medium text-gray-700 mb-1">选择题型：</label>
-                    <select id="question-type" onchange="resetSequentialMode()" class="mt-1 block w-full sm:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
-                        <!-- 选项将由 JS 加载后动态添加 -->
-                    </select>
-                </div>
-
-                <!-- 题目序号跳转 (仅在顺序模式下显示) -->
-                <div id="sequential-nav" class="hidden mt-4 flex items-center space-x-3">
-                    <div class="flex items-center space-x-2">
-                        <label for="question-jump-input" class="text-sm font-medium text-gray-700 whitespace-nowrap">跳转到第</label>
-                        <input type="number" id="question-jump-input" min="1" onchange="jumpToQuestion(this.value)" class="w-20 text-center rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm">
-                        <span id="jump-total-display" class="text-sm font-medium text-gray-700">/? 题</span>
-                    </div>
+                    <!-- 新增：代码练习模式 -->
+                    <label class="flex items-center space-x-2">
+                        <input type="radio" name="practiceMode" value="code" onchange="handleModeChange(this.value)" class="h-4 w-4 text-green-600 focus:ring-green-500">
+                        <span class="text-sm font-medium text-gray-700 font-bold">代码练习</span>
+                    </label>
                 </div>
             </div>
 
+            <!-- 题型选择 (仅在顺序模式下显示) -->
+            <div id="type-selection" class="hidden">
+                <label for="question-type" class="block text-sm font-medium text-gray-700 mb-1">选择题型：</label>
+                <select id="question-type" onchange="resetSequentialMode()" class="mt-1 block w-full sm:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                    <!-- 选项将由 JS 加载后动态添加 -->
+                </select>
+            </div>
 
+            <!-- 题目序号跳转 (仅在顺序模式下显示) -->
+            <div id="sequential-nav" class="hidden mt-4 flex items-center space-x-3">
+                <div class="flex items-center space-x-2">
+                    <label for="question-jump-input" class="text-sm font-medium text-gray-700 whitespace-nowrap">跳转到第</label>
+                    <input type="number" id="question-jump-input" min="1" onchange="jumpToQuestion(this.value)" class="w-20 text-center rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm">
+                    <span id="jump-total-display" class="text-sm font-medium text-gray-700">/? 题</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 代码练习区域 (初始隐藏) -->
+        <section id="code-practice-section" class="mb-10 p-6 bg-white rounded-xl shadow-2xl hidden">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b pb-2 border-gray-200">Python / Jupyter 代码练习</h2>
+            <!-- 
+                iframe 用于显示 static/ipynb.html 的内容。
+            -->
+            <iframe 
+                src="static/ipynb.html" 
+                title="代码练习题嵌入"
+                class="code-iframe rounded-lg border-2 border-gray-300 shadow-inner"
+                style="height: 600px;" 
+                sandbox="allow-scripts allow-same-origin allow-popups"
+            ></iframe>
+            <p class="text-sm text-gray-500 mt-2">（此区域嵌入了一个交互式代码环境。如果您没有看到内容，请检查 `static/ipynb.html` 文件是否存在。）</p>
+        </section>
+        <!-- 结束：代码练习区域 -->
+
+
+        <!-- 答题区域主体 (初始显示) -->
+        <main id="quiz-main-section" class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl">
             <!-- 题目区域 -->
             <div id="question-area" class="min-h-[150px]">
                 <p id="loading-message" class="text-center text-xl font-semibold text-indigo-600">正在加载题库文件...</p>
@@ -103,17 +134,18 @@
     </div>
 
     <script>
+        // JS 代码部分
         let quizData = [];
         let currentQuestion = null;
         const BLANK_PLACEHOLDER = "_BLANK_";
         
         // 状态管理
-        let currentMode = 'random'; // 'random' 或 'sequential'
-        let currentQuestionIndex = -1; // 当前正在显示的题目在filteredQuestions中的索引 (0-indexed)
-        let currentQuestionType = ''; // 当前顺序模式下选择的题型
-        let randomQuestionCounter = 0; // 随机模式下的计数器
-        let awaitingCheck = true; // 操作按钮状态: true为检查答案，false为下一题
-        let availableTypes = []; // 已加载的题型列表
+        let currentMode = 'random'; // 'random', 'sequential', 或 'code'
+        let currentQuestionIndex = -1; 
+        let currentQuestionType = ''; 
+        let randomQuestionCounter = 0; 
+        let awaitingCheck = true; 
+        let availableTypes = []; 
 
         // 文件路径配置
         const FILE_PATHS = [
@@ -123,6 +155,9 @@
         ];
 
         // DOM 元素
+        const quizMainSection = document.getElementById('quiz-main-section');
+        const codePracticeSection = document.getElementById('code-practice-section');
+
         const questionArea = document.getElementById('question-area');
         const actionBtn = document.getElementById('action-btn');
         const prevBtn = document.getElementById('prev-btn');
@@ -148,12 +183,12 @@
             const data = [];
 
             if (!requiredHeaders.every(h => headers.includes(h))) {
+                console.error(`CSV 文件表头不匹配。要求: ${requiredHeaders.join(', ')}`);
                 throw new Error(`CSV 文件表头不匹配。要求: ${requiredHeaders.join(', ')}`);
             }
 
             for (let i = 1; i < lines.length; i++) {
                 const currentLine = lines[i];
-                // 简单的逗号分割，这假设数据中不包含被双引号包裹的逗号。
                 const values = currentLine.split(',').map(v => v.trim());
                 if (values.length !== headers.length) {
                      console.warn(`行 ${i + 1} 列数不匹配，跳过。`);
@@ -242,11 +277,10 @@
             // 默认选中第一个题型
             if (availableTypes.length > 0) {
                  currentQuestionType = availableTypes[0].type;
-                 // 初始加载第一题
-                 loadNextQuestion();
-            } else {
-                 loadingMessage.textContent = '❌ 未发现有效题目，无法开始练习。';
-                 actionBtn.disabled = true;
+            } 
+            // 初始加载第一题（如果不是代码模式）
+            if (currentMode !== 'code') {
+                loadNextQuestion();
             }
         }
         
@@ -259,13 +293,18 @@
                     fetch(fileInfo.path)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`无法加载文件: ${fileInfo.path}.`);
+                                console.warn(`警告: 无法加载文件 ${fileInfo.path}. 状态: ${response.status}`);
+                                return ""; 
                             }
                             return response.text();
                         })
                         .then(csvText => {
+                            if (!csvText) return [];
                             const rawData = parseCSV(csvText, fileInfo.headers);
                             return normalizeQuizData(rawData, fileInfo.type);
+                        }).catch(error => {
+                            console.error(`解析文件 ${fileInfo.path} 失败:`, error);
+                            return [];
                         })
                 );
 
@@ -273,15 +312,17 @@
                 quizData = results.flat(); 
 
                 if (quizData.length === 0) {
-                    throw new Error("所有文件中均未发现有效题目。");
+                    loadingMessage.textContent = '❌ 未发现有效题目，无法开始练习。';
+                    actionBtn.disabled = true;
+                    prevBtn.disabled = true;
                 }
                 
                 loadingMessage.classList.add('hidden');
-                initializeTypeSelect(); // 必须在加载数据后初始化题型选择
+                initializeTypeSelect(); 
                 
             } catch (error) {
                 console.error("加载题库失败:", error);
-                loadingMessage.textContent = `❌ 加载题库失败：${error.message}. 请检查文件。`;
+                loadingMessage.textContent = `❌ 加载题库失败：${error.message}. 请检查文件路径和格式。`;
                 actionBtn.disabled = true;
                 prevBtn.disabled = true;
             }
@@ -296,25 +337,36 @@
         }
 
         /**
-         * 处理模式切换
+         * 处理模式切换：控制区域显示和题目加载。
          */
         function handleModeChange(mode) {
             currentMode = mode;
-            currentQuestionIndex = -1; // 索引重置为-1，以便 loadNextQuestion 从 0 开始
+            currentQuestionIndex = -1; // 索引重置
             randomQuestionCounter = 0;
-            currentQuestionType = questionTypeSelect.value;
             
-            if (mode === 'sequential') {
-                typeSelectionDiv.classList.remove('hidden');
-                sequentialNavDiv.classList.remove('hidden');
-                prevBtn.classList.remove('hidden');
+            // 1. 控制代码练习和答题区域的显示/隐藏
+            if (mode === 'code') {
+                quizMainSection.classList.add('hidden');
+                codePracticeSection.classList.remove('hidden');
             } else {
-                typeSelectionDiv.classList.add('hidden');
-                sequentialNavDiv.classList.add('hidden');
-                prevBtn.classList.add('hidden');
+                quizMainSection.classList.remove('hidden');
+                codePracticeSection.classList.add('hidden');
             }
-            
-            loadNextQuestion(); // 切换模式后，自动加载下一题
+
+            // 2. 控制顺序模式的导航控件
+            const isSequential = mode === 'sequential';
+            typeSelectionDiv.classList.toggle('hidden', !isSequential);
+            sequentialNavDiv.classList.toggle('hidden', !isSequential);
+            prevBtn.classList.toggle('hidden', !isSequential);
+
+            // 3. 重新加载题目 (仅对答题模式有效)
+            if (mode !== 'code') {
+                // 如果是顺序模式，确保 currentQuestionType 已设置
+                if (mode === 'sequential') {
+                    currentQuestionType = questionTypeSelect.value;
+                }
+                loadNextQuestion(); 
+            }
         }
 
         /**
@@ -335,15 +387,12 @@
             const filteredQuestions = getFilteredQuestions();
             const total = filteredQuestions.length;
             
-            // 确保输入是数字且在有效范围内
             let jumpIndex = parseInt(questionNumber, 10);
             if (isNaN(jumpIndex) || jumpIndex < 1 || jumpIndex > total) {
-                // 如果输入无效，重置为当前题号
                 questionJumpInput.value = currentQuestionIndex + 1;
                 return;
             }
 
-            // 1-based 转 0-based
             currentQuestionIndex = jumpIndex - 1; 
             
             const nextQuestion = filteredQuestions[currentQuestionIndex];
@@ -370,7 +419,6 @@
 
             if (total === 0) return;
 
-            // 索引减 1。如果小于 0，则循环到最后一题
             currentQuestionIndex = (currentQuestionIndex - 1 + total) % total;
 
             const nextQuestion = filteredQuestions[currentQuestionIndex];
@@ -396,7 +444,6 @@
                 if (total === 0) {
                      endMessage = `当前选中的题型 (${getQuestionTypeLabel(currentQuestionType)}) 题库为空。`;
                 } else {
-                    // 索引加 1。如果等于总数，则循环回到第一题 (0)
                     currentQuestionIndex = (currentQuestionIndex + 1) % total;
                     nextQuestion = filteredQuestions[currentQuestionIndex];
 
@@ -431,7 +478,7 @@
             currentQuestion = question;
             resultArea.classList.add('hidden');
             actionBtn.disabled = false;
-            setButtonState(true); // 始终从 "检查答案" 状态开始
+            setButtonState(true); 
 
             const typeLabel = getQuestionTypeLabel(question.type);
             let questionHtml = `<div class="text-xl font-medium text-gray-700 leading-relaxed mb-4">${question.question}</div>`;
@@ -442,10 +489,9 @@
                 const total = filteredQuestions.length;
                 currentQuestionNumberDisplay = `(${typeLabel}) 第 ${currentQuestionIndex + 1}/${total} 题`;
                 
-                // 更新跳转输入框和总数
                 questionJumpInput.value = currentQuestionIndex + 1;
                 jumpTotalDisplay.textContent = `/${total} 题`;
-                prevBtn.disabled = false; // 顺序模式始终可切换上一题（循环）
+                prevBtn.disabled = false; 
 
             } else {
                 currentQuestionNumberDisplay = `(随机 ${typeLabel}) 第 ${randomQuestionCounter} 题`;
@@ -521,7 +567,7 @@
                         const userAnswer = input.value.trim();
                         const correctAnswer = correctAnswers[index].trim();
                         userAnswers.push(userAnswer);
-                        const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+                        const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase(); 
 
                         if (isCorrect) {
                             input.classList.add('correct-answer');
@@ -567,8 +613,8 @@
                     }
                     
                     const answerText = currentQuestion.type === 'multiple_choice' ? 
-                                       currentQuestion.options.find(opt => opt.startsWith(correctAnswerMC)) || correctAnswerMC : 
-                                       correctAnswerMC;
+                                         currentQuestion.options.find(opt => opt.startsWith(correctAnswerMC)) || correctAnswerMC : 
+                                         correctAnswerMC;
 
                     userAnswerDisplay = `
                         <p class="font-semibold text-gray-800">正确答案：<span class="text-green-700 font-normal">${answerText}</span></p>
@@ -579,18 +625,18 @@
 
             // --- 通用结果反馈 ---
             resultArea.classList.remove('hidden');
-            actionBtn.disabled = false; // 启用下一题按钮
-            setButtonState(false); // 切换到 "下一题" 状态
+            actionBtn.disabled = false; 
+            setButtonState(false); 
 
             if (allCorrect) {
                 resultArea.className = 'mt-6 p-4 rounded-lg bg-green-100 border border-green-500';
-                resultText.textContent = '✅ 恭喜！回答完全正确。';
+                resultText.textContent = '✅ 回答正确。';
                 resultText.classList.remove('text-red-600');
                 resultText.classList.add('text-green-700');
                 correctAnswerDisplay.innerHTML = '';
             } else {
                 resultArea.className = 'mt-6 p-4 rounded-lg bg-red-100 border border-red-500';
-                resultText.textContent = '❌ 很遗憾，回答不正确。';
+                resultText.textContent = '❌ 回答错误。';
                 resultText.classList.remove('text-green-700');
                 resultText.classList.add('text-red-600');
                 correctAnswerDisplay.innerHTML = userAnswerDisplay;
