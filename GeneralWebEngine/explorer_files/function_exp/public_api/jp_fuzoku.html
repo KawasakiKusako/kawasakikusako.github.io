@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>社会语言病例档案｜日本风俗行业术语</title>
+    <style>
+        body {
+            background: #d1d5db;
+            font-family: "Noto Serif SC", "Source Han Serif", serif;
+            color: #1a1a1a;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        .case {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #fffef8;
+            border: 2px solid #333;
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 装饰性元素 */
+        .case::before {
+            content: "CONFIDENTIAL";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.03);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hanko {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 110px;
+            height: 110px;
+            border: 4px double #cc0000;
+            color: #cc0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            transform: rotate(15deg);
+            border-radius: 10px;
+            opacity: 0.7;
+            font-size: 18px;
+            z-index: 10;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 4px solid #000;
+            padding-bottom: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: monospace;
+        }
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 32px;
+            letter-spacing: 6px;
+            font-weight: 900;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 20px;
+        }
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 2px solid #000;
+            margin-bottom: 30px;
+            background: #f9f9f9;
+        }
+        .info-box {
+            padding: 10px;
+            border-right: 1px solid #000;
+        }
+        .info-box:last-child { border-right: none; }
+        .info-label { font-size: 10px; color: #666; display: block; margin-bottom: 5px; }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: -2px;
+            position: relative;
+            z-index: 2;
+        }
+        .tab {
+            border: 2px solid #000;
+            border-bottom: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            background: #eee;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .tab:hover { background: #ddd; }
+        .tab.active {
+            background: #fffef8;
+            padding-top: 12px;
+            margin-top: -4px;
+            border-top: 5px solid #000;
+        }
+
+        .content-area {
+            border: 2px solid #000;
+            padding: 20px;
+            background: #fffef8;
+            min-height: 400px;
+            z-index: 1;
+        }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #f0f0f0; font-size: 11px; text-transform: uppercase; }
+        td { font-size: 13px; }
+        
+        .jp { font-family: "Noto Serif JP", serif; font-weight: 900; font-size: 15px; color: #000; }
+        .romaji { font-size: 10px; color: #666; font-style: italic; display: block; }
+        
+        .risk-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .risk-high { background: #ffebeb; color: #b91c1c; border: 1px solid #f87171; }
+        .risk-med { background: #fffbeb; color: #92400e; border: 1px solid #fbbf24; }
+        
+        .footer-note {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-left: 5px solid #1e293b;
+            font-size: 12px;
+        }
+        .signature-area {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .stamp-red { color: #cc0000; font-family: serif; font-size: 24px; border: 3px solid #cc0000; padding: 5px 15px; transform: rotate(-5deg); }
+    </style>
+</head>
+<body>
+
+<div class="case">
+    <div class="hanko">风俗法务<br>研究委员<br>审阅济</div>
+
+    <div class="header">
+        <div>档案编号：ARCHIVE-2025-FZK</div>
+        <div>秘密等级：LEVEL 3 (INTERNAL USE)</div>
+    </div>
+
+    <h1>日本风俗行业术语及风险诊断书</h1>
+
+    <div class="patient-info">
+        <div class="info-box">
+            <span class="info-label">受诊对象 / SUBJECT</span>
+            <span class="font-bold">社会观察者 (GUEST)</span>
+        </div>
+        <div class="info-box">
+            <span class="info-label">主要症状 / SYMPTOMS</span>
+            <span class="font-bold">认知偏差 / 风险感知不足</span>
+        </div>
+        <div class="info-box">
+            <span class="info-label">主治部门 / DEPT</span>
+            <span class="font-bold">特殊行为风险评估组</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab(0)">核心禁忌</div>
+        <div class="tab" onclick="showTab(1)">行为(基础)</div>
+        <div class="tab" onclick="showTab(2)">行为(进阶/细节)</div>
+        <div class="tab" onclick="showTab(3)">特殊加项(Option)</div>
+        <div class="tab" onclick="showTab(4)">黑话/经营</div>
+        <div class="tab" onclick="showTab(5)">地域并发症</div>
+    </div>
+
+    <div class="content-area">
+        <!-- 核心禁忌 -->
+        <div class="section active">
+            <table>
+                <tr><th width="30%">术语 (Code)</th><th>病理解析 (Sociolinguistics)</th><th>风险警告</th></tr>
+                <tr>
+                    <td><span class="jp">本番</span><span class="romaji">Honban</span></td>
+                    <td>真正的性行为。行业绝对禁语。</td>
+                    <td><span class="risk-tag risk-high">LEGAL CRITICAL</span><br>触犯日本刑法，正规店会立刻驱逐。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">生</span><span class="romaji">Nama / Skin</span></td>
+                    <td>无避孕措施（无套）。</td>
+                    <td><span class="risk-tag risk-high">HEALTH FATAL</span><br>高浓度病毒交换，致命风险。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">中出し</span><span class="romaji">Nakadashi</span></td>
+                    <td>体内射精。</td>
+                    <td><span class="risk-tag risk-high">ABSOLUTE NO</span><br>涉及极高赔偿与刑事责任。</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 行为项目(基本) -->
+        <div class="section">
+            <table>
+                <tr><th width="30%">项目</th><th>临床定义</th><th>备注</th></tr>
+                <tr>
+                    <td><span class="jp">生フェラ</span><span class="romaji">Nama-Fera</span></td>
+                    <td>无套口交。</td>
+                    <td><span class="risk-tag risk-med">INFECT RISK</span> 咽喉性病主要媒介。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">パイズリ</span><span class="romaji">Paizuri</span></td>
+                    <td>乳交。</td>
+                    <td>利用乳部压迫摩擦，安全系数中高。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">素股</span><span class="romaji">Sumata</span></td>
+                    <td>股间摩擦。</td>
+                    <td>模拟进入感但无实质插入。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">手コキ</span><span class="romaji">Tekoki</span></td>
+                    <td>手淫 (Handjob)。</td>
+                    <td>常规手动刺激，最基础服务。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">口内発射</span><span class="romaji">Kounai Hassha</span></td>
+                    <td>口内射精。</td>
+                    <td>允许在受诊者口中结束。</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 行为项目(细节) -->
+        <div class="section">
+            <table>
+                <tr><th width="30%">项目</th><th>临床定义</th><th>备注</th></tr>
+                <tr>
+                    <td><span class="jp">クンニ</span><span class="romaji">Kunni</span></td>
+                    <td>舔阴 / 女子口交。</td>
+                    <td>受诊者为服务者提供口舌刺激。多有卫生限制。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">アニリン</span><span class="romaji">Anilingus</span></td>
+                    <td>舔肛。</td>
+                    <td><span class="risk-tag risk-high">HIGH INFECT</span> 涉及极高细菌与病毒传染风险。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">全身リップ</span><span class="romaji">Zenshin Lip</span></td>
+                    <td>全身亲吻/舔舐。</td>
+                    <td>全皮肤粘膜接触过程。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">玉舐め</span><span class="romaji">Tamaname</span></td>
+                    <td>舔舐睾丸。</td>
+                    <td>针对卵巢对应部位的精细局部服务。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">ディープキス</span><span class="romaji">Deep Kiss</span></td>
+                    <td>深吻 / 舌吻。</td>
+                    <td>部分女孩视此为隐私/情感防线，会拒绝。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">69</span><span class="romaji">Sixty-Nine</span></td>
+                    <td>互为口交。</td>
+                    <td>多器官粘膜同时暴露。</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 特殊加项(Option) -->
+        <div class="section">
+            <table>
+                <tr><th width="30%">加项 (Option)</th><th>含义与病理</th><th>参考价格/风险</th></tr>
+                <tr>
+                    <td><span class="jp">AF</span><span class="romaji">Anal Fuck</span></td>
+                    <td>肛交。</td>
+                    <td><span class="risk-tag risk-high">DEADLY</span> +8000円~1.5万円。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">イラマチオ</span><span class="romaji">Iramachio</span></td>
+                    <td>深喉 / 强力口交。</td>
+                    <td>带有暴力倾向的喉部深度压迫。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">电マ / ローター</span><span class="romaji">Toy / Massager</span></td>
+                    <td>强力震动器/跳蛋。</td>
+                    <td>外部物理辅具干预。通常+1000円。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">洗体 / 泡姬</span><span class="romaji">Arai / Awa</span></td>
+                    <td>泡泡浴洗体。</td>
+                    <td>使用特殊皂液进行全身滑行接触。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">スパンキング</span><span class="romaji">Spanking</span></td>
+                    <td>打屁股 (SP)。</td>
+                    <td>轻度痛感刺激（SM初级）。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">生パン / 生パンスト</span><span class="romaji">Nama-Pan</span></td>
+                    <td>原味内衣/丝袜。</td>
+                    <td>受诊者购买服务者正在穿着的衣物。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">野外 / 车内</span><span class="romaji">Yagai</span></td>
+                    <td>模拟野外/车载场景。</td>
+                    <td>通常存在于外送店(Deli-hel)的特殊套餐。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">圣水 / 吞精</span><span class="romaji">Seisui / Gokkun</span></td>
+                    <td>尿液服务 / 吞食精液。</td>
+                    <td><span class="risk-tag risk-high">FATAL</span> 涉及排泄物/体液的高级接触。</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 经营与黑话 -->
+        <div class="section">
+            <table>
+                <tr><th width="30%">黑话 (Slang)</th><th>行业背景</th><th>潜在威胁</th></tr>
+                <tr>
+                    <td><span class="jp">パネルマジック</span><span class="romaji">P-Magic</span></td>
+                    <td>修图魔法。</td>
+                    <td>照片与实物严重不符。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">枕営業</span><span class="romaji">Makura</span></td>
+                    <td>潜规则关系。</td>
+                    <td>场外交易引发的金钱勒索风险。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">太客 / 痛客</span><span class="romaji">Futo / Ita</span></td>
+                    <td>大金主 / 麻烦客。</td>
+                    <td>受诊者的信用等级。</td>
+                </tr>
+                <tr>
+                    <td><span class="jp">出禁</span><span class="romaji">Dekin</span></td>
+                    <td>禁止入内。</td>
+                    <td>被列入店铺或全地区永久拒绝名单。</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 地域并发症 -->
+        <div class="section">
+            <div style="background: #fff; border: 1px solid #000; padding: 15px; font-size: 13px;">
+                <h4 style="border-bottom: 2px solid #000; margin-bottom: 12px; font-size: 16px;">深度地域病理分析</h4>
+                
+                <p><strong>1. 歌舞伎町：</strong> 全球陷阱密度最高。严禁听从路边“初回特价”的引导。</p>
+                <hr style="margin: 8px 0; border-style: dashed;">
+                <p><strong>2. 飞田新地：</strong> 极度排外且严禁摄影。快节奏、高压力的传统“料理”模式。</p>
+                <hr style="margin: 8px 0; border-style: dashed;">
+                <p><strong>3. 吉原：</strong> 泡泡浴圣地。高价、高素质，但对非本土受诊者有极强隐形门槛。</p>
+                <hr style="margin: 8px 0; border-style: dashed;">
+                <p><strong>4. 川崎-堀之内：</strong> 工业区风气，多涉及深度物理开发与核心向Option。</p>
+                <hr style="margin: 8px 0; border-style: dashed;">
+                <p><strong>5. 薄野/中洲：</strong> 地区性外送店(Deli)极度发达，注意“照片修饰”的高发病率。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <strong>⚠ 综合医嘱 (Summary)：</strong><br>
+        1. 术语差异是导致“医患”冲突的核心原因，操作前务必进行双重确认。<br>
+        2. 所有特殊加项（Option）均需额外付费，严禁在疗程中强行要求未约定的项目。<br>
+        3. 尊重行业红线（本番/无套/摄影禁止），违者可能面临物理或法律惩戒。
+        <br><br>
+        示例网页1：<a href="https://fuzoku.jp/">WEBSITE FUZOKU</a>
+        示例网页2：<a href="https://yoasobi-heaven.com/zh-hans/">WEBSITE YOASOBI-HEAVEN</a>
+        
+    </div>
+
+    <div class="signature-area">
+        <div>
+            <p style="font-size: 10px; color: #888;">INTERNAL CASE FILE - PRIVATE COPY</p>
+            <p>Github @ Kawasaki Kusako</p>
+        </div>
+        <div style="text-align: right;">
+            <p class="info-label">Sign Analysier</p>
+            <div class="stamp-red">Kawasaki.</div>
+            <p style="margin-top: 10px; font-weight: bold;">DATE: 2025/12/26</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(i){
+    document.querySelectorAll('.tab').forEach((t,idx)=>{
+        t.classList.toggle('active',idx===i);
+    });
+    document.querySelectorAll('.section').forEach((s,idx)=>{
+        s.classList.toggle('active',idx===i);
+    });
+}
+</script>
+
+</body>
+</html>
