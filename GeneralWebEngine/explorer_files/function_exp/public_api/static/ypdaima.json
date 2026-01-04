@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "title": "中文文本分词与向量化",
+    "code": "import jieba\nfrom sklearn.feature_extraction.text import CountVectorizer\n\ntexts = [\"自然语言处理很有趣\", \"机器学习是人工智能的分支\"]\ntexts_cut = [' '.join(jieba.lcut(text)) for text in texts]\n\nvectorizer = CountVectorizer()\nX = vectorizer.fit_transform(texts_cut)\nprint(vectorizer.get_feature_names_out())\nprint(X.toarray())",
+    "questions": [
+      {
+        "q": "上述代码的核心功能是什么？",
+        "a": "对中文文本进行分词后，使用词袋模型进行文本向量化。"
+      },
+      {
+        "q": "texts_cut 的处理目的是什么？",
+        "a": "将分词后的词语用空格连接，适配 CountVectorizer 的输入格式（CountVectorizer 默认按空格分词）。"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "大模型 API 调用基础",
+    "code": "from zhipuai import ZhipuAI\nimport os\n\napi_key = os.getenv(\"ZHIPU_API_KEY\")\nclient = ZhipuAI(api_key=api_key)\n\nmessages = [\n  {\"role\": \"system\", \"content\": \"你是一个专业的课程顾问\"},\n  {\"role\": \"user\", \"content\": \"推荐一门适合初学者的NLP课程\"}\n]\n\nresponse = client.chat.completions.create(\n  model=\"glm-4-flash\",\n  messages=messages\n)\nprint(response.choices[0].message.content)",
+    "questions": [
+      {
+        "q": "role='system' 的作用是什么？",
+        "a": "设定大模型的角色和行为准则，引导模型以专业课程顾问的身份回应。"
+      },
+      {
+        "q": "如果环境变量中未设置 'ZHIPU_API_KEY'，代码会出现什么问题？",
+        "a": "api_key 为 None，调用 API 时会因权限不足报错，无法正常获取模型响应。"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "逻辑回归模型训练与评估",
+    "code": "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import f1_score\n\n# 假设X为文本向量化后的特征，y为情感标签\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)\n\nmodel = LogisticRegression()\nmodel.fit(X_train, y_train)\ny_pred = model.predict(X_test)\nf1 = f1_score(y_test, y_pred, average='weighted')\nprint(f\"F1值：{f1}\")",
+    "questions": [
+      {
+        "q": "test_size=0.25 表示什么含义？",
+        "a": "将数据集按 75% 训练集、25%测试集的比例拆分。"
+      },
+      {
+        "q": "average='weighted' 的作用是什么？",
+        "a": "计算加权 F1 值，考虑不同类别样本的数量差异，对样本量大的类别赋予更高权重。"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "基于互信息的特征选择",
+    "code": "import numpy as np\nfrom sklearn.feature_selection import mutual_info_classif\n\n# 假设X为特征矩阵，y为分类标签\nmi_scores = mutual_info_classif(X, y)\nfeature_importance = dict(zip(vectorizer.get_feature_names_out(), mi_scores))\nsorted_importance = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)\ntop_features = [item[0] for item in sorted_importance[:100]]",
+    "questions": [
+      {
+        "q": "上述代码的核心功能是什么？",
+        "a": "使用互信息法计算特征重要性，筛选出前 100 个最重要的特征。"
+      },
+      {
+        "q": "互信息法的核心原理是什么？",
+        "a": "衡量特征与标签之间的关联程度，互信息值越高，说明特征对标签的预测能力越强。"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "LDA 主题模型建模",
+    "code": "from gensim import corpora, models\n\n# 假设texts为分词并去停用词后的文本列表\ndictionary = corpora.Dictionary(texts)\ncorpus = [dictionary.doc2bow(text) for text in texts]\ntfidf_model = models.TfidfModel(corpus)\ncorpus_tfidf = tfidf_model[corpus]\n\nlda_model = models.LdaModel(corpus_tfidf, id2word=dictionary, num_topics=5, random_state=42)\nprint(lda_model.print_topics(num_words=5))",
+    "questions": [
+      {
+        "q": "corpora.Dictionary(texts) 的作用是什么？",
+        "a": "构建文本语料的词汇表，为每个词分配唯一索引。"
+      },
+      {
+        "q": "num_topics=5 表示什么？",
+        "a": "指定 LDA 模型的主题数量为 5 个。"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "向量数据库 Chroma 存储",
+    "code": "from langchain.text_splitter import CharacterTextSplitter\nfrom langchain_community.embeddings import HuggingFaceEmbeddings\nfrom langchain_community.vectorstores import Chroma\n\n# 假设text为长文本内容\ntext_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)\nchunks = text_splitter.split_text(text)\n\nembeddings = HuggingFaceEmbeddings(model_name=\"text2vec-base-chinese\")\ndb = Chroma.from_texts(chunks, embeddings, persist_directory=\"./vector_db\")\ndb.persist()",
+    "questions": [
+      {
+        "q": "chunk_overlap=50 的作用是什么？",
+        "a": "设置相邻文本块的重叠长度为 50 个字符，避免拆分导致的语义断裂。"
+      },
+      {
+        "q": "Chroma.from_texts 的核心功能是什么？",
+        "a": "将文本块向量化后存储到向量数据库中，用于后续的相似度检索。"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "聚类评估与轮廓系数",
+    "code": "from sklearn.cluster import KMeans\nfrom sklearn.metrics import silhouette_score\n\n# 假设X为文本向量化后的特征矩阵\nsilhouette_scores = []\nk_range = range(2, 11)\nfor k in k_range:\n  kmeans = KMeans(n_clusters=k, n_init='auto', random_state=42)\n  cluster_labels = kmeans.fit_predict(X)\n  score = silhouette_score(X, cluster_labels)\n  silhouette_scores.append(score)\n\nbest_k = k_range[silhouette_scores.index(max(silhouette_scores))]\nprint(f\"最佳簇数：{best_k}\")",
+    "questions": [
+      {
+        "q": "上述代码使用什么方法确定 K-means 的最佳簇数？",
+        "a": "轮廓系数法，通过计算不同 K 值对应的轮廓系数，选择系数最大的 K 作为最佳簇数。"
+      },
+      {
+        "q": "轮廓系数的取值范围是什么？值越大表示什么？",
+        "a": "取值范围为 [-1, 1]，值越大表示聚类效果越好，样本与自身簇内样本的相似度越高。"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Word2Vec 训练配置",
+    "code": "from gensim.models import Word2Vec\n\n# 假设texts为分词后的文本列表\nmodel = Word2Vec(\n  sentences=texts,\n  vector_size=128,\n  window=5,\n  min_count=3,\n  sg=1,\n  workers=4\n)\n\nprint(model.wv.most_similar(\"自然语言\", topn=5))",
+    "questions": [
+      {
+        "q": "sg=1 表示使用 word2vec 的哪种模型？",
+        "a": "Skip-gram 模型。"
+      },
+      {
+        "q": "min_count=3 的作用是什么？",
+        "a": "过滤出现次数少于 3 次的词，避免低频词对模型训练的干扰。"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "BERT 句子表征提取",
+    "code": "from transformers import BertTokenizer, BertModel\nimport torch\n\ntokenizer = BertTokenizer.from_pretrained(\"bert-base-chinese\")\nmodel = BertModel.from_pretrained(\"bert-base-chinese\")\n\ntext = \"我爱自然语言处理\"\ninputs = tokenizer(text, return_tensors=\"pt\", padding=True, truncation=True)\nwith torch.no_grad():\n  outputs = model(**inputs)\nsentence_embedding = outputs.pooler_output.numpy()",
+    "questions": [
+      {
+        "q": "outputs.pooler_output 对应的是什么向量？",
+        "a": "BERT 模型输出的句子级向量，由 [CLS] token 的向量经过池化得到。"
+      },
+      {
+        "q": "torch.no_grad() 的作用是什么？",
+        "a": "禁用梯度计算，减少内存消耗，加快推理速度（仅用于预测，不用于训练）。"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "BERTopic 主题发现",
+    "code": "from bertopic import BERTopic\nfrom sentence_transformers import SentenceTransformer\n\n# 假设texts为原始文本列表\nembedding_model = SentenceTransformer(\"bert-base-chinese\")\nembeddings = embedding_model.encode(texts, show_progress_bar=True)\n\ntopic_model = BERTopic(\n  embedding_model=embedding_model,\n  n_gram_range=(1, 2),\n  top_n_words=10\n)\ntopics, probs = topic_model.fit_transform(texts, embeddings=embeddings)",
+    "questions": [
+      {
+        "q": "n_gram_range=(1, 2) 表示什么？",
+        "a": "提取 1 元词和 2 元短语作为主题关键词，丰富主题的表达。"
+      },
+      {
+        "q": "topics 变量存储的是什么信息？",
+        "a": "每个文本所属的主题索引，标识该文本被分配到哪个主题。"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "LangChain 顺序链调用",
+    "code": "from langchain.chains import SequentialChain\nfrom langchain.prompts import PromptTemplate\n\n# 链1：生成标题\nprompt1 = PromptTemplate(input_variables=[\"theme\"], template=\"为主题{theme}生成标题\")\ntitle_chain = LLMChain(llm=llm, prompt=prompt1, output_key=\"titles\")\n\n# 链2：生成摘要\nprompt2 = PromptTemplate(input_variables=[\"theme\", \"titles\"], template=\"生成文章摘要\")\nsummary_chain = LLMChain(llm=llm, prompt=prompt2, output_key=\"summary\")\n\noverall_chain = SequentialChain(\n  chains=[title_chain, summary_chain],\n  input_variables=[\"theme\"],\n  output_variables=[\"titles\", \"summary\"]\n)",
+    "questions": [
+      {
+        "q": "SequentialChain 与 SimpleSequentialChain 的区别？",
+        "a": "SequentialChain 支持多输入多输出，可指定变量映射；SimpleSequentialChain 仅支持单输入单输出顺序传递。"
+      },
+      {
+        "q": "output_key 的作用是什么？",
+        "a": "为输出指定键名，便于后续链中通过键名引用该结果。"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "title": "名词词频统计",
+    "code": "import jieba.posseg as pseg\nfrom collections import Counter\n\ntext = \"自然语言处理是人工智能领域的重要分支\"\nwords = pseg.lcut(text)\nnouns = [word for word, flag in words if flag.startswith('n')]\nnoun_freq = Counter(nouns)\nprint(noun_freq.most_common(5))",
+    "questions": [
+      {
+        "q": "上述代码的核心功能是什么？",
+        "a": "对文本进行分词和词性标注，提取名词并统计词频最高的 5 个名词。"
+      },
+      {
+        "q": "flag.startswith('n') 的作用是什么？",
+        "a": "筛选词性标签以 'n' 开头的词（通常表示各类名词）。"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "title": "混淆矩阵可视化",
+    "code": "from sklearn.metrics import confusion_matrix\nimport seaborn as sns\n\ncm = confusion_matrix(y_true, y_pred)\nsns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['负面', '正面'], yticklabels=['负面', '正面'])\nplt.xlabel('预测标签')\nplt.ylabel('真实标签')",
+    "questions": [
+      {
+        "q": "混淆矩阵中，对角线元素表示什么？",
+        "a": "表示预测正确的样本数量，即真实标签与预测标签一致的样本数。"
+      },
+      {
+        "q": "annot=True 的作用是什么？",
+        "a": "在热力图中显示每个单元格的具体数值，便于直观查看分布。"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "title": "对话记忆管理",
+    "code": "from langchain.memory import ConversationBufferWindowMemory\n\nmemory = ConversationBufferWindowMemory(k=3, return_messages=True)\nconversation_chain = ConversationChain(\n  llm=llm,\n  memory=memory,\n  verbose=True\n)",
+    "questions": [
+      {
+        "q": "k=3 表示什么含义？",
+        "a": "设置对话记忆窗口大小为 3，即模型仅保留最近 3 轮的对话历史。"
+      },
+      {
+        "q": "相对于普通 BufferMemory 的优势？",
+        "a": "避免对话历史过长导致的上下文窗口溢出，减少计算负担。"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "title": "文本正则清洗",
+    "code": "import re\ndef clean_text(text):\n  text = re.sub(r'<[^>]+>', '', text)\n  text = re.sub(r'[^\\u4e00-\\u9fa5a-zA-Z0-9\\s]', '', text)\n  text = re.sub(r'\\s+', ' ', text).strip()\n  return text",
+    "questions": [
+      {
+        "q": "上述代码的核心功能是什么？",
+        "a": "对原始文本进行清洗，去除 HTML 标签、特殊字符、多余空格等噪声。"
+      },
+      {
+        "q": "正则 [^\\u4e00-\\u9fa5a-zA-Z0-9\\s] 的作用？",
+        "a": "匹配所有非中文、非英文、非数字、非空格的字符，用于去除特殊符号。"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "title": "PCA 降维处理",
+    "code": "from sklearn.decomposition import PCA\n\npca = PCA(n_components=0.95, random_state=42)\nX_reduced = pca.fit_transform(X)\n\nprint(f\"降维前维度：{X.shape[1]}\")\nprint(f\"降维后维度：{X_reduced.shape[1]}\")",
+    "questions": [
+      {
+        "q": "n_components=0.95 表示什么？",
+        "a": "保留 95% 的原始数据方差，以此自动确定降维后的维度。"
+      },
+      {
+        "q": "PCA 降维的核心目的是什么？",
+        "a": "降低特征矩阵的维度，减少冗余信息和计算复杂度，同时保留数据主要特征。"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "title": "方面级情感分析",
+    "code": "prompt = \"分析评论中：外观、性能、续航，以 JSON 返回：评论：{review}\"\nreview = \"外观简洁大方，性能流畅，但续航有待提升\"\nresponse = client.chat.completions.create(\n  model=\"glm-4-flash\",\n  messages=[{\"role\": \"user\", \"content\": prompt.format(review=review)}]\n)\nresult = json.loads(response.choices[0].message.content)",
+    "questions": [
+      {
+        "q": "上述代码的核心任务是什么？",
+        "a": "对产品评论进行方面级情感分析，识别外观等三个方面的情感极性，并以 JSON 格式输出。"
+      },
+      {
+        "q": "如果评论未提及“续航”，结果中该项倾向通常是什么？",
+        "a": "不涉及。"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "title": "FastText 词向量优势",
+    "code": "from gensim.models import FastText\nmodel = FastText.load_fasttext_format('cc.zh.bin')\nmodel = FastText.reduce_model(model, 100)\nsimilarity = model.similarity(\"手机\", \"电脑\")",
+    "questions": [
+      {
+        "q": "FastText.reduce_model 的作用？",
+        "a": "降低预训练词向量的维度，减少计算开销并保留语义信息。"
+      },
+      {
+        "q": "处理生僻词更有优势的原因？",
+        "a": "FastText 考虑了子词（subword）信息，生僻词可通过子词组合获得语义向量。"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "title": "MMR 多样性关键词提取",
+    "code": "from bertopic.representation import MaximalMarginalRelevance\n\nrepresentation_model = MaximalMarginalRelevance(diversity=0.5)\ntopic_model = BERTopic(\n  representation_model=representation_model,\n  top_n_words=8\n)",
+    "questions": [
+      {
+        "q": "MaximalMarginalRelevance 的作用？",
+        "a": "提高主题关键词的多样性，避免语义重复，使主题表达更全面。"
+      },
+      {
+        "q": "diversity=0.5 表示什么？",
+        "a": "设置关键词多样性的权重，平衡相关性与多样性。"
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "title": "路由链智能调度",
+    "code": "router_template = \"物理选择 physics，数学选择 math。问题：{input}\"\nrouter_prompt = PromptTemplate(\n  template=router_template,\n  input_variables=[\"input\"],\n  output_parser=RouterOutputParser()\n)\nrouter_chain = RouterChain.from_llm(llm, router_prompt)",
+    "questions": [
+      {
+        "q": "路由链的核心功能是什么？",
+        "a": "根据用户问题类型，自动选择对应的领域链进行处理。"
+      },
+      {
+        "q": "RouterOutputParser 的作用是什么？",
+        "a": "解析路由链输出，提取目标领域和输入，确保后续链能正确接收参数。"
+      }
+    ]
+  }
+]
