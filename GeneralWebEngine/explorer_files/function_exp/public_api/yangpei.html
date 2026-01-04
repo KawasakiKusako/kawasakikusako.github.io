@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KawasakiKusako - STUDY TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=Oswald:wght@500;700&display=swap');
+
+        :root {
+            --ark-bg: #f2f2f2;
+            --ark-primary: #00b4ff;
+            --ark-error: #ff4d00;
+            --ark-panel: #ffffff;
+            --ark-border: #1a1a1a;
+            --ark-text-main: #1a1a1a;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body { 
+            font-family: 'Noto Sans SC', sans-serif; 
+            background: var(--ark-bg);
+            color: var(--ark-text-main);
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(242, 242, 242, 0.85), rgba(242, 242, 242, 0.85)), 
+                url('https://upload-bbs.miyoushe.com/upload/2023/08/17/341553312/071c25f0cd03520eee3ce4c7fe0bbc1e_1487008884625840809.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding-bottom: 100px;
+        }
+
+        .quiz-container { max-width: 1050px; margin: auto; position: relative; z-index: 10; }
+
+        /* 硬核双排LOGO */
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-logo .deco-block {
+            width: 8px;
+            height: 38px;
+            background: var(--ark-text-main);
+            transform: skewX(-15deg);
+        }
+        .brand-text {
+            line-height: 1;
+        }
+        .brand-text .top {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: none;
+            /*靠左对齐*/
+            text-align: left;
+        }
+        .brand-text .bottom {
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            opacity: 0.5;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .mode-pill {
+            padding: 8px 24px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s var(--bezier);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mode-pill.active {
+            background: var(--ark-text-main);
+            color: white;
+        }
+        .mode-pill.inactive {
+            background: transparent;
+            color: var(--ark-text-main);
+            opacity: 0.4;
+        }
+        .mode-pill.inactive:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.05);
+        }
+
+        
+        .ark-panel {
+            background: var(--ark-panel);
+            border: 2px solid var(--ark-border);
+            position: relative;
+            box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 0.1), 
+                        16px 16px 0px 0px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s var(--bezier);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
+        }
+        .ark-panel:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 0.12), 
+                        22px 22px 0px 0px rgba(0, 0, 0, 0.06);
+        }
+
+        .animate-content {
+            animation: fadeInUp 0.8s var(--bezier) forwards;
+        }
+
+        /* 选项交互美化 */
+        .option-label {
+            background: #fdfdfd;
+            border: 1px solid rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s var(--bezier);
+        }
+        .option-label:hover {
+            background: #f0f0f0;
+            border-color: var(--ark-text-main);
+            transform: scale(1.01);
+            box-shadow: 4px 4px 0px 0px var(--ark-text-main);
+            z-index: 2;
+        }
+
+        input:checked + .option-label {
+            background: #fff;
+            border-color: var(--ark-primary);
+            box-shadow: 4px 4px 0px 0px var(--ark-primary);
+            color: var(--ark-primary);
+        }
+
+        /* 按钮动画 */
+        .action-primary { 
+            background-color: var(--ark-text-main); 
+            color: white; 
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+            transition: all 0.3s var(--bezier);
+            font-family: 'Oswald', sans-serif;
+        }
+        .action-primary:hover { 
+            background-color: var(--ark-primary); 
+            transform: scale(1.05) skewX(-2deg);
+        }
+
+        .stat-card {
+            background: white;
+            border-left: 4px solid var(--ark-text-main);
+            padding: 8px 20px;
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.05);
+        }
+
+        .loading-bar-container {
+            height: 4px;
+            background: rgba(0,0,0,0.05);
+            margin: 20px 0;
+        }
+        
+        .correct-answer { background: #ecfdf5 !important; border-color: #10b981 !important; color: #065f46 !important; box-shadow: 4px 4px 0px 0px #10b981 !important; }
+        .incorrect-answer { background: #fef2f2 !important; border-color: #ef4444 !important; color: #991b1b !important; box-shadow: 4px 4px 0px 0px #ef4444 !important; }
+
+        pre {
+            background: #1a1a1a;
+            color: #eee;
+            padding: 20px;
+            border-radius: 0;
+            border-left: 5px solid var(--ark-primary);
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="quiz-container">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 border-b-4 border-black pb-8">
+            <div class="brand-logo">
+                <div class="deco-block"></div>
+                <div class="brand-text">
+                    <div class="top">Kawasaki</div>
+                    <div class="bottom">Study Terminal</div>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 bg-black/5 p-1 rounded-sm">
+                <button onclick="switchMode('quiz')" id="btn-quiz" class="px-10 py-3 font-black transition-all bg-black text-white italic tracking-widest">
+                    PRACTICE
+                </button>
+                <button onclick="switchMode('code')" id="btn-code" class="px-10 py-3 font-black transition-all text-black/40 hover:bg-black/10 italic tracking-widest">
+                    CODE_LAB
+                </button>
+            </div>
+        </header>
+
+        <!-- Quiz Section -->
+        <main id="quiz-section" class="space-y-10">
+            <div class="ark-panel">
+                <div class="p-8 md:p-16">
+                    <!-- Dashboard -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 items-end">
+                        <div class="space-y-6">
+                            <div class="flex border-2 border-black rounded-sm overflow-hidden w-fit bg-white">
+                                <div id="mode-sequential" onclick="setQuizMode('sequential')" class="mode-pill active">顺序模式</div>
+                                <div id="mode-random" onclick="setQuizMode('random')" class="mode-pill inactive">随机模式</div>
+                            </div>
+                            
+                            <div id="filter-controls" class="flex gap-8 transition-opacity duration-300">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] font-black opacity-30 tracking-[0.2em] mb-1">TYPE_SELECTOR</span>
+                                    <select id="type-filter" onchange="initializeQuestionQueue()" class="bg-transparent border-b-2 border-black/20 text-sm font-black py-1 focus:border-black outline-none cursor-pointer">
+                                        <option value="all">ALL_RECORDS</option>
+                                        <option value="choice">MULTIPLE_CHOICE</option>
+                                        <option value="boolean">JUDGEMENT</option>
+                                    </select>
+                                </div>
+                                <div id="jump-container" class="flex flex-col">
+                                    <span class="text-[10px] font-black opacity-30 tracking-[0.2em] mb-1">DATA_POINTER</span>
+                                    <select id="jump-select" onchange="jumpToQuestion(this.value)" class="bg-transparent border-b-2 border-black/20 text-sm font-black py-1 focus:border-black outline-none cursor-pointer">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap justify-end gap-4">
+                            <div class="stat-card">
+                                <div class="text-[10px] font-black opacity-40">ACCURACY</div>
+                                <div id="accuracy-text" class="text-2xl font-black font-mono">100%</div>
+                            </div>
+                            <div class="stat-card" style="border-left-color: var(--ark-error)">
+                                <div class="text-[10px] font-black text-orange-600 opacity-60">ERRORS</div>
+                                <div id="error-count" class="text-2xl font-black font-mono text-orange-600">00</div>
+                            </div>
+                            <div class="text-right ml-4">
+                                <div id="status-label" class="text-[10px] font-black opacity-30 tracking-widest uppercase">Sequential_Active</div>
+                                <div id="progress-text" class="text-4xl font-black italic font-mono tracking-tighter">00<span class="text-lg mx-1 opacity-20 not-italic">/</span>00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="loading-bar-container">
+                        <div id="progress-bar" class="loading-bar-fill" style="width: 0%;"></div>
+                    </div>
+
+                    <div id="question-wrapper" class="animate-content mt-16">
+                        <div class="flex items-center gap-4 mb-8">
+                            <span id="question-type-tag" class="px-4 py-1 bg-black text-white text-[10px] font-bold tracking-[0.3em]">NULL</span>
+                            <div class="h-[2px] flex-1 bg-black/10"></div>
+                        </div>
+
+                        <h2 id="question-title" class="text-4xl font-bold text-black leading-tight mb-16 tracking-tight">WAITING_FOR_DATA_LOAD...</h2>
+                        
+                        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+                        <!-- Feedback -->
+                        <div id="result-area" class="hidden mt-16 p-8 border-2 border-black">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p id="result-text" class="text-3xl font-black italic uppercase tracking-tighter"></p>
+                                    <div id="correct-answer-display" class="mt-2 text-black/40 font-mono text-xl"></div>
+                                </div>
+                                <div class="w-16 h-16 border-4 border-current flex items-center justify-center font-black text-2xl animate-pulse">!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-black/5 p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <button onclick="prevQuestion()" id="prev-btn" class="group flex items-center gap-4 text-black/40 font-black hover:text-black transition-all">
+                        <span class="w-10 h-10 border-2 border-current flex items-center justify-center group-hover:-translate-x-2 transition-transform">←</span>
+                        <span class="uppercase tracking-widest text-xs">Previous_Entry</span>
+                    </button>
+                    
+                    <button id="main-action-btn" onclick="handleMainAction()" class="action-primary px-32 py-6 text-3xl italic font-black">
+                        VERIFY_DATA
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center opacity-20 font-black text-[10px] tracking-[0.5em] mt-20">
+                KAWASAKI_TERMINAL_INTERFACE_ST.V2 // 2026_REVISION
+            </div>
+        </main>
+
+        <!-- Code Section -->
+        <main id="code-section" class="hidden space-y-12 animate-content">
+            <div id="code-container" class="space-y-16"></div>
+        </main>
+    </div>
+
+    <script>
+        let rawQuestions = []; 
+        let displayQuestions = []; 
+        let currentIndex = 0;
+        let awaitingCheck = true;
+        let currentMode = 'sequential'; 
+        let totalAnswered = 0;
+        let wrongCount = 0;
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                let obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] ? values[i].trim() : '';
+                });
+                return obj;
+            });
+        }
+
+        function switchMode(mode) {
+            const quizSec = document.getElementById('quiz-section');
+            const codeSec = document.getElementById('code-section');
+            const btnQuiz = document.getElementById('btn-quiz');
+            const btnCode = document.getElementById('btn-code');
+
+            if (mode === 'quiz') {
+                quizSec.classList.remove('hidden');
+                codeSec.classList.add('hidden');
+                btnQuiz.className = "px-10 py-3 font-black bg-black text-white italic tracking-widest";
+                btnCode.className = "px-10 py-3 font-black text-black/40 hover:bg-black/10 italic tracking-widest";
+            } else {
+                quizSec.classList.add('hidden');
+                codeSec.classList.remove('hidden');
+                btnCode.className = "px-10 py-3 font-black bg-black text-white italic tracking-widest";
+                btnQuiz.className = "px-10 py-3 font-black text-black/40 hover:bg-black/10 italic tracking-widest";
+                loadCodeData();
+            }
+        }
+
+        function setQuizMode(mode) {
+            if (currentMode === mode) return;
+            currentMode = mode;
+            
+            const isRandom = (mode === 'random');
+            document.getElementById('mode-sequential').className = !isRandom ? 'mode-pill active' : 'mode-pill inactive';
+            document.getElementById('mode-random').className = isRandom ? 'mode-pill active' : 'mode-pill inactive';
+            
+            const filterControls = document.getElementById('filter-controls');
+            const statusLabel = document.getElementById('status-label');
+            const prevBtn = document.getElementById('prev-btn');
+
+            if (isRandom) {
+                filterControls.style.opacity = '0';
+                filterControls.style.pointerEvents = 'none';
+                statusLabel.textContent = "Random_Flow_Active";
+                prevBtn.style.visibility = 'hidden';
+            } else {
+                filterControls.style.opacity = '1';
+                filterControls.style.pointerEvents = 'auto';
+                statusLabel.textContent = "Sequential_Active";
+                prevBtn.style.visibility = 'visible';
+                totalAnswered = 0;
+                wrongCount = 0;
+                updateStatsUI();
+            }
+
+            initializeQuestionQueue();
+        }
+
+        function initializeQuestionQueue() {
+            if (rawQuestions.length === 0) return;
+            let filtered = [...rawQuestions];
+            if (currentMode !== 'random') {
+                const filterType = document.getElementById('type-filter').value;
+                if (filterType !== 'all') {
+                    filtered = filtered.filter(q => q.type === filterType);
+                }
+                displayQuestions = filtered;
+            } else {
+                displayQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
+            }
+            updateJumpSelect();
+            currentIndex = 0;
+            renderQuestion();
+        }
+
+        function updateJumpSelect() {
+            const select = document.getElementById('jump-select');
+            select.innerHTML = '';
+            displayQuestions.forEach((_, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `PTR_${String(idx + 1).padStart(3, '0')}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function updateStatsUI() {
+            document.getElementById('error-count').textContent = String(wrongCount).padStart(2, '0');
+            const accuracy = totalAnswered === 0 ? 100 : Math.round(((totalAnswered - wrongCount) / totalAnswered) * 100);
+            document.getElementById('accuracy-text').textContent = accuracy + '%';
+        }
+
+        async function fetchQuestions() {
+            try {
+                const resChoice = await fetch('static/ypxuanze.csv');
+                let choiceData = [];
+                if (resChoice.ok) {
+                    const text = await resChoice.text();
+                    choiceData = parseCSV(text).map(q => ({
+                        type: 'choice',
+                        question: q.题目,
+                        options: [q.选项A, q.选项B, q.选项C, q.选项D].filter(o => o),
+                        answer: q.答案
+                    }));
+                }
+
+                const resBool = await fetch('static/yppanduan.csv');
+                let boolData = [];
+                if (resBool.ok) {
+                    const text = await resBool.text();
+                    boolData = parseCSV(text).map(q => ({
+                        type: 'boolean',
+                        question: q.题目,
+                        options: ['正确', '错误'],
+                        answer: (q.答案 === 'True' || q.答案 === '正确' || q.答案 === 'T') ? '正确' : '错误'
+                    }));
+                }
+
+                rawQuestions = [...choiceData, ...boolData];
+                initializeQuestionQueue();
+            } catch (err) {
+                document.getElementById('question-title').innerHTML = `<span class="text-red-600">ERROR: DATA_FETCH_FAILED</span>`;
+            }
+        }
+
+        function renderQuestion() {
+            if (displayQuestions.length === 0) return;
+            
+            const wrapper = document.getElementById('question-wrapper');
+            wrapper.style.animation = 'none';
+            wrapper.offsetHeight;
+            wrapper.style.animation = 'fadeInUp 0.8s var(--bezier) forwards';
+
+            const q = displayQuestions[currentIndex];
+            const container = document.getElementById('options-container');
+            const title = document.getElementById('question-title');
+            const typeTag = document.getElementById('question-type-tag');
+            const progressText = document.getElementById('progress-text');
+            const progressBar = document.getElementById('progress-bar');
+            
+            awaitingCheck = true;
+            document.getElementById('result-area').classList.add('hidden');
+            const mainBtn = document.getElementById('main-action-btn');
+            mainBtn.textContent = "VERIFY_DATA";
+            
+            if (currentMode === 'sequential') {
+                document.getElementById('jump-select').value = currentIndex;
+            }
+            
+            progressText.innerHTML = `${String(currentIndex + 1).padStart(2, '0')}<span class="text-lg mx-1 opacity-20 not-italic">/</span>${String(displayQuestions.length).padStart(2, '0')}`;
+            progressBar.style.width = `${((currentIndex + 1) / displayQuestions.length) * 100}%`;
+            
+            container.innerHTML = '';
+            typeTag.textContent = q.type === 'boolean' ? "TYPE: JUDGEMENT" : "TYPE: MULTIPLE_CHOICE";
+            title.textContent = q.question;
+            
+            q.options.forEach((opt, idx) => {
+                const letter = String.fromCharCode(65 + idx);
+                const val = q.type === 'boolean' ? opt : letter;
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <input type="radio" name="quiz" id="opt-${idx}" value="${val}" class="hidden peer">
+                    <label for="opt-${idx}" class="option-label flex items-center p-8 cursor-pointer group">
+                        <span class="w-14 h-14 flex items-center justify-center bg-black/5 border-2 border-black/10 text-black/20 font-black mr-6 peer-checked:bg-black peer-checked:text-white transition-all font-mono text-2xl">
+                            ${q.type === 'boolean' ? (opt === '正确' ? 'T' : 'F') : letter}
+                        </span>
+                        <span class="text-black/70 font-bold text-2xl group-hover:text-black transition-colors">${opt}</span>
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function handleMainAction() {
+            if (awaitingCheck) checkAnswer();
+            else nextQuestion();
+        }
+
+        function checkAnswer() {
+            const q = displayQuestions[currentIndex];
+            const selected = document.querySelector('input[name="quiz"]:checked');
+            const userVal = selected ? selected.value : null;
+            const correctVal = q.answer;
+            const isCorrect = (userVal === correctVal);
+
+            totalAnswered++;
+            if (!isCorrect) wrongCount++;
+            updateStatsUI();
+
+            document.querySelectorAll('#options-container label').forEach(label => {
+                const input = label.previousElementSibling;
+                if (input.value === correctVal) label.classList.add('correct-answer');
+                else if (input.checked) label.classList.add('incorrect-answer');
+            });
+
+            const area = document.getElementById('result-area');
+            const text = document.getElementById('result-text');
+            const display = document.getElementById('correct-answer-display');
+
+            area.classList.remove('hidden');
+            area.style.borderColor = isCorrect ? '#10b981' : '#ef4444';
+            area.style.color = isCorrect ? '#065f46' : '#991b1b';
+            text.textContent = isCorrect ? '>> ACCESS_GRANTED' : '>> DATA_CORRUPTED';
+            display.innerHTML = `<span class="opacity-30 uppercase text-xs">Reference:</span> <span class="font-black ml-2">${correctVal}</span>`;
+
+            awaitingCheck = false;
+            const mainBtn = document.getElementById('main-action-btn');
+            mainBtn.textContent = currentIndex < displayQuestions.length - 1 ? "NEXT_ENTRY" : "FINALIZE";
+        }
+
+        function nextQuestion() {
+            if (currentIndex < displayQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0 && currentMode !== 'random') {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            currentIndex = parseInt(idx);
+            renderQuestion();
+        }
+
+        async function loadCodeData() {
+            const container = document.getElementById('code-container');
+            try {
+                const response = await fetch('static/ypdaima.json');
+                const codeData = await response.json();
+                container.innerHTML = ''; 
+                codeData.forEach((item) => {
+                    const section = document.createElement('div');
+                    section.className = "ark-panel p-10 md:p-16";
+                    let questionsHtml = item.questions.map((q) => `
+                        <div class="border-b border-black/5 py-8 last:border-0">
+                            <p class="font-black text-xl mb-4 italic opacity-80 underline decoration-sky-500 decoration-2 underline-offset-4">${q.q}</p>
+                            <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="text-[10px] font-black bg-black text-white px-4 py-1 tracking-widest hover:bg-sky-500 transition-colors uppercase">Decrypt_Solution</button>
+                            <div class="hidden mt-4 p-6 bg-black/5 font-bold italic text-lg border-l-4 border-black">${q.a}</div>
+                        </div>
+                    `).join('');
+
+                    section.innerHTML = `
+                        <div class="mb-8 pb-4 border-b-2 border-black/10">
+                            <h3 class="text-3xl font-black italic tracking-tighter uppercase">${item.title}</h3>
+                        </div>
+                        <pre><code>${item.code}</code></pre>
+                        <div class="mt-8">${questionsHtml}</div>
+                    `;
+                    container.appendChild(section);
+                });
+            } catch (e) {
+                container.innerHTML = `<div class="text-center p-20 font-black opacity-10 text-4xl">NO_CODE_RECORDS_FOUND</div>`;
+            }
+        }
+
+        window.onload = fetchQuestions;
+    </script>
+</body>
+</html>
