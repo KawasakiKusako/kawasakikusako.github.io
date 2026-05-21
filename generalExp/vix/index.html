@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full bg-[#f8f9fa] text-[#1e222d]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>川羽大霄A股家务指数</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lightweight Charts (v4.1.1) 高可用 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        /* 隐藏滚动条 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden bg-[#f8f9fa]">
+
+    <!-- 顶部极简导航栏 -->
+    <header class="h-14 bg-white border-b border-[#e0e3eb] flex items-center justify-between px-6 shrink-0 select-none">
+        <div class="flex items-center space-x-4">
+            <!-- 品牌标识 -->
+            <div class="flex items-center space-x-2 text-[#2962ff] font-bold text-lg tracking-wider">
+                <i data-lucide="activity" class="w-6 h-6"></i>
+                <span>Kawasaki-Daxiao A Share Vix Index</span>
+            </div>
+            <div class="h-4 w-[1px] bg-[#e0e3eb]"></div>
+            <!-- 商品名称 -->
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-[#1e222d] text-sm" id="ticker-name">KAWASAKI DAXIAO A SHARE VIX INDEX</span>
+                <span class="text-xs bg-[#089981]/10 text-[#089981] px-1.5 py-0.5 rounded font-mono" id="last-price-badge">--</span>
+            </div>
+            <span class="text-xs text-gray-400 font-medium">日线 (D)</span><span class="text-xs text-gray-400 font-medium">川羽大霄A股家务指数 - 不代表投资建议©KawasakiKusako 2026</span>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- 导入 CSV -->
+            <label class="flex items-center space-x-1.5 bg-[#f0f3fa] hover:bg-[#e0e3eb] text-xs text-[#1e222d] font-semibold px-3 py-2 rounded-lg cursor-pointer transition">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-[#2962ff]"></i>
+                <span>导入本地 CSV</span>
+                <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+            </label>
+            <!-- 恢复示例 -->
+            <button id="reset-data-btn" class="flex items-center justify-center p-2 rounded-lg bg-[#f0f3fa] hover:bg-[#e0e3eb] transition" title="重置回内置数据">
+                <i data-lucide="rotate-ccw" class="w-4 h-4 text-gray-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 指标多功能配置面板 -->
+    <section class="bg-white border-b border-[#e0e3eb] px-6 py-2.5 flex flex-wrap items-center gap-y-2 gap-x-6 shrink-0 text-xs text-[#4c525e] select-none">
+        <!-- 主图指标 -->
+        <div class="flex items-center space-x-4">
+            <span class="font-bold text-[#1e222d] flex items-center space-x-1">
+                <i data-lucide="layers-3" class="w-3.5 h-3.5 text-blue-500"></i>
+                <span>主图叠加：</span>
+            </span>
+            <!-- MA 1 -->
+            <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" id="enable-ma1" checked class="accent-[#2962ff] rounded">
+                <span class="font-semibold text-[#2962ff]">MA1:</span>
+                <input type="number" id="ma1-period" value="5" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
+            </label>
+            <!-- MA 2 -->
+            <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" id="enable-ma2" checked class="accent-[#ff9800] rounded">
+                <span class="font-semibold text-[#ff9800]">MA2:</span>
+                <input type="number" id="ma2-period" value="10" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
+            </label>
+            <!-- MA 3 -->
+            <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" id="enable-ma3" class="accent-[#9c27b0] rounded">
+                <span class="font-semibold text-[#9c27b0]">MA3:</span>
+                <input type="number" id="ma3-period" value="30" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
+            </label>
+            <div class="h-4 w-[1px] bg-gray-200"></div>
+            <!-- BOLL -->
+            <label class="flex items-center space-x-1 cursor-pointer">
+                <input type="checkbox" id="enable-boll" class="accent-emerald-600 rounded">
+                <span class="font-semibold text-emerald-600">BOLL (20, 2)</span>
+            </label>
+        </div>
+
+        <div class="h-4 w-[1px] bg-gray-200 hidden md:block"></div>
+
+        <!-- 副图指标单选切换 -->
+        <div class="flex items-center space-x-3">
+            <span class="font-bold text-[#1e222d] flex items-center space-x-1">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-[#ff9800]"></i>
+                <span>副图指标：</span>
+            </span>
+            <div class="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
+                <button id="sub-none" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition" onclick="selectSubIndicator('none')">无</button>
+                <button id="sub-macd" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('macd')">MACD</button>
+                <button id="sub-kdj" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('kdj')">KDJ</button>
+                <button id="sub-rsi" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('rsi')">RSI</button>
+                <button id="sub-obv" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('obv')">OBV</button>
+                <button id="sub-dmi" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('dmi')">DMI</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- OHLCV 数据浮动条 -->
+    <div class="h-9 bg-white border-b border-[#e0e3eb]/70 flex items-center px-6 text-xs text-gray-500 font-mono select-none overflow-x-auto no-scrollbar shrink-0">
+        <div class="flex items-center space-x-4">
+            <span class="text-[#1e222d] font-bold">DATA SUMMARY</span>
+            <div class="flex items-center space-x-1">
+                <span>开:</span><span id="info-open" class="text-gray-900 font-bold">--</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span>高:</span><span id="info-high" class="text-[#089981] font-bold">--</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span>低:</span><span id="info-low" class="text-[#f23645] font-bold">--</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span>收:</span><span id="info-close" class="text-gray-900 font-bold">--</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span>涨跌:</span><span id="info-change" class="text-gray-900 font-bold">--</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span>成交量:</span><span id="info-volume" class="text-amber-600 font-bold">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表容器主体 (Flex 伸缩布局，上下完美排布主图与副图) -->
+    <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
+        <!-- 主 K 线图容器 -->
+        <div id="main-chart-container" class="flex-1 w-full relative min-h-[300px]"></div>
+        <!-- 动态副图容器 (默认隐藏，根据选项动态高度显现) -->
+        <div id="sub-chart-container" class="h-[180px] w-full border-t border-[#e0e3eb] relative hidden bg-white">
+            <div class="absolute top-2 left-4 z-10 text-[10px] text-gray-400 font-mono font-semibold select-none" id="sub-title">副图</div>
+        </div>
+
+        <!-- 异常提示浮层 -->
+        <div id="error-overlay" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30 hidden px-6 text-center">
+            <i data-lucide="alert-circle" class="w-12 h-12 text-[#f23645]"></i>
+            <h3 class="text-sm font-bold text-gray-800" id="error-title">渲染出错</h3>
+            <p class="text-xs text-gray-500 max-w-sm" id="error-message">检测到未知格式异常。</p>
+            <button onclick="hideErrorAndShowBackup()" class="bg-[#2962ff] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-md transition shadow-sm">
+                重新加载数据或使用自定义数据
+            </button>
+        </div>
+
+        <!-- 全局 loading -->
+        <div id="loading-overlay" class="absolute inset-0 bg-white/80 flex flex-col items-center justify-center space-y-2 z-20">
+            <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-gray-400">更新走势数据中...</p>
+        </div>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="h-7 bg-white border-t border-[#e0e3eb] flex items-center justify-between px-6 text-[11px] text-gray-400 shrink-0 select-none">
+        <div class="flex items-center space-x-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#089981]"></span>
+            <span id="data-source-status">数据源：载入中...</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span id="stat-days">-- 数据点</span>
+            <span>|</span>
+            <span>Github © Kawasaki Kusako 2026</span><span>川羽大霄A股家务指数</span><span>|</span><span>指数仅供参考，不代表任何投资建议</span>
+        </div>
+    </footer>
+
+    <script>
+        // 重新调用./index.csv
+        const DEFAULT_CSV_DATA = 'https://kawasakikusako.github.io/generalExp/vix/index.csv';
+
+        // 图表实例及系列管理器
+        let mainChart = null;
+        let subChart = null;
+
+        // 主图系列
+        let candleSeries = null;
+        let mainVolumeSeries = null;
+        let ma1Series = null;
+        let ma2Series = null;
+        let ma3Series = null;
+        let bollMiddleSeries = null;
+        let bollUpperSeries = null;
+        let bollLowerSeries = null;
+
+        // 副图系列 (根据选择动态替换/装载)
+        let subMacdDifSeries = null;
+        let subMacdDeaSeries = null;
+        let subMacdHistSeries = null;
+        let subKdjKSeries = null;
+        let subKdjDSeries = null;
+        let subKdjJSeries = null;
+        let subRsiSeries = null;
+        let subObvSeries = null;
+        let subDmiPdiSeries = null;
+        let subDmiMdiSeries = null;
+        let subDmiAdxSeries = null;
+
+        // 状态变量
+        let currentParsedData = [];
+        let currentSubIndicator = 'macd'; // 默认为 MACD
+
+        // 初始化 Lucide 图标
+        lucide.createIcons();
+
+        // 统一展示和消除错误蒙层
+        function showError(title, msg) {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            const overlay = document.getElementById('error-overlay');
+            document.getElementById('error-title').innerText = title;
+            document.getElementById('error-message').innerText = msg;
+            overlay.classList.remove('hidden');
+        }
+
+        function hideErrorAndShowBackup() {
+            document.getElementById('error-overlay').classList.add('hidden');
+            loadBackupData();
+        }
+
+        function initCharts() {
+            const mainContainer = document.getElementById('main-chart-container');
+            const subContainer = document.getElementById('sub-chart-container');
+
+            const commonOptions = {
+                layout: {
+                    background: { type: 'solid', color: '#ffffff' },
+                    textColor: '#1e222d',
+                    fontSize: 11,
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                grid: {
+                    vertLines: { color: '#f0f3fa' },
+                    horzLines: { color: '#f0f3fa' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { width: 1, color: '#758696', style: 3 },
+                    horzLine: { width: 1, color: '#758696', style: 3 }
+                },
+                rightPriceScale: {
+                    borderColor: '#e0e3eb',
+                    visible: true,
+                },
+                timeScale: {
+                    borderColor: '#e0e3eb',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                handleScale: { mouseWheel: true, pinch: true },
+                handleScroll: { mouseDrag: true, touchDrag: true }
+            };
+
+            // 创建主图
+            mainChart = LightweightCharts.createChart(mainContainer, {
+                ...commonOptions,
+                width: mainContainer.clientWidth || 800,
+                height: mainContainer.clientHeight || 450,
+            });
+
+            // 1. K 线主系列 (采用无宽边呼吸配色)
+            candleSeries = mainChart.addCandlestickSeries({
+                upColor: '#31BD65',
+                downColor: '#f23645',
+                borderVisible: false,
+                wickUpColor: '#089981',
+                wickDownColor: '#f23645',
+            });
+
+            // 2. 主图叠加：成交量层 (放置在主图底部作为淡色虚影，不遮挡 K 线)
+            mainVolumeSeries = mainChart.addHistogramSeries({
+                color: '#26a69a',
+                priceFormat: { type: 'volume' },
+                priceScaleId: 'volume_scale',
+            });
+            mainChart.priceScale('volume_scale').applyOptions({
+                visible: false,
+                scaleMargins: { top: 0.82, bottom: 0 },
+            });
+
+            // 3. 主图叠加：三组 MA 均线
+            ma1Series = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma2Series = mainChart.addLineSeries({ color: '#ff9800', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma3Series = mainChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+
+            // 4. 主图叠加：布林带 BOLL 三根曲线
+            bollMiddleSeries = mainChart.addLineSeries({ color: '#ff9800', lineWidth: 1.5, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollUpperSeries = mainChart.addLineSeries({ color: '#5B9CF6', lineWidth: 1.2, lineStyle: 0, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollLowerSeries = mainChart.addLineSeries({ color: '#5B9CF6', lineWidth: 1.2, lineStyle: 0, crosshairMarkerVisible: false, lastValueVisible: false });
+            
+            // 调整主图 K 线渲染边缘
+            candleSeries.priceScale().applyOptions({
+                scaleMargins: { top: 0.08, bottom: 0.2 },
+            });
+
+            // 创建副图 (默认隐藏，直到用户选择子指标)
+            subChart = LightweightCharts.createChart(subContainer, {
+                ...commonOptions,
+                width: subContainer.clientWidth || 800,
+                height: subContainer.clientHeight || 180,
+                timeScale: {
+                    ...commonOptions.timeScale,
+                    visible: false, // 隐藏副图底部的多余时间坐标，以免重合
+                }
+            });
+
+            // 5. 统一注册并绑定双图的交互坐标轴同步 (实现 TradingView 级别的联动效果)
+            let isSyncing = false;
+            mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                subChart.timeScale().setVisibleLogicalRange(range);
+                isSyncing = false;
+            });
+            subChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                mainChart.timeScale().setVisibleLogicalRange(range);
+                isSyncing = false;
+            });
+
+            // 监听主图十字准星移动，联动浮动数据
+            mainChart.subscribeCrosshairMove(param => {
+                if (param === undefined || param.time === undefined || param.point === undefined) {
+                    if (currentParsedData.length > 0) {
+                        displayOHLCV(currentParsedData[currentParsedData.length - 1]);
+                    }
+                } else {
+                    const candleData = param.seriesData.get(candleSeries);
+                    const volData = param.seriesData.get(mainVolumeSeries);
+                    if (candleData) {
+                        displayOHLCV({
+                            time: param.time,
+                            open: candleData.open,
+                            high: candleData.high,
+                            low: candleData.low,
+                            close: candleData.close,
+                            volume: volData ? volData.value : 0
+                        });
+                    }
+                }
+            });
+
+            // 响应容器大小的变动
+            const resizeObserver = new ResizeObserver(() => {
+                if (mainContainer.clientWidth > 0 && mainContainer.clientHeight > 0) {
+                    mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+                }
+                if (subContainer.clientWidth > 0 && subContainer.clientHeight > 0) {
+                    subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+                }
+            });
+            resizeObserver.observe(mainContainer);
+            resizeObserver.observe(subContainer);
+        }
+
+        // ------------------ 算法层 ------------------
+
+        // 标准化日期为 YYYY-MM-DD
+        function normalizeDate(dateStr) {
+            if (!dateStr) return null;
+            let cleaned = dateStr.trim().replace(/^["']|["']$/g, '').replace(/[\/\.]/g, '-');
+            if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return cleaned;
+            const parts = cleaned.split('-');
+            if (parts.length === 3) {
+                let y = parts[0];
+                let m = parts[1].padStart(2, '0');
+                let d = parts[2].padStart(2, '0');
+                if (y.length === 2) y = '20' + y;
+                if (y.length === 4 && !isNaN(y) && !isNaN(m) && !isNaN(d)) return `${y}-${m}-${d}`;
+            }
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }
+            return null;
+        }
+
+        // 算术移动平均线 MA
+        function calculateMA(data, period) {
+            const maData = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) continue;
+                let sum = 0;
+                for (let j = 0; j < period; j++) {
+                    sum += data[i - j].close;
+                }
+                maData.push({ time: data[i].time, value: Number((sum / period).toFixed(2)) });
+            }
+            return maData;
+        }
+
+        // 布林线 BOLL
+        function calculateBOLL(data, period = 20, multiplier = 2) {
+            const boll = { middle: [], upper: [], lower: [] };
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) continue;
+                let sum = 0;
+                for (let j = 0; j < period; j++) sum += data[i - j].close;
+                const ma = sum / period;
+
+                let variance = 0;
+                for (let j = 0; j < period; j++) {
+                    variance += Math.pow(data[i - j].close - ma, 2);
+                }
+                const stdDev = Math.sqrt(variance / period);
+
+                boll.middle.push({ time: data[i].time, value: Number(ma.toFixed(2)) });
+                boll.upper.push({ time: data[i].time, value: Number((ma + multiplier * stdDev).toFixed(2)) });
+                boll.lower.push({ time: data[i].time, value: Number((ma - multiplier * stdDev).toFixed(2)) });
+            }
+            return boll;
+        }
+
+        // 指数平滑 EMA (用于 MACD 计算)
+        function calculateEMARaw(data, period) {
+            const ema = [];
+            if (data.length === 0) return ema;
+            const k = 2 / (period + 1);
+            let val = data[0].close;
+            ema.push(val);
+            for (let i = 1; i < data.length; i++) {
+                val = data[i].close * k + val * (1 - k);
+                ema.push(val);
+            }
+            return ema;
+        }
+
+        // 经典 MACD (12, 26, 9)
+        function calculateMACD(data, short = 12, long = 26, signal = 9) {
+            const macd = { dif: [], dea: [], hist: [] };
+            if (data.length === 0) return macd;
+
+            const emaShort = calculateEMARaw(data, short);
+            const emaLong = calculateEMARaw(data, long);
+
+            const dif = [];
+            for (let i = 0; i < data.length; i++) {
+                dif.push({ time: data[i].time, value: emaShort[i] - emaLong[i] });
+            }
+
+            const k = 2 / (signal + 1);
+            let deaVal = dif[0].value;
+            const dea = [{ time: dif[0].time, value: deaVal }];
+
+            for (let i = 1; i < dif.length; i++) {
+                deaVal = dif[i].value * k + deaVal * (1 - k);
+                dea.push({ time: dif[i].time, value: deaVal });
+            }
+
+            for (let i = 0; i < dif.length; i++) {
+                const histVal = 2 * (dif[i].value - dea[i].value);
+                macd.dif.push({ time: dif[i].time, value: Number(dif[i].value.toFixed(3)) });
+                macd.dea.push({ time: dif[i].time, value: Number(dea[i].value.toFixed(3)) });
+                macd.hist.push({ time: dif[i].time, value: Number(histVal.toFixed(3)) });
+            }
+            return macd;
+        }
+
+        // 经典 KDJ (9, 3, 3)
+        function calculateKDJ(data, n = 9, m1 = 3, m2 = 3) {
+            const kdj = { k: [], d: [], j: [] };
+            if (data.length === 0) return kdj;
+
+            let kVal = 50;
+            let dVal = 50;
+
+            for (let i = 0; i < data.length; i++) {
+                if (i < n - 1) {
+                    kdj.k.push({ time: data[i].time, value: 50 });
+                    kdj.d.push({ time: data[i].time, value: 50 });
+                    kdj.j.push({ time: data[i].time, value: 50 });
+                    continue;
+                }
+
+                let lowN = data[i].low;
+                let highN = data[i].high;
+                for (let j = 0; j < n; j++) {
+                    if (data[i - j].low < lowN) lowN = data[i - j].low;
+                    if (data[i - j].high > highN) highN = data[i - j].high;
+                }
+
+                const rsv = (highN === lowN) ? 0 : ((data[i].close - lowN) / (highN - lowN)) * 100;
+                kVal = (2 / m1) * kVal + (1 / m1) * rsv;
+                dVal = (2 / m2) * dVal + (1 / m2) * kVal;
+                const jVal = 3 * kVal - 2 * dVal;
+
+                kdj.k.push({ time: data[i].time, value: Number(kVal.toFixed(2)) });
+                kdj.d.push({ time: data[i].time, value: Number(dVal.toFixed(2)) });
+                kdj.j.push({ time: data[i].time, value: Number(jVal.toFixed(2)) });
+            }
+            return kdj;
+        }
+
+        // 强弱指标 RSI (14)
+        function calculateRSI(data, period = 14) {
+            const rsiList = [];
+            if (data.length < period + 1) return rsiList;
+            if (data.length < period + 1) {
+                for (let i = 0; i < data.length; i++) {
+                    rsiList.push({ time: data[i].time, value: 50 });
+                }
+                return rsiList;  // ← 返回填充50值的完整数组
+            }
+            let avgGain = 0;
+            let avgLoss = 0;
+
+            for (let i = 1; i <= period; i++) {
+                const diff = data[i].close - data[i - 1].close;
+                if (diff > 0) avgGain += diff;
+                else avgLoss -= diff;
+            }
+
+            avgGain /= period;
+            avgLoss /= period;
+
+            let rsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+
+            for (let i = 0; i < period; i++) {
+                rsiList.push({ time: data[i].time, value: 50 });
+            }
+            rsiList.push({ time: data[period].time, value: Number(rsi.toFixed(2)) });
+
+            for (let i = period + 1; i < data.length; i++) {
+                const diff = data[i].close - data[i - 1].close;
+                avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+                avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+                rsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+                rsiList.push({ time: data[i].time, value: Number(rsi.toFixed(2)) });
+            }
+            return rsiList;
+        }
+
+
+        // DMI (趋向指标)
+        function calculateDMI(data, period = 14) {
+            const dmi = { pdi: [], mdi: [], adx: [] };
+            if (data.length < period + 1) return dmi;
+            if (data.length < period + 1) {
+                for (let i = 0; i < data.length; i++) {
+                    dmi.pdi.push({ time: data[i].time, value: 50 });
+                    dmi.mdi.push({ time: data[i].time, value: 50 });
+                    dmi.adx.push({ time: data[i].time, value: 50 });
+                }
+                return dmi;  // ← 返回填充50值的完整数组
+            }
+            const plusDM = [];
+            const minusDM = [];
+            const tr = [];
+
+            for (let i = 1; i < data.length; i++) {
+                const highDiff = data[i].high - data[i - 1].high;
+                const lowDiff = data[i - 1].low - data[i].low;
+
+                let pDM = 0;
+                let mDM = 0;
+
+                if (highDiff > lowDiff && highDiff > 0) {
+                    pDM = highDiff;
+                }
+                if (lowDiff > highDiff && lowDiff > 0) {
+                    mDM = lowDiff;
+                }
+
+                plusDM.push(pDM);
+                minusDM.push(mDM);
+
+                const trueRange = Math.max(
+                    data[i].high - data[i].low,
+                    Math.abs(data[i].high - data[i - 1].close),
+                    Math.abs(data[i].low - data[i - 1].close)
+                );
+                tr.push(trueRange);
+            }
+
+            const smoothPlusDM = calculateEMARaw(plusDM.map(v => ({ close: v })), period).map(v => v);
+            const smoothMinusDM = calculateEMARaw(minusDM.map(v => ({ close: v })), period).map(v => v);
+            const smoothTR = calculateEMARaw(tr.map(v => ({ close: v })), period).map(v => v);
+
+            const plusDI = [];
+            const minusDI = [];
+            const dx = [];
+
+            for (let i = 0; i < smoothTR.length; i++) {
+                if (smoothTR[i] === 0) {
+                    plusDI.push(0);
+                    minusDI.push(0);
+                    dx.push(0);
+                } else {
+                    const pDI = (smoothPlusDM[i] / smoothTR[i]) * 100;
+                    const mDI = (smoothMinusDM[i] / smoothTR[i]) * 100;
+                    plusDI.push(pDI);
+                    minusDI.push(mDI);
+
+                    const sum = pDI + mDI;
+                    const dxValue = sum === 0 ? 0 : (Math.abs(pDI - mDI) / sum) * 100;
+                    dx.push(dxValue);
+                }
+            }
+
+            const adxRaw = calculateEMARaw(dx.map(v => ({ close: v })), period).map(v => v);
+
+            for (let i = 0; i < plusDI.length; i++) {
+                const dataIndex = period + i;
+                if (dataIndex < data.length) {
+                    dmi.pdi.push({ time: data[dataIndex].time, value: Number(plusDI[i].toFixed(2)) });
+                    dmi.mdi.push({ time: data[dataIndex].time, value: Number(minusDI[i].toFixed(2)) });
+                    dmi.adx.push({ time: data[dataIndex].time, value: Number(adxRaw[i].toFixed(2)) });
+                }
+            }
+
+            return dmi;
+        }
+
+        // OBV (能量潮)
+        function calculateOBV(data) {
+            const obvList = [];
+            if (data.length === 0) return obvList;
+
+            let obv = 0;
+            obvList.push({ time: data[0].time, value: data[0].volume });
+
+            for (let i = 1; i < data.length; i++) {
+                if (data[i].close > data[i - 1].close) {
+                    obv += data[i].volume;
+                } else if (data[i].close < data[i - 1].close) {
+                    obv -= data[i].volume;
+                }
+                obvList.push({ time: data[i].time, value: obv });
+            }
+            return obvList;
+        }
+
+
+        // ------------------ 数据导入逻辑 ------------------
+
+        function parseCSV(csvText) {
+            if (!csvText || csvText.trim() === '') return [];
+
+            // 去除 Excel BOM
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.slice(1);
+            }
+
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            let separator = ',';
+            if (lines[0].includes(';')) separator = ';';
+            else if (lines[0].includes('\t')) separator = '\t';
+
+            const headers = lines[0].split(separator).map(h => h.trim().replace(/^["']|["']$/g, ''));
+            
+            // 模糊搜寻对应的栏目索引
+            const dateIdx = headers.findIndex(h => h.includes('日期') || h.includes('时间') || h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
+            const openIdx = headers.findIndex(h => h.includes('开盘') || h.toLowerCase().includes('open'));
+            const closeIdx = headers.findIndex(h => h.includes('收盘') || h.toLowerCase().includes('close'));
+            const highIdx = headers.findIndex(h => h.includes('最高') || h.toLowerCase().includes('high'));
+            const lowIdx = headers.findIndex(h => h.includes('最低') || h.toLowerCase().includes('low'));
+            const volIdx = headers.findIndex(h => h.includes('成交') || h.toLowerCase().includes('volume') || h.toLowerCase().includes('vol'));
+
+            if (dateIdx === -1 || openIdx === -1 || closeIdx === -1 || highIdx === -1 || lowIdx === -1) {
+                showError('CSV 匹配失败', '未能成功映射“日期, 开盘, 收盘, 最高, 最低”这几个核心标头名，请检查您的 CSV 文件的首行。');
+                return [];
+            }
+
+            const parsed = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(separator).map(c => c.trim());
+                if (cols.length < headers.length) continue;
+
+                const dateStr = normalizeDate(cols[dateIdx]);
+                if (!dateStr) continue;
+
+                const openVal = parseFloat(cols[openIdx].replace(/[^\d\.]/g, ''));
+                const closeVal = parseFloat(cols[closeIdx].replace(/[^\d\.]/g, ''));
+                const highVal = parseFloat(cols[highIdx].replace(/[^\d\.]/g, ''));
+                const lowVal = parseFloat(cols[lowIdx].replace(/[^\d\.]/g, ''));
+                const volVal = parseFloat(cols[volIdx] ? cols[volIdx].replace(/[^\d\.]/g, '') : '0') || 0;
+
+                if (isNaN(openVal) || isNaN(closeVal) || isNaN(highVal) || isNaN(lowVal)) continue;
+
+                parsed.push({
+                    time: dateStr,
+                    open: openVal,
+                    high: highVal,
+                    low: lowVal,
+                    close: closeVal,
+                    volume: volVal
+                });
+            }
+
+            // 依据日期串按字母严格递增升序，避开图表组件抛错
+            parsed.sort((a, b) => a.time.localeCompare(b.time));
+            return parsed;
+        }
+
+        // ------------------ 指标装载与渲染 ------------------
+
+        function renderData(data) {
+            if (!data || data.length === 0) return;
+            currentParsedData = data;
+
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    // 装填核心 K 线
+                    const candles = data.map(item => ({
+                        time: item.time,
+                        open: item.open,
+                        high: item.high,
+                        low: item.low,
+                        close: item.close
+                    }));
+                    candleSeries.setData(candles);
+
+                    // 装填主图成交量
+                    const volumes = data.map(item => ({
+                        time: item.time,
+                        value: item.volume,
+                        color: item.close >= item.open ? 'rgba(8, 153, 129, 0.16)' : 'rgba(242, 54, 69, 0.16)'
+                    }));
+                    mainVolumeSeries.setData(volumes);
+
+                    // 同步并加载更新所有配置好的主、副图指标
+                    updateMainIndicators();
+                    updateSubIndicatorView();
+
+                    // 让主图自适应范围显示
+                    mainChart.timeScale().fitContent();
+
+                    // 更新面板状态显示
+                    document.getElementById('stat-days').innerText = data.length + ' 天数据';
+                    displayOHLCV(data[data.length - 1]);
+                } catch (err) {
+                    showError('渲染引擎异常', '数据合并入 Canvas 时失败：' + err.message);
+                } finally {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                }
+            }, 50);
+        }
+
+        // 刷新主图上叠加的指标：MA, BOLL
+        function updateMainIndicators() {
+            if (currentParsedData.length === 0) return;
+
+            // 1. MA1
+            if (document.getElementById('enable-ma1').checked) {
+                const period = parseInt(document.getElementById('ma1-period').value) || 5;
+                ma1Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma1Series.setData([]);
+            }
+
+            // 2. MA2
+            if (document.getElementById('enable-ma2').checked) {
+                const period = parseInt(document.getElementById('ma2-period').value) || 10;
+                ma2Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma2Series.setData([]);
+            }
+
+            // 3. MA3
+            if (document.getElementById('enable-ma3').checked) {
+                const period = parseInt(document.getElementById('ma3-period').value) || 30;
+                ma3Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma3Series.setData([]);
+            }
+
+            // 4. BOLL
+            if (document.getElementById('enable-boll').checked) {
+                const boll = calculateBOLL(currentParsedData, 20, 2);
+                bollMiddleSeries.setData(boll.middle);
+                bollUpperSeries.setData(boll.upper);
+                bollLowerSeries.setData(boll.lower);
+            } else {
+                bollMiddleSeries.setData([]);
+                bollUpperSeries.setData([]);
+                bollLowerSeries.setData([]);
+            }
+        }
+
+        // 清理所有已加载的副图指标系列
+        function clearAllSubSeries() {
+            if (subMacdDifSeries) { subChart.removeSeries(subMacdDifSeries); subMacdDifSeries = null; }
+            if (subMacdDeaSeries) { subChart.removeSeries(subMacdDeaSeries); subMacdDeaSeries = null; }
+            if (subMacdHistSeries) { subChart.removeSeries(subMacdHistSeries); subMacdHistSeries = null; }
+            if (subKdjKSeries) { subChart.removeSeries(subKdjKSeries); subKdjKSeries = null; }
+            if (subKdjDSeries) { subChart.removeSeries(subKdjDSeries); subKdjDSeries = null; }
+            if (subKdjJSeries) { subChart.removeSeries(subKdjJSeries); subKdjJSeries = null; }
+            if (subRsiSeries) { subChart.removeSeries(subRsiSeries); subRsiSeries = null; }
+            if (subObvSeries) { subChart.removeSeries(subObvSeries); subObvSeries = null; }
+            if (subDmiPdiSeries) { subChart.removeSeries(subDmiPdiSeries); subDmiPdiSeries = null; }
+            if (subDmiMdiSeries) { subChart.removeSeries(subDmiMdiSeries); subDmiMdiSeries = null; }
+            if (subDmiAdxSeries) { subChart.removeSeries(subDmiAdxSeries); subDmiAdxSeries = null; }
+        }
+
+        // 切换副图指标展示 (MACD / KDJ / RSI / 无)
+        function selectSubIndicator(type) {
+            currentSubIndicator = type;
+
+            // 改变选中按钮样式
+            ['none', 'macd', 'kdj', 'rsi', 'obv', 'dmi'].forEach(t => {
+                const el = document.getElementById(`sub-${t}`);
+                if (el) {
+                    if (t === type) {
+                        el.className = "px-2.5 py-1 rounded-md bg-white text-[#2962ff] shadow-sm font-bold transition";
+                    } else {
+                        el.className = "px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition";
+                    }
+                }
+            });
+
+            const subContainer = document.getElementById('sub-chart-container');
+            if (type === 'none') {
+                subContainer.classList.add('hidden');
+            } else {
+                subContainer.classList.remove('hidden');
+                document.getElementById('sub-title').innerText = type.toUpperCase() + "指标";
+            }
+
+            // 强行刷新布局尺寸
+            const mainContainer = document.getElementById('main-chart-container');
+            if (mainChart) mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+            if (subChart) subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+
+            // 重新装填指标内容
+            updateSubIndicatorView();
+
+            // 延迟同步时间范围，确保副图完全渲染后再同步
+            setTimeout(() => {
+                const mainRange = mainChart.timeScale().getVisibleRange();
+                if (mainRange) {
+                    subChart.timeScale().setVisibleRange(mainRange);
+                }
+            }, 100);
+
+            // 延迟同步时间范围，确保副图完全渲染后再同步
+            setTimeout(() => {
+                const mainRange = mainChart.timeScale().getVisibleRange();
+                if (mainRange) {
+                    subChart.timeScale().setVisibleRange(mainRange);
+                }
+            }, 100);
+
+            // 重新建立时间轴同步
+            reestablishTimeSync();
+        }
+
+        // 重新建立时间轴同步（在副图显示后调用）
+        function reestablishTimeSync() {
+            if (!mainChart || !subChart) return;
+            
+            let isSyncing = false;
+            
+            // 主图变化时同步到副图
+            mainChart.timeScale().subscribeVisibleTimeRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                subChart.timeScale().setVisibleRange(range);
+                isSyncing = false;
+            });
+            
+            // 副图变化时同步到主图
+            subChart.timeScale().subscribeVisibleTimeRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                mainChart.timeScale().setVisibleRange(range);
+                isSyncing = false;
+            });
+        }
+
+        function updateSubIndicatorView() {
+            if (!subChart || currentParsedData.length === 0) return;
+
+            // 首先移除并清除所有已有副图指标，防止画线堆叠
+            clearAllSubSeries();
+
+            if (currentSubIndicator === 'none') return;
+
+            if (currentSubIndicator === 'macd') {
+                // 1. MACD
+                subMacdHistSeries = subChart.addHistogramSeries({
+                    priceFormat: { type: 'volume' },
+                    color: '#26a69a'
+                });
+                subMacdDifSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
+                subMacdDeaSeries = subChart.addLineSeries({ color: '#ff9800', lineWidth: 1.2, lastValueVisible: false });
+
+                const macd = calculateMACD(currentParsedData);
+                subMacdDifSeries.setData(macd.dif);
+                subMacdDeaSeries.setData(macd.dea);
+
+                // 柱子变色 (DIF-DEA 差值决定红绿)
+                const histData = macd.hist.map(item => ({
+                    time: item.time,
+                    value: item.value,
+                    color: item.value >= 0 ? 'rgba(8, 153, 129, 0.5)' : 'rgba(242, 54, 69, 0.5)'
+                }));
+                subMacdHistSeries.setData(histData);
+
+            } else if (currentSubIndicator === 'kdj') {
+                // 2. KDJ
+                subKdjKSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
+                subKdjDSeries = subChart.addLineSeries({ color: '#ff9800', lineWidth: 1.2, lastValueVisible: false });
+                subKdjJSeries = subChart.addLineSeries({ color: '#e91e63', lineWidth: 1.2, lastValueVisible: false });
+
+                const kdj = calculateKDJ(currentParsedData);
+                subKdjKSeries.setData(kdj.k);
+                subKdjDSeries.setData(kdj.d);
+                subKdjJSeries.setData(kdj.j);
+
+            } else if (currentSubIndicator === 'rsi') {
+                // 3. RSI
+                subRsiSeries = subChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.5, lastValueVisible: false });
+                const rsi = calculateRSI(currentParsedData);
+                subRsiSeries.setData(rsi);
+            } else if (currentSubIndicator === 'obv') {
+                // 4. OBV
+                subObvSeries = subChart.addLineSeries({ color: '#26a69a', lineWidth: 1.5, lastValueVisible: false });
+                const obv = calculateOBV(currentParsedData);
+                subObvSeries.setData(obv);
+            } else if (currentSubIndicator === 'dmi') {
+                // 5. DMI
+                subDmiPdiSeries = subChart.addLineSeries({ color: '#089981', lineWidth: 1.2, lastValueVisible: false });
+                subDmiMdiSeries = subChart.addLineSeries({ color: '#f23645', lineWidth: 1.2, lastValueVisible: false });
+                subDmiAdxSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
+
+                const dmi = calculateDMI(currentParsedData);
+                subDmiPdiSeries.setData(dmi.pdi);
+                subDmiMdiSeries.setData(dmi.mdi);
+                subDmiAdxSeries.setData(dmi.adx);
+            }
+
+            // 同步主图的时间范围到副图，而不是自适应
+            const mainRange = mainChart.timeScale().getVisibleRange();
+            if (mainRange) {
+                subChart.timeScale().setVisibleRange(mainRange);
+            }
+        }
+
+        // ------------------ 数据流看板联动 ------------------
+
+        function displayOHLCV(item) {
+            if (!item) return;
+
+            const change = item.close - item.open;
+            const changePercent = (change / item.open) * 100;
+            const isUp = change >= 0;
+
+            document.getElementById('info-open').innerText = item.open.toFixed(2);
+            document.getElementById('info-high').innerText = item.high.toFixed(2);
+            document.getElementById('info-low').innerText = item.low.toFixed(2);
+            document.getElementById('info-close').innerText = item.close.toFixed(2);
+            
+            const changeEl = document.getElementById('info-change');
+            changeEl.innerText = `${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${changePercent.toFixed(2)}%)`;
+            changeEl.className = isUp ? 'text-[#089981] font-bold' : 'text-[#f23645] font-bold';
+
+            const formatVol = (val) => {
+                if (val >= 1e9) return (val / 1e9).toFixed(2) + ' B';
+                if (val >= 1e6) return (val / 1e6).toFixed(2) + ' M';
+                if (val >= 1e3) return (val / 1e3).toFixed(2) + ' K';
+                return val.toString();
+            };
+            document.getElementById('info-volume').innerText = formatVol(item.volume);
+
+            const lastPriceBadge = document.getElementById('last-price-badge');
+            lastPriceBadge.innerText = item.close.toFixed(2);
+            lastPriceBadge.className = `text-xs px-1.5 py-0.5 rounded font-mono ${isUp ? 'bg-[#089981]/10 text-[#089981]' : 'bg-[#f23645]/10 text-[#f23645]'}`;
+        }
+
+        function loadBackupData() {
+            const parsed = parseCSV(DEFAULT_CSV_DATA);
+            renderData(parsed);
+            document.getElementById('ticker-name').innerText = 'VIX INDEX';
+            document.getElementById('data-source-status').innerText = '数据源：川羽大霄A股VIX INDEX';
+        }
+
+        // ------------------ 启动与事件绑定 ------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof LightweightCharts === 'undefined') {
+                showError('核心组件加载失败', '由于网络问题未能成功获取图表引擎。请刷新页面再试。');
+                return;
+            }
+
+            try {
+                // 初始化图表结构
+                initCharts();
+                // 默认选择 MACD 并在副图激活
+                selectSubIndicator('macd');
+            } catch (err) {
+                showError('图表引擎错误', '在构建 canvas 容器时发生错误：' + err.message);
+                return;
+            }
+
+            // 尝试加载同级目录 ./index.csv
+            fetch('https://kawasakikusako.github.io/generalExp/vix/index.csv')
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('未能在本地找到 ./index.csv 资产或受到跨域安全访问限制');
+                })
+                .then(csvText => {
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        renderData(parsed);
+                        document.getElementById('ticker-name').innerText = 'INDEX.CSV';
+                        document.getElementById('data-source-status').innerText = '数据源：自动同步 ./index.csv';
+                    } else {
+                        loadBackupData();
+                    }
+                })
+                .catch(err => {
+                    console.warn(err.message);
+                    loadBackupData();
+                });
+
+            // 手动上传本地 CSV
+            const fileInput = document.getElementById('csv-file-input');
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const csvText = evt.target.result;
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('error-overlay').classList.add('hidden');
+                        renderData(parsed);
+                        document.getElementById('ticker-name').innerText = file.name.replace('.csv', '').toUpperCase();
+                        document.getElementById('data-source-status').innerText = `数据源：导入自 ${file.name}`;
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // 点击重置按钮
+            document.getElementById('reset-data-btn').addEventListener('click', () => {
+                document.getElementById('error-overlay').classList.add('hidden');
+                loadBackupData();
+            });
+
+            // 主图指标开关与周期改变事件绑定
+            const mainIndicatorControls = [
+                'enable-ma1', 'ma1-period',
+                'enable-ma2', 'ma2-period',
+                'enable-ma3', 'ma3-period',
+                'enable-boll'
+            ];
+            mainIndicatorControls.forEach(ctrlId => {
+                const el = document.getElementById(ctrlId);
+                if (el) {
+                    el.addEventListener('change', updateMainIndicators);
+                    if (el.tagName === 'INPUT' && el.type === 'number') {
+                        el.addEventListener('input', updateMainIndicators);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
