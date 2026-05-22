@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIX 零售恐慌指数多因子量化回测系统</title>
+    <!-- Tailwind CSS for sleek styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for beautiful interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Zoom Plugin for panning and zooming -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <!-- PapaParse for parsing user uploaded CSVs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Tailwind configuration to customize colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col custom-scrollbar">
+
+    <!-- Header bar -->
+    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-500/30">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    VIX 零售恐慌指数 <span class="text-indigo-600">量化回测终端</span>
+                </h1>
+                <p class="text-xs text-slate-500">基于布林带 + MA均线 + 指数配比买入的多因子轮动策略</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5 self-end md:self-auto">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                初始资金: ¥10,000
+            </span>
+            <span id="allocation-badge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                分配比例: 上证50% | 沪深30% | 创业20%
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6">
+        
+        <!-- Left Panel: Configurations & CSV upload -->
+        <div class="xl:col-span-1 flex flex-col gap-6">
+            
+            <!-- File Import Card -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    数据源导入 (CSV)
+                </h2>
+                
+                <div class="space-y-3">
+                    <!-- Multiple files input -->
+                    <div id="dropzone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500/50 rounded-lg p-4 text-center cursor-pointer transition bg-slate-50/50">
+                        <input type="file" id="csv-files" multiple accept=".csv" class="hidden" />
+                        <p class="text-xs text-slate-700 font-semibold">拖拽或点击上传本地数据</p>
+                        <p class="text-[10px] text-slate-400 mt-1">需包含: VIX.csv, 上证.csv, 沪深.csv, 创业.csv</p>
+                    </div>
+                    
+                    <div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-100 space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <span>VIX 数据：</span>
+                            <span id="vix-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>上证指数：</span>
+                            <span id="sz-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>沪深300：</span>
+                            <span id="hs-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>创业板指：</span>
+                            <span id="cy-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                        </div>
+                    </div>
+                    <button id="reset-data" class="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded transition">
+                        还原为内置高保真测试数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strategy Parameters Card -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex-1 flex flex-col">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    策略因子配置
+                </h2>
+                
+                <div class="space-y-4 flex-1">
+                    <!-- BB Period -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-500">布林带计算周期 (BB Period)</span>
+                            <span id="val-bb-period" class="text-indigo-600 font-bold">20 天</span>
+                        </div>
+                        <input type="range" id="param-bb-period" min="5" max="50" value="20" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                    </div>
+
+                    <!-- BB StdDev -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-500">布林带倍数 (Standard Deviation)</span>
+                            <span id="val-bb-std" class="text-indigo-600 font-bold">2.0 倍</span>
+                        </div>
+                        <input type="range" id="param-bb-std" min="1.0" max="3.0" step="0.1" value="2.0" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                    </div>
+
+                    <!-- MA Period -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-500">VIX 短期过滤均线 (MA)</span>
+                            <span id="val-ma" class="text-indigo-600 font-bold">5 天</span>
+                        </div>
+                        <input type="range" id="param-ma" min="2" max="30" value="5" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                    </div>
+
+                    <hr class="border-slate-100 my-2">
+
+                    <!-- Allocation Config (Requirement 2) -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-700">指数买入资产占比设定</span>
+                            <span id="val-total-alloc" class="text-xs font-bold text-emerald-600">合计: 100%</span>
+                        </div>
+                        
+                        <!-- SSE % -->
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
+                                <span>上证指数配比</span>
+                                <span id="val-alloc-sse" class="font-semibold text-slate-700">50%</span>
+                            </div>
+                            <input type="range" id="alloc-sse" min="0" max="100" step="5" value="50" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                        </div>
+                        
+                        <!-- HS300 % -->
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
+                                <span>沪深300配比</span>
+                                <span id="val-alloc-hs" class="font-semibold text-slate-700">30%</span>
+                            </div>
+                            <input type="range" id="alloc-hs" min="0" max="100" step="5" value="30" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                        </div>
+
+                        <!-- Chinext % -->
+                        <div>
+                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
+                                <span>创业板指配比</span>
+                                <span id="val-alloc-cy" class="font-semibold text-slate-700">20%</span>
+                            </div>
+                            <input type="range" id="alloc-cy" min="0" max="100" step="5" value="20" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                        </div>
+                        
+                        <!-- Real-time weight warning message -->
+                        <div id="alloc-warning" class="hidden text-[10px] text-rose-500 font-medium bg-rose-50 p-2 rounded border border-rose-100">
+                            ⚠ 资产分配比例之和必须等于 100% 才能执行回测。
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-100 my-2">
+
+                    <!-- Strategy Trigger logic Selection -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700">买入触发信号 (最底部区域)</label>
+                        <select id="buy-logic" class="w-full bg-white border border-slate-200 text-xs rounded-lg p-2 text-slate-700 focus:outline-none focus:border-indigo-500">
+                            <option value="cross_below_upper" selected>VIX收盘价 跌破 布林带上轨 (恐慌退散)</option>
+                            <option value="cross_above_upper">VIX收盘价 突破 布林带上轨 (极端恐慌)</option>
+                            <option value="above_sma">VIX收盘价 高于 布林带中轨</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700">清仓离场信号 (泡沫贪婪出逃)</label>
+                        <select id="sell-logic" class="w-full bg-white border border-slate-200 text-xs rounded-lg p-2 text-slate-700 focus:outline-none focus:border-indigo-500">
+                            <option value="cross_below_lower" selected>VIX收盘价 跌破 布林带下轨 (极度贪婪狂热)</option>
+                            <option value="cross_above_lower">VIX收盘价 从下轨向上拉起 (贪婪高点已过)</option>
+                            <option value="cross_below_sma">VIX收盘价 跌破 中轨 (情绪见顶)</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-3">
+                        <button id="run-backtest-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg shadow-md shadow-indigo-600/10 transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            运行量化回测
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panels: Charts, Performance Metrics, Logs -->
+        <div class="xl:col-span-3 flex flex-col gap-6">
+            
+            <!-- Performance Statistics Board -->
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">期末总资产</span>
+                    <span id="metric-final-equity" class="text-lg font-bold text-slate-900 mt-1">¥10,000.00</span>
+                    <span class="text-[10px] text-slate-400 mt-1">初始本金 ¥10,000</span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">策略累计收益</span>
+                    <span id="metric-total-return" class="text-lg font-bold text-emerald-600 mt-1">+0.00%</span>
+                    <span id="metric-vs-benchmark" class="text-[10px] text-slate-500 mt-1">超额收益: --</span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">基准持有收益</span>
+                    <span id="metric-benchmark-return" class="text-lg font-bold text-slate-600 mt-1">+0.00%</span>
+                    <span id="metric-benchmark-weights" class="text-[10px] text-slate-400 mt-1">按配置权重持有至今</span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">历史最大回撤</span>
+                    <span id="metric-max-drawdown" class="text-lg font-bold text-rose-600 mt-1">0.00%</span>
+                    <span class="text-[10px] text-slate-400 mt-1">回撤风控核心指标</span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">年化夏普比率</span>
+                    <span id="metric-sharpe" class="text-lg font-bold text-sky-600 mt-1">0.00</span>
+                    <span class="text-[10px] text-slate-400 mt-1">Risk-Adjusted Ratio</span>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                    <span class="text-xs text-slate-500 font-medium">交易胜率 / 次数</span>
+                    <span id="metric-win-rate" class="text-lg font-bold text-amber-600 mt-1">0% / 0次</span>
+                    <span id="metric-win-count" class="text-[10px] text-slate-400 mt-1">盈利 0 次 | 亏损 0 次</span>
+                </div>
+            </div>
+
+            <!-- Chart Panels tabs (Requirement 4: Zoom added) -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+                    <div class="flex flex-wrap gap-2">
+                        <button id="tab-equity" class="text-xs font-bold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 transition">
+                            策略资产净值曲线 (Equity Curve)
+                        </button>
+                        <button id="tab-vix" class="text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition">
+                            VIX恐慌指数与布林通道
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-3 self-end sm:self-auto">
+                        <button id="reset-zoom-btn" class="px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100 rounded-md transition flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12"></path></svg>
+                            重置缩放
+                        </button>
+                        <div class="text-[11px] text-slate-400 font-medium" id="data-range-label">
+                            回测区间: -- 至 --
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart Info Indicator -->
+                <div class="text-[10px] text-slate-400 -mt-2">
+                    💡 提示：支持图表滑动与缩放。您可以使用**鼠标滚轮/手机双指捏合进行横向缩放**，按住并**拖拽图表以左右平移**细节。
+                </div>
+
+                <!-- Chart Area -->
+                <div class="relative w-full h-[400px]">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Backtest Log & Trade List (Requirement 3: Export added) -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        交易成交记录与仓位变动历史
+                    </h2>
+                    <div class="flex items-center gap-3">
+                        <button id="export-csv-btn" class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-md transition flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            导出 CSV 记录
+                        </button>
+                        <span id="log-count" class="text-xs text-slate-400 font-medium">共 0 条记录</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-y-auto max-h-[250px] custom-scrollbar rounded-lg border border-slate-100 bg-slate-50/50">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="text-[10px] uppercase text-slate-500 bg-slate-100 sticky top-0 border-b border-slate-200">
+                            <tr>
+                                <th class="py-2.5 px-4 font-bold">序号</th>
+                                <th class="py-2.5 px-4 font-bold">下单日期</th>
+                                <th class="py-2.5 px-4 font-bold">动作</th>
+                                <th class="py-2.5 px-4 font-bold">上证变动份数 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">沪深变动份数 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">创业变动份数 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">期末权益值 (现金)</th>
+                                <th class="py-2.5 px-4 font-bold">相对初始盈亏比</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trade-log-body">
+                            <tr>
+                                <td colspan="8" class="text-center py-8 text-slate-400">暂无交易信号生成。点击“运行量化回测”开始。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white py-4 px-6 text-center text-xs text-slate-400 flex flex-col md:flex-row justify-between items-center gap-2">
+        <p>© 2026 VIX 量化投资系统. 本终端运行在本地浏览器沙盒环境中，所有回测皆为模拟计算。</p>
+        <div class="flex gap-4">
+            <a href="#" class="hover:text-slate-600 transition">算法文档</a>
+            <a href="#" class="hover:text-slate-600 transition">策略免责声明</a>
+        </div>
+    </footer>
+
+    <script>
+        // High fidelity mock data generator mimicking Chinese Stock Market + Custom VIX in 2014-2015
+        function generateRealisticMockData() {
+            const data = [];
+            const startDate = new Date('2014-08-12');
+            let vixVal = 1000.0;
+            let szVal = 1398.15;
+            let hsVal = 2300.0;
+            let cyVal = 1400.0;
+
+            const days = 300; // Simulating roughly 300 trading days (~15 months of highly volatile bull-bear phase)
+
+            for (let i = 0; i < days; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + Math.floor(i * 1.45)); // Generate trading days (skipping some weekends)
+                
+                // Keep weekends out
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    continue;
+                }
+                const dateString = currentDate.toISOString().split('T')[0];
+
+                // Simulating market movement trend (The great 2014-2015 bull market phase and then sharp plunge)
+                let trend = 0.0005; // standard slow drift
+                if (i > 40 && i < 180) {
+                    trend = 0.0045; // Huge parabolic rally
+                } else if (i >= 180 && i < 240) {
+                    trend = -0.0075; // Violent crash
+                } else if (i >= 240) {
+                    trend = -0.001; // Consolidation
+                }
+
+                // Random walk noise
+                const noiseSz = (Math.random() - 0.48) * 0.025 + trend;
+                const noiseHs = (Math.random() - 0.48) * 0.028 + trend * 1.1;
+                const noiseCy = (Math.random() - 0.46) * 0.038 + trend * 1.5; // Chinext has higher volatility
+
+                // Calculate daily open/close
+                const prevSz = szVal;
+                szVal = szVal * (1 + noiseSz);
+                const szOpen = prevSz * (1 + (Math.random() - 0.5) * 0.005);
+                const szHigh = Math.max(szOpen, szVal) * (1 + Math.random() * 0.01);
+                const szLow = Math.min(szOpen, szVal) * (1 - Math.random() * 0.01);
+
+                const prevHs = hsVal;
+                hsVal = hsVal * (1 + noiseHs);
+                const hsOpen = prevHs * (1 + (Math.random() - 0.5) * 0.005);
+                const hsHigh = Math.max(hsOpen, hsVal) * (1 + Math.random() * 0.01);
+                const hsLow = Math.min(hsOpen, hsVal) * (1 - Math.random() * 0.01);
+
+                const prevCy = cyVal;
+                cyVal = cyVal * (1 + noiseCy);
+                const cyOpen = prevCy * (1 + (Math.random() - 0.5) * 0.005);
+                const cyHigh = Math.max(cyOpen, cyVal) * (1 + Math.random() * 0.012);
+                const cyLow = Math.min(cyOpen, cyVal) * (1 - Math.random() * 0.012);
+
+                // Retail Panic Index (VIX) calculation
+                const marketAvgRet = (noiseSz + noiseHs + noiseCy) / 3;
+                
+                let vixChange = -marketAvgRet * 6.5 + (Math.random() - 0.5) * 0.12;
+                if (marketAvgRet < -0.015) {
+                    vixChange += Math.abs(marketAvgRet) * 9.0; // Panic multiplier on crashes
+                }
+                
+                const prevVix = vixVal;
+                vixVal = Math.max(600, vixVal * (1 + vixChange));
+                const vixOpen = prevVix * (1 + (Math.random() - 0.5) * 0.02);
+                const vixHigh = Math.max(vixOpen, vixVal) * (1 + Math.random() * 0.03);
+                const vixLow = Math.min(vixOpen, vixVal) * (1 - Math.random() * 0.03);
+
+                data.push({
+                    date: dateString,
+                    vix: { open: parseFloat(vixOpen.toFixed(2)), close: parseFloat(vixVal.toFixed(2)), high: parseFloat(vixHigh.toFixed(2)), low: parseFloat(vixLow.toFixed(2)) },
+                    sz: { open: parseFloat(szOpen.toFixed(2)), close: parseFloat(szVal.toFixed(2)), high: parseFloat(szHigh.toFixed(2)), low: parseFloat(szLow.toFixed(2)) },
+                    hs: { open: parseFloat(hsOpen.toFixed(2)), close: parseFloat(hsVal.toFixed(2)), high: parseFloat(hsHigh.toFixed(2)), low: parseFloat(hsLow.toFixed(2)) },
+                    cy: { open: parseFloat(cyOpen.toFixed(2)), close: parseFloat(cyVal.toFixed(2)), high: parseFloat(cyHigh.toFixed(2)), low: parseFloat(cyLow.toFixed(2)) }
+                });
+            }
+            return data;
+        }
+
+        // Global dataset stores
+        let activeDataset = generateRealisticMockData();
+        let activeChartInstance = null;
+        let activeTab = 'equity'; // 'equity' or 'vix'
+        let currentTradeLogGlobal = []; // Keeps track of logs for exporting
+
+        // UI Value bindings
+        const params = {
+            bbPeriod: document.getElementById('param-bb-period'),
+            bbStd: document.getElementById('param-bb-std'),
+            maPeriod: document.getElementById('param-ma'),
+            buyLogic: document.getElementById('buy-logic'),
+            sellLogic: document.getElementById('sell-logic'),
+            allocSse: document.getElementById('alloc-sse'),
+            allocHs: document.getElementById('alloc-hs'),
+            allocCy: document.getElementById('alloc-cy')
+        };
+
+        const valDisplays = {
+            bbPeriod: document.getElementById('val-bb-period'),
+            bbStd: document.getElementById('val-bb-std'),
+            maPeriod: document.getElementById('val-ma'),
+            allocSse: document.getElementById('val-alloc-sse'),
+            allocHs: document.getElementById('val-alloc-hs'),
+            allocCy: document.getElementById('val-alloc-cy'),
+            totalAlloc: document.getElementById('val-total-alloc'),
+            warning: document.getElementById('alloc-warning'),
+            runBtn: document.getElementById('run-backtest-btn')
+        };
+
+        // Validate Asset Allocation Weights (Requirement 2)
+        function validateAllocation() {
+            const sseVal = parseInt(params.allocSse.value);
+            const hsVal = parseInt(params.allocHs.value);
+            const cyVal = parseInt(params.allocCy.value);
+            const total = sseVal + hsVal + cyVal;
+
+            valDisplays.allocSse.textContent = sseVal + '%';
+            valDisplays.allocHs.textContent = hsVal + '%';
+            valDisplays.allocCy.textContent = cyVal + '%';
+            valDisplays.totalAlloc.textContent = '当前合计: ' + total + '%';
+
+            if (total === 100) {
+                valDisplays.totalAlloc.className = "text-xs font-bold text-emerald-600";
+                valDisplays.warning.classList.add('hidden');
+                valDisplays.runBtn.removeAttribute('disabled');
+                valDisplays.runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return true;
+            } else {
+                valDisplays.totalAlloc.className = "text-xs font-bold text-rose-500";
+                valDisplays.warning.classList.remove('hidden');
+                valDisplays.runBtn.setAttribute('disabled', 'true');
+                valDisplays.runBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                return false;
+            }
+        }
+
+        // Update indicators slider readouts
+        params.bbPeriod.addEventListener('input', (e) => { valDisplays.bbPeriod.textContent = e.target.value + ' 天'; });
+        params.bbStd.addEventListener('input', (e) => { valDisplays.bbStd.textContent = parseFloat(e.target.value).toFixed(1) + ' 倍'; });
+        params.maPeriod.addEventListener('input', (e) => { valDisplays.maPeriod.textContent = e.target.value + ' 天'; });
+        
+        params.allocSse.addEventListener('input', validateAllocation);
+        params.allocHs.addEventListener('input', validateAllocation);
+        params.allocCy.addEventListener('input', validateAllocation);
+
+        // CSV upload handling
+        const fileInput = document.getElementById('csv-files');
+        const dropzone = document.getElementById('dropzone');
+        const resetBtn = document.getElementById('reset-data');
+
+        let uploadedCSVs = {
+            vix: null,
+            sz: null,
+            hs: null,
+            cy: null
+        };
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-indigo-500', 'bg-slate-100');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-indigo-500', 'bg-slate-100');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-indigo-500', 'bg-slate-100');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            activeDataset = generateRealisticMockData();
+            uploadedCSVs = { vix: null, sz: null, hs: null, cy: null };
+            document.getElementById('vix-status').className = "text-amber-600 font-semibold";
+            document.getElementById('vix-status').textContent = "使用内置模拟数据";
+            document.getElementById('sz-status').className = "text-amber-600 font-semibold";
+            document.getElementById('sz-status').textContent = "使用内置模拟数据";
+            document.getElementById('hs-status').className = "text-amber-600 font-semibold";
+            document.getElementById('hs-status').textContent = "使用内置模拟数据";
+            document.getElementById('cy-status').className = "text-amber-600 font-semibold";
+            document.getElementById('cy-status').textContent = "使用内置模拟数据";
+            runBacktest();
+        });
+
+        // Parse files dynamically
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                const name = file.name.toLowerCase();
+                let type = '';
+                if (name.includes('vix')) type = 'vix';
+                else if (name.includes('上证')) type = 'sz';
+                else if (name.includes('沪深')) type = 'hs';
+                else if (name.includes('创业')) type = 'cy';
+
+                if (type) {
+                    Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            uploadedCSVs[type] = results.data;
+                            const statusElem = document.getElementById(`${type}-status`);
+                            statusElem.textContent = "已导入 " + results.data.length + " 条";
+                            statusElem.className = "text-emerald-600 font-semibold";
+                            checkAndMergeDatasets();
+                        }
+                    });
+                }
+            });
+        }
+
+        // Merge datasets together aligning on date
+        function checkAndMergeDatasets() {
+            if (uploadedCSVs.vix && uploadedCSVs.sz && uploadedCSVs.hs && uploadedCSVs.cy) {
+                const aligned = [];
+                
+                // Helper to build date index mapping
+                const createMap = (dataArr) => {
+                    const map = {};
+                    dataArr.forEach(row => {
+                        const d = row['日期'] || row['date'] || row['Date'];
+                        if (d) {
+                            const cleanD = d.trim();
+                            map[cleanD] = row;
+                        }
+                    });
+                    return map;
+                };
+
+                const vixMap = createMap(uploadedCSVs.vix);
+                const szMap = createMap(uploadedCSVs.sz);
+                const hsMap = createMap(uploadedCSVs.hs);
+                const cyMap = createMap(uploadedCSVs.cy);
+
+                // Use all dates in VIX as baseline
+                const vixDates = Object.keys(vixMap).sort();
+                
+                vixDates.forEach(date => {
+                    if (szMap[date] && hsMap[date] && cyMap[date]) {
+                        const v = vixMap[date];
+                        const s = szMap[date];
+                        const h = hsMap[date];
+                        const c = cyMap[date];
+
+                        const cleanNum = (val) => {
+                            if (!val) return 0;
+                            return parseFloat(String(val).replace(/[%,\s]/g, ''));
+                        };
+
+                        aligned.push({
+                            date: date,
+                            vix: {
+                                open: cleanNum(v['开盘'] || v['open'] || v['Open']),
+                                close: cleanNum(v['收盘'] || v['close'] || v['Close']),
+                                high: cleanNum(v['最高'] || v['high'] || v['High']),
+                                low: cleanNum(v['最低'] || v['low'] || v['Low'])
+                            },
+                            sz: {
+                                open: cleanNum(s['开盘'] || s['open'] || s['Open']),
+                                close: cleanNum(s['收盘'] || s['close'] || s['Close']),
+                                high: cleanNum(s['最高'] || s['high'] || s['High']),
+                                low: cleanNum(s['最低'] || s['low'] || s['Low'])
+                            },
+                            hs: {
+                                open: cleanNum(h['开盘'] || h['open'] || h['Open']),
+                                close: cleanNum(h['收盘'] || h['close'] || h['Close']),
+                                high: cleanNum(h['最高'] || h['high'] || h['High']),
+                                low: cleanNum(h['最低'] || h['low'] || h['Low'])
+                            },
+                            cy: {
+                                open: cleanNum(c['开盘'] || c['open'] || c['Open']),
+                                close: cleanNum(c['收盘'] || c['close'] || c['Close']),
+                                high: cleanNum(c['最高'] || c['high'] || c['High']),
+                                low: cleanNum(c['最低'] || c['low'] || c['Low'])
+                            }
+                        });
+                    }
+                });
+
+                if (aligned.length > 0) {
+                    activeDataset = aligned.sort((a,b) => new Date(a.date) - new Date(b.date));
+                    console.log("Successfully aligned user CSVs:", activeDataset.length, "trading days mapped.");
+                    runBacktest();
+                } else {
+                    // Create a visual indicator block instead of block alerts
+                    alert("错误：数据日期未重合。请确保四个文件的 日期 字段格式一致（例如 YYYY-MM-DD）。");
+                }
+            }
+        }
+
+        // Technical Analysis Indicators Calculations
+        function computeIndicators(data, bbPeriod, bbStd, maPeriod) {
+            const vixCloses = data.map(d => d.vix.close);
+            
+            const sma = [];
+            const upperBB = [];
+            const lowerBB = [];
+            const filterMA = [];
+
+            // Compute Simple Moving Average (SMA) and Bollinger Bands
+            for (let i = 0; i < data.length; i++) {
+                // SMA / Mid Band
+                if (i < bbPeriod - 1) {
+                    sma.push(null);
+                    upperBB.push(null);
+                    lowerBB.push(null);
+                } else {
+                    const window = vixCloses.slice(i - bbPeriod + 1, i + 1);
+                    const sum = window.reduce((a, b) => a + b, 0);
+                    const mean = sum / bbPeriod;
+                    sma.push(mean);
+
+                    // Standard deviation
+                    const variance = window.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / bbPeriod;
+                    const stdDev = Math.sqrt(variance);
+
+                    upperBB.push(mean + bbStd * stdDev);
+                    lowerBB.push(mean - bbStd * stdDev);
+                }
+
+                // Short Filter MA on VIX
+                if (i < maPeriod - 1) {
+                    filterMA.push(null);
+                } else {
+                    const window = vixCloses.slice(i - maPeriod + 1, i + 1);
+                    const sum = window.reduce((a, b) => a + b, 0);
+                    filterMA.push(sum / maPeriod);
+                }
+            }
+
+            return { sma, upperBB, lowerBB, filterMA };
+        }
+
+        // BACKTEST ENGINE
+        function runBacktest() {
+            if (!validateAllocation()) return;
+
+            const bbP = parseInt(params.bbPeriod.value);
+            const bbS = parseFloat(params.bbStd.value);
+            const maP = parseInt(params.maPeriod.value);
+            const buyLogic = params.buyLogic.value;
+            const sellLogic = params.sellLogic.value;
+
+            // Target Allocations adjusted from User Sliders (Requirement 2)
+            const allocSse = parseInt(params.allocSse.value) / 100;
+            const allocHs = parseInt(params.allocHs.value) / 100;
+            const allocCy = parseInt(params.allocCy.value) / 100;
+
+            // Dynamic header update
+            document.getElementById('allocation-badge').textContent = `分配比例: 上证${(allocSse*100).toFixed(0)}% | 沪深${(allocHs*100).toFixed(0)}% | 创业${(allocCy*100).toFixed(0)}%`;
+            document.getElementById('metric-benchmark-weights').textContent = `${(allocSse*100).toFixed(0)}/${(allocHs*100).toFixed(0)}/${(allocCy*100).toFixed(0)} 固定配置权重`;
+
+            // Calculate indicators
+            const indicators = computeIndicators(activeDataset, bbP, bbS, maP);
+            const { sma, upperBB, lowerBB, filterMA } = indicators;
+
+            // Initial simulation state
+            let initialCash = 10000;
+            let currentCash = initialCash;
+            
+            // Portfolios holdings quantities
+            let sseUnits = 0;
+            let hsUnits = 0;
+            let cyUnits = 0;
+            let isHolding = false;
+
+            const equityCurve = [];
+            const benchmarkCurve = [];
+            const tradeLog = [];
+
+            // Tracking benchmark (Always buy & hold with configured ratio from Day 0)
+            const bch_sz_initial = activeDataset[0].sz.close;
+            const bch_hs_initial = activeDataset[0].hs.close;
+            const bch_cy_initial = activeDataset[0].cy.close;
+
+            // Generate trade signals day-by-day
+            const signals = new Array(activeDataset.length).fill(null);
+
+            for (let t = 0; t < activeDataset.length; t++) {
+                const today = activeDataset[t];
+                let signal = null;
+
+                // Check indicators validity
+                if (t >= bbP && t >= maP) {
+                    const prevVix = activeDataset[t-1].vix.close;
+                    const currVix = today.vix.close;
+                    const prevUpper = upperBB[t-1];
+                    const currUpper = upperBB[t];
+                    const prevLower = lowerBB[t-1];
+                    const currLower = lowerBB[t];
+                    const prevSma = sma[t-1];
+                    const currSma = sma[t];
+
+                    // BUY Signal Evaluation
+                    if (!isHolding) {
+                        let buyTriggered = false;
+                        if (buyLogic === 'cross_below_upper') {
+                            if (prevVix >= prevUpper && currVix < currUpper) buyTriggered = true;
+                        } else if (buyLogic === 'cross_above_upper') {
+                            if (prevVix <= prevUpper && currVix > currUpper) buyTriggered = true;
+                        } else if (buyLogic === 'above_sma') {
+                            if (prevVix <= prevSma && currVix > currSma) buyTriggered = true;
+                        }
+
+                        if (buyTriggered) {
+                            signal = 'BUY';
+                        }
+                    } 
+                    // SELL Signal Evaluation
+                    else {
+                        let sellTriggered = false;
+                        if (sellLogic === 'cross_below_lower') {
+                            if (prevVix >= prevLower && currVix < currLower) sellTriggered = true;
+                        } else if (sellLogic === 'cross_above_lower') {
+                            if (prevVix <= prevLower && currVix > currLower) sellTriggered = true;
+                        } else if (sellLogic === 'cross_below_sma') {
+                            if (prevVix >= prevSma && currVix < currSma) sellTriggered = true;
+                        }
+
+                        if (sellTriggered) {
+                            signal = 'SELL';
+                        }
+                    }
+                }
+
+                signals[t] = signal;
+
+                // Execute trade execution on NEXT day Open (T+1)
+                if (t > 0 && signals[t-1] !== null) {
+                    const execSignal = signals[t-1];
+                    
+                    if (execSignal === 'BUY' && !isHolding) {
+                        // Allocation proportions
+                        const sseAllocated = currentCash * allocSse;
+                        const hsAllocated = currentCash * allocHs;
+                        const cyAllocated = currentCash * allocCy;
+
+                        // Minimum unit = 1% of index price
+                        const sseUnitVal = 0.01 * today.sz.open;
+                        const hsUnitVal = 0.01 * today.hs.open;
+                        const cyUnitVal = 0.01 * today.cy.open;
+
+                        sseUnits = Math.floor(sseAllocated / sseUnitVal);
+                        hsUnits = Math.floor(hsAllocated / hsUnitVal);
+                        cyUnits = Math.floor(cyAllocated / cyUnitVal);
+
+                        const sseCost = sseUnits * sseUnitVal;
+                        const hsCost = hsUnits * hsUnitVal;
+                        const cyCost = cyUnits * cyUnitVal;
+
+                        currentCash = currentCash - (sseCost + hsCost + cyCost);
+                        isHolding = true;
+
+                        tradeLog.push({
+                            date: today.date,
+                            action: 'BUY',
+                            sseUnits, sseVal: sseCost,
+                            hsUnits, hsVal: hsCost,
+                            cyUnits, cyVal: cyCost,
+                            equity: currentCash + sseCost + hsCost + cyCost,
+                            cash: currentCash
+                        });
+                    } 
+                    else if (execSignal === 'SELL' && isHolding) {
+                        const sseUnitVal = 0.01 * today.sz.open;
+                        const hsUnitVal = 0.01 * today.hs.open;
+                        const cyUnitVal = 0.01 * today.cy.open;
+
+                        const sseProceeds = sseUnits * sseUnitVal;
+                        const hsProceeds = hsUnits * hsUnitVal;
+                        const cyProceeds = cyUnits * cyUnitVal;
+
+                        currentCash = currentCash + sseProceeds + hsProceeds + cyProceeds;
+                        
+                        tradeLog.push({
+                            date: today.date,
+                            action: 'SELL',
+                            sseUnits, sseVal: sseProceeds,
+                            hsUnits, hsVal: hsProceeds,
+                            cyUnits, cyVal: cyProceeds,
+                            equity: currentCash,
+                            cash: currentCash
+                        });
+
+                        sseUnits = 0;
+                        hsUnits = 0;
+                        cyUnits = 0;
+                        isHolding = false;
+                    }
+                }
+
+                // Daily net worth (equity) at CLOSE
+                const todaySseUnitVal = 0.01 * today.sz.close;
+                const todayHsUnitVal = 0.01 * today.hs.close;
+                const todayCyUnitVal = 0.01 * today.cy.close;
+
+                const assetVal = (sseUnits * todaySseUnitVal) + (hsUnits * todayHsUnitVal) + (cyUnits * todayCyUnitVal);
+                const dailyEquity = currentCash + assetVal;
+
+                equityCurve.push({
+                    date: today.date,
+                    val: dailyEquity,
+                    cash: currentCash
+                });
+
+                // Record daily Benchmark (Hold-and-Buy ratio aligned with slider setting)
+                const benchmarkVal = 10000 * (
+                    allocSse * (today.sz.close / bch_sz_initial) + 
+                    allocHs * (today.hs.close / bch_hs_initial) + 
+                    allocCy * (today.cy.close / bch_cy_initial)
+                );
+                benchmarkCurve.push({
+                    date: today.date,
+                    val: benchmarkVal
+                });
+            }
+
+            // Expose trade log globally for exporting
+            currentTradeLogGlobal = tradeLog;
+
+            // Calculate Performance Metrics
+            const totalRet = ((equityCurve[equityCurve.length - 1].val - initialCash) / initialCash) * 100;
+            const benchRet = ((benchmarkCurve[benchmarkCurve.length - 1].val - initialCash) / initialCash) * 100;
+
+            // Max Drawdown
+            let maxDrawdown = 0;
+            let peak = -Infinity;
+            for (let i = 0; i < equityCurve.length; i++) {
+                if (equityCurve[i].val > peak) {
+                    peak = equityCurve[i].val;
+                }
+                const dd = ((peak - equityCurve[i].val) / peak) * 100;
+                if (dd > maxDrawdown) {
+                    maxDrawdown = dd;
+                }
+            }
+
+            // Win Rate & Trade Count
+            let winCount = 0;
+            let lossCount = 0;
+            let totalTrades = 0;
+
+            for (let i = 0; i < tradeLog.length; i++) {
+                if (tradeLog[i].action === 'SELL') {
+                    totalTrades++;
+                    const sellEq = tradeLog[i].equity;
+                    const buyEq = tradeLog[i - 1].equity; // corresponding preceding buy
+                    if (sellEq > buyEq) {
+                        winCount++;
+                    } else {
+                        lossCount++;
+                    }
+                }
+            }
+            const winRate = totalTrades > 0 ? (winCount / totalTrades) * 100 : 0;
+
+            // Sharpe Ratio
+            const dailyReturns = [];
+            for (let i = 1; i < equityCurve.length; i++) {
+                dailyReturns.push((equityCurve[i].val - equityCurve[i - 1].val) / equityCurve[i - 1].val);
+            }
+            const meanDailyRet = dailyReturns.reduce((a, b) => a + b, 0) / dailyReturns.length;
+            const varianceDailyRet = dailyReturns.reduce((a, b) => a + Math.pow(b - meanDailyRet, 2), 0) / dailyReturns.length;
+            const stdDailyRet = Math.sqrt(varianceDailyRet);
+            const sharpe = stdDailyRet > 0 ? (meanDailyRet / stdDailyRet) * Math.sqrt(244) : 0;
+
+            // Update Metrics in DOM
+            const finalEquityVal = equityCurve[equityCurve.length - 1].val;
+            document.getElementById('metric-final-equity').textContent = '¥' + finalEquityVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const trElem = document.getElementById('metric-total-return');
+            trElem.textContent = (totalRet >= 0 ? '+' : '') + totalRet.toFixed(2) + '%';
+            trElem.className = `text-lg font-bold mt-1 ${totalRet >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+            const activeVsBench = totalRet - benchRet;
+            const vsBenchElem = document.getElementById('metric-vs-benchmark');
+            vsBenchElem.textContent = `超额收益: ${activeVsBench >= 0 ? '+' : ''}${activeVsBench.toFixed(2)}%`;
+            vsBenchElem.className = `text-[10px] mt-1 font-semibold ${activeVsBench >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+            document.getElementById('metric-benchmark-return').textContent = (benchRet >= 0 ? '+' : '') + benchRet.toFixed(2) + '%';
+            document.getElementById('metric-max-drawdown').textContent = maxDrawdown.toFixed(2) + '%';
+            document.getElementById('metric-sharpe').textContent = sharpe.toFixed(2);
+            document.getElementById('metric-win-rate').textContent = `${winRate.toFixed(0)}% / ${totalTrades}次`;
+            document.getElementById('metric-win-count').textContent = `盈利 ${winCount} 次 | 亏损 ${lossCount} 次`;
+            document.getElementById('data-range-label').textContent = `回测区间: ${activeDataset[0].date} 至 ${activeDataset[activeDataset.length - 1].date}`;
+
+            // Render Transaction Log Table
+            const tbody = document.getElementById('trade-log-body');
+            document.getElementById('log-count').textContent = `共 ${tradeLog.length} 条记录`;
+            
+            if (tradeLog.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">在当前的参数设置下没有触发任何买卖信号。</td></tr>`;
+            } else {
+                tbody.innerHTML = tradeLog.map((log, idx) => {
+                    const actionClass = log.action === 'BUY' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100';
+                    const indexDetailsBuy = log.action === 'BUY' ? '买入' : '平仓变现';
+                    return `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+                            <td class="py-3 px-4 font-mono text-slate-400">${idx + 1}</td>
+                            <td class="py-3 px-4 font-medium">${log.date}</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${actionClass}">${log.action}</span>
+                            </td>
+                            <td class="py-3 px-4 font-mono">${log.sseUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.sseVal.toFixed(1)})</span></td>
+                            <td class="py-3 px-4 font-mono">${log.hsUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.hsVal.toFixed(1)})</span></td>
+                            <td class="py-3 px-4 font-mono">${log.cyUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.cyVal.toFixed(1)})</span></td>
+                            <td class="py-3 px-4 font-mono font-semibold text-slate-900">¥${log.equity.toLocaleString(undefined, {maximumFractionDigits:1})} <span class="text-[10px] text-slate-400 font-normal">(余额: ¥${log.cash.toFixed(1)})</span></td>
+                            <td class="py-3 px-4 font-mono text-slate-600">${((log.equity - initialCash)/initialCash*100).toFixed(1)}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Draw Charts
+            renderChart(equityCurve, benchmarkCurve, signals, indicators);
+        }
+
+        // Export CSV Function (Requirement 3)
+        function exportTradeLogToCSV() {
+            if (currentTradeLogGlobal.length === 0) {
+                alert("当前无交易记录可供导出！");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\ufeff"; // Added BOM for Excel Chinese compatibility
+            csvContent += "序号,交易日期,交易动作,上证变动份数,上证交易额(元),沪深变动份数,沪深交易额(元),创业变动份数,创业交易额(元),总权益(元),剩余现金(元)\r\n";
+
+            currentTradeLogGlobal.forEach((log, index) => {
+                const row = [
+                    index + 1,
+                    log.date,
+                    log.action,
+                    log.sseUnits,
+                    log.sseVal.toFixed(2),
+                    log.hsUnits,
+                    log.hsVal.toFixed(2),
+                    log.cyUnits,
+                    log.cyVal.toFixed(2),
+                    log.equity.toFixed(2),
+                    log.cash.toFixed(2)
+                ];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `VIX_量化策略交易成交记录_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // CHART RENDERING ENGINE with zoom configured (Requirement 4)
+        function renderChart(equityCurve, benchmarkCurve, signals, indicators) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (activeChartInstance) {
+                activeChartInstance.destroy();
+            }
+
+            const dates = activeDataset.map(d => d.date);
+            let datasets = [];
+
+            if (activeTab === 'equity') {
+                datasets = [
+                    {
+                        label: '零售恐慌VIX 轮动策略净值',
+                        data: equityCurve.map(e => e.val),
+                        borderColor: '#4f46e5', // Brand Indigo
+                        borderWidth: 2.5,
+                        backgroundColor: 'rgba(79, 70, 229, 0.04)',
+                        fill: true,
+                        tension: 0.1,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '自定义指数配比买入持有基准',
+                        data: benchmarkCurve.map(b => b.val),
+                        borderColor: '#94a3b8', // slate 400
+                        borderWidth: 1.5,
+                        borderDash: [4, 4],
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ];
+            } else {
+                datasets = [
+                    {
+                        label: 'VIX 恐慌收盘价',
+                        data: activeDataset.map(d => d.vix.close),
+                        borderColor: '#d97706', // amber 600
+                        borderWidth: 1.8,
+                        fill: false,
+                        pointRadius: 1.5,
+                        pointBackgroundColor: '#d97706',
+                        tension: 0.1
+                    },
+                    {
+                        label: '布林带上轨 (压力顶)',
+                        data: indicators.upperBB,
+                        borderColor: '#dc2626', // red 600
+                        borderWidth: 1.2,
+                        borderDash: [4, 4],
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '布林带下轨 (极度贪婪支撑)',
+                        data: indicators.lowerBB,
+                        borderColor: '#059669', // emerald 600
+                        borderWidth: 1.2,
+                        borderDash: [4, 4],
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: '布林带中轨 / SMA均线',
+                        data: indicators.sma,
+                        borderColor: '#64748b', // slate 500
+                        borderWidth: 1,
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ];
+            }
+
+            activeChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(71, 85, 105, 0.06)' },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(71, 85, 105, 0.08)' },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#334155', font: { size: 11, weight: '500' } }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#ffffff',
+                            titleColor: '#1e293b',
+                            bodyColor: '#475569',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            shadowColor: 'rgba(0,0,0,0.05)'
+                        },
+                        // ZOOM PLUGIN CONFIGURATION (Requirement 4)
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                                threshold: 10
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Reset Zoom Button Trigger
+        document.getElementById('reset-zoom-btn').addEventListener('click', () => {
+            if (activeChartInstance) {
+                activeChartInstance.resetZoom();
+            }
+        });
+
+        // Export CSV Button Event Listener (Requirement 3)
+        document.getElementById('export-csv-btn').addEventListener('click', exportTradeLogToCSV);
+
+        // Tab toggle buttons
+        const btnEquity = document.getElementById('tab-equity');
+        const btnVix = document.getElementById('tab-vix');
+
+        btnEquity.addEventListener('click', () => {
+            activeTab = 'equity';
+            btnEquity.className = "text-xs font-bold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 transition";
+            btnVix.className = "text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition";
+            runBacktest();
+        });
+
+        btnVix.addEventListener('click', () => {
+            activeTab = 'vix';
+            btnVix.className = "text-xs font-bold px-3 py-1.5 rounded-md bg-amber-50 text-amber-700 border border-amber-100 transition";
+            btnEquity.className = "text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition";
+            runBacktest();
+        });
+
+        // Trigger Backtest Button Listener
+        document.getElementById('run-backtest-btn').addEventListener('click', runBacktest);
+
+        // Auto run initial backtest on load
+        window.addEventListener('load', () => {
+            validateAllocation();
+            runBacktest();
+        });
+
+    </script>
+</body>
+</html>
