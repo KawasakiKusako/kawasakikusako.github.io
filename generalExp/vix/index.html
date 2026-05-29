@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="h-full bg-[#f8f9fa] text-[#1e222d]">
+<html lang="zh-CN" class="h-full bg-white text-[#111111]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>川羽大霄A股家务指数</title>
+    <title>KVIX - 川羽A股恐慌指数</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -19,155 +19,342 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+        }
+
+        /* 工业点阵/微格栅背景，增加系统面板质感 */
+        .industrial-grid {
+            background-image: radial-gradient(#efefef 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
     </style>
 </head>
-<body class="h-full flex flex-col font-sans overflow-hidden bg-[#f8f9fa]">
+<body class="h-full flex flex-col font-mono overflow-hidden bg-white selection:bg-[#f25f22] selection:text-white">
 
-    <!-- 顶部极简导航栏 -->
-    <header class="h-14 bg-white border-b border-[#e0e3eb] flex items-center justify-between px-6 shrink-0 select-none">
-        <div class="flex items-center space-x-4">
-            <!-- 品牌标识 -->
-            <div class="flex items-center space-x-2 text-[#2962ff] font-bold text-lg tracking-wider">
-                <i data-lucide="activity" class="w-6 h-6"></i>
-                <span>Kawasaki-Daxiao A Share Vix Index</span>
+    <!-- 顶部工业系统硬核头部 -->
+    <header class="h-14 bg-white border-b-2 border-[#111111] flex items-center justify-between px-6 shrink-0 select-none relative z-40">
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-btn hidden md:hidden p-2 border border-[#111111] hover:bg-gray-100 rounded-none" onclick="toggleMobileMenu()">
+            <i data-lucide="menu" class="w-5 h-5 text-[#111111]"></i>
+        </button>
+
+        <!-- 移动端下拉菜单 (高密度直角面板) -->
+        <div id="mobile-menu" class="hidden absolute top-14 left-0 right-0 bg-white border-b-2 border-[#111111] shadow-none z-50 md:hidden">
+            <div class="p-4 space-y-4 bg-white border-t border-gray-200">
+                <!-- 移动端周期选择 -->
+                <div class="space-y-2">
+                    <p class="text-[9px] font-bold text-gray-400">// SYSTEM_PERIOD // 运行周期</p>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button onclick="changePeriod('D')" id="mobile-period-D" class="p-2 text-xs rounded-none border border-[#111111] bg-[#111111] text-white font-bold">日线 (D)</button>
+                        <button onclick="changePeriod('W')" id="mobile-period-W" class="p-2 text-xs rounded-none border border-gray-300 hover:border-[#111111]">周线 (W)</button>
+                        <button onclick="changePeriod('M')" id="mobile-period-M" class="p-2 text-xs rounded-none border border-gray-300 hover:border-[#111111]">月线 (M)</button>
+                    </div>
+                </div>
+
+                <!-- 移动端主图叠加控制 -->
+                <div class="space-y-2">
+                    <p class="text-[9px] font-bold text-gray-400">// MASTER_INDICATOR // 主图叠加</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 border border-gray-200 p-2">
+                            <input type="checkbox" id="m-enable-ma1" checked onchange="syncCheckbox('enable-ma1', this)" class="accent-[#f25f22]">
+                            <span class="text-xs font-bold text-[#f25f22]">MA1</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-gray-200 p-2">
+                            <input type="checkbox" id="m-enable-ma2" checked onchange="syncCheckbox('enable-ma2', this)" class="accent-[#3b82f6]">
+                            <span class="text-xs font-bold text-[#3b82f6]">MA2</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-gray-200 p-2">
+                            <input type="checkbox" id="m-enable-ma3" onchange="syncCheckbox('enable-ma3', this)" class="accent-[#9c27b0]">
+                            <span class="text-xs font-bold text-[#9c27b0]">MA3</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-gray-200 p-2">
+                            <input type="checkbox" id="m-enable-boll" onchange="syncCheckbox('enable-boll', this)" class="accent-[#00b060]">
+                            <span class="text-xs font-bold text-[#00b060]">BOLL</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- 移动端副图选择 -->
+                <div class="space-y-2">
+                    <p class="text-[9px] font-bold text-gray-400">// SLAVE_INDICATOR // 辅助系统</p>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button onclick="selectSubIndicator('none')" class="p-2 text-[10px] border border-gray-200 rounded-none text-gray-500">NONE</button>
+                        <button onclick="selectSubIndicator('macd')" class="p-2 text-[10px] border border-[#111111] rounded-none font-bold text-black bg-gray-100">MACD</button>
+                        <button onclick="selectSubIndicator('kdj')" class="p-2 text-[10px] border border-gray-200 rounded-none">KDJ</button>
+                        <button onclick="selectSubIndicator('rsi')" class="p-2 text-[10px] border border-gray-200 rounded-none">RSI</button>
+                        <button onclick="selectSubIndicator('obv')" class="p-2 text-[10px] border border-gray-200 rounded-none">OBV</button>
+                        <button onclick="selectSubIndicator('dmi')" class="p-2 text-[10px] border border-gray-200 rounded-none">DMI</button>
+                    </div>
+                </div>
             </div>
-            <div class="h-4 w-[1px] bg-[#e0e3eb]"></div>
-            <!-- 商品名称 -->
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-[#1e222d] text-sm" id="ticker-name">KAWASAKI DAXIAO A SHARE VIX INDEX</span>
-                <span class="text-xs bg-[#089981]/10 text-[#089981] px-1.5 py-0.5 rounded font-mono" id="last-price-badge">--</span>
+        </div>
+        
+        <!-- 头部左侧：系统身份标识 -->
+        <div class="flex items-center space-x-5">
+            <div class="flex items-center space-x-2 select-none">
+                <!-- 终末地标志性旋转棱形 -->
+                <div class="w-3 h-3 bg-[#f25f22] transform rotate-45 mr-1 flex items-center justify-center">
+                    <div class="w-1 h-1 bg-white"></div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-black text-sm tracking-widest text-[#111111]">KAWASAKI A-SHARE VIX INDEX</span>
+                    <span class="text-[8px] text-gray-400 font-bold tracking-widest leading-none">SYS.VER 0.2.01A // ALPHA</span>
+                </div>
             </div>
-            <span class="text-xs text-gray-400 font-medium">日线 (D)</span><span class="text-xs text-gray-400 font-medium">川羽大霄A股家务指数 - 不代表投资建议©KawasakiKusako 2026</span>
+            
+            <div class="h-6 w-[1px] bg-[#111111]/10"></div>
+            
+            <!-- 指数信息区 -->
+            <div class="flex items-center space-x-3">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase leading-none">SYS_TARGET_INDEX</span>
+                    <span class="font-black text-xs text-[#111111] tracking-wider mt-0.5" id="ticker-name">A SHARE VIX INDEX</span>
+                </div>
+                <span class="text-[11px] border-2 border-[#f25f22] text-[#f25f22] px-2 py-0.5 font-bold rounded-none bg-[#f25f22]/5 font-mono" id="last-price-badge">--</span>
+            </div>
         </div>
 
+        <!-- 头部右侧：数据导入与重置 -->
         <div class="flex items-center space-x-3">
+            <div class="text-right hidden xl:block mr-2">
+                <p class="text-[8px] text-gray-400 font-bold leading-none uppercase">INTERFACE_STATUS</p>
+                <p class="text-[10px] text-[#00b060] font-black tracking-wider leading-normal">[ SECURE_MONITOR ]</p>
+            </div>
+            
             <!-- 导入 CSV -->
-            <label class="flex items-center space-x-1.5 bg-[#f0f3fa] hover:bg-[#e0e3eb] text-xs text-[#1e222d] font-semibold px-3 py-2 rounded-lg cursor-pointer transition">
-                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-[#2962ff]"></i>
-                <span>导入本地 CSV</span>
+            <label class="flex items-center space-x-2 border-2 border-[#111111] hover:bg-[#111111] hover:text-white text-xs text-[#111111] font-black px-4 py-2 rounded-none cursor-pointer transition-all">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                <span class="tracking-widest text-[10px]">IMPORT .CSV</span>
                 <input type="file" id="csv-file-input" accept=".csv" class="hidden">
             </label>
+            
             <!-- 恢复示例 -->
-            <button id="reset-data-btn" class="flex items-center justify-center p-2 rounded-lg bg-[#f0f3fa] hover:bg-[#e0e3eb] transition" title="重置回内置数据">
-                <i data-lucide="rotate-ccw" class="w-4 h-4 text-gray-600"></i>
+            <button id="reset-data-btn" class="flex items-center justify-center p-2 rounded-none border border-[#111111] hover:bg-gray-100 transition-all" title="重置回内置数据">
+                <i data-lucide="rotate-ccw" class="w-4 h-4 text-[#111111]"></i>
             </button>
         </div>
     </header>
 
-    <!-- 指标多功能配置面板 -->
-    <section class="bg-white border-b border-[#e0e3eb] px-6 py-2.5 flex flex-wrap items-center gap-y-2 gap-x-6 shrink-0 text-xs text-[#4c525e] select-none">
-        <!-- 主图指标 -->
-        <div class="flex items-center space-x-4">
-            <span class="font-bold text-[#1e222d] flex items-center space-x-1">
-                <i data-lucide="layers-3" class="w-3.5 h-3.5 text-blue-500"></i>
-                <span>主图叠加：</span>
-            </span>
-            <!-- MA 1 -->
-            <label class="flex items-center space-x-1 cursor-pointer">
-                <input type="checkbox" id="enable-ma1" checked class="accent-[#2962ff] rounded">
-                <span class="font-semibold text-[#2962ff]">MA1:</span>
-                <input type="number" id="ma1-period" value="5" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
-            </label>
-            <!-- MA 2 -->
-            <label class="flex items-center space-x-1 cursor-pointer">
-                <input type="checkbox" id="enable-ma2" checked class="accent-[#ff9800] rounded">
-                <span class="font-semibold text-[#ff9800]">MA2:</span>
-                <input type="number" id="ma2-period" value="10" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
-            </label>
-            <!-- MA 3 -->
-            <label class="flex items-center space-x-1 cursor-pointer">
-                <input type="checkbox" id="enable-ma3" class="accent-[#9c27b0] rounded">
-                <span class="font-semibold text-[#9c27b0]">MA3:</span>
-                <input type="number" id="ma3-period" value="30" min="2" max="200" class="w-10 text-center border border-gray-300 rounded focus:outline-none focus:border-blue-500 py-0.5 bg-gray-50">
-            </label>
-            <div class="h-4 w-[1px] bg-gray-200"></div>
-            <!-- BOLL -->
-            <label class="flex items-center space-x-1 cursor-pointer">
-                <input type="checkbox" id="enable-boll" class="accent-emerald-600 rounded">
-                <span class="font-semibold text-emerald-600">BOLL (20, 2)</span>
-            </label>
-        </div>
-
-        <div class="h-4 w-[1px] bg-gray-200 hidden md:block"></div>
-
-        <!-- 副图指标单选切换 -->
-        <div class="flex items-center space-x-3">
-            <span class="font-bold text-[#1e222d] flex items-center space-x-1">
-                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-[#ff9800]"></i>
-                <span>副图指标：</span>
-            </span>
-            <div class="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
-                <button id="sub-none" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition" onclick="selectSubIndicator('none')">无</button>
-                <button id="sub-macd" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('macd')">MACD</button>
-                <button id="sub-kdj" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('kdj')">KDJ</button>
-                <button id="sub-rsi" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('rsi')">RSI</button>
-                <button id="sub-obv" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('obv')">OBV</button>
-                <button id="sub-dmi" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition font-semibold" onclick="selectSubIndicator('dmi')">DMI</button>
+    <!-- 顶层 telemetry 面板 (极窄微网格样式) -->
+    <div class="h-10 bg-white border-b border-[#111111] flex items-center px-6 text-[10px] text-gray-500 select-none overflow-x-auto no-scrollbar shrink-0">
+        <div class="flex items-center space-x-6 w-full justify-between font-mono">
+            <div class="flex items-center space-x-4">
+                <span class="text-[#111111] font-black tracking-widest text-[9px] border border-[#111111] px-1.5 bg-[#111111]/5">TELEMETRY_DAT_FLOAT</span>
+                <div class="h-3 w-[1px] bg-gray-200"></div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">OP:</span><span id="info-open" class="text-[#111111] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">HI:</span><span id="info-high" class="text-[#00b060] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">LO:</span><span id="info-low" class="text-[#d12f2f] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">CL:</span><span id="info-close" class="text-[#111111] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">CHG:</span><span id="info-change" class="text-[#111111] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[9px] text-gray-400 font-bold">VOL:</span><span id="info-volume" class="text-[#f25f22] font-bold">--</span>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- OHLCV 数据浮动条 -->
-    <div class="h-9 bg-white border-b border-[#e0e3eb]/70 flex items-center px-6 text-xs text-gray-500 font-mono select-none overflow-x-auto no-scrollbar shrink-0">
-        <div class="flex items-center space-x-4">
-            <span class="text-[#1e222d] font-bold">DATA SUMMARY</span>
-            <div class="flex items-center space-x-1">
-                <span>开:</span><span id="info-open" class="text-gray-900 font-bold">--</span>
-            </div>
-            <div class="flex items-center space-x-1">
-                <span>高:</span><span id="info-high" class="text-[#089981] font-bold">--</span>
-            </div>
-            <div class="flex items-center space-x-1">
-                <span>低:</span><span id="info-low" class="text-[#f23645] font-bold">--</span>
-            </div>
-            <div class="flex items-center space-x-1">
-                <span>收:</span><span id="info-close" class="text-gray-900 font-bold">--</span>
-            </div>
-            <div class="flex items-center space-x-1">
-                <span>涨跌:</span><span id="info-change" class="text-gray-900 font-bold">--</span>
-            </div>
-            <div class="flex items-center space-x-1">
-                <span>成交量:</span><span id="info-volume" class="text-amber-600 font-bold">--</span>
+            
+            <div class="hidden md:flex items-center space-x-2 text-[9px] text-gray-400 font-bold uppercase">
+                <span>COORD. KD-09 // LAT.06 // LNG.91</span>
             </div>
         </div>
     </div>
 
-    <!-- 图表容器主体 (Flex 伸缩布局，上下完美排布主图与副图) -->
-    <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
-        <!-- 主 K 线图容器 -->
-        <div id="main-chart-container" class="flex-1 w-full relative min-h-[300px]"></div>
-        <!-- 动态副图容器 (默认隐藏，根据选项动态高度显现) -->
-        <div id="sub-chart-container" class="h-[180px] w-full border-t border-[#e0e3eb] relative hidden bg-white">
-            <div class="absolute top-2 left-4 z-10 text-[10px] text-gray-400 font-mono font-semibold select-none" id="sub-title">副图</div>
-        </div>
+    <!-- 核心运行空间 (精密侧栏 + 图表主面板) -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- 左侧高精工业控制面板 (桌面端常驻，移动端隐藏) -->
+        <aside class="w-[280px] bg-[#f9f9f9] border-r-2 border-[#111111] shrink-0 hidden md:flex flex-col select-none justify-between overflow-y-auto no-scrollbar relative z-30">
+            
+            <!-- 斜条纹装饰标头 -->
+            <div class="p-4 border-b border-[#111111] space-y-3 industrial-grid">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black tracking-widest text-[#111111]">// SYSTEM_CALIBRATION</span>
+                    <span class="text-[8px] text-gray-400 font-bold font-mono">CFG_M.01</span>
+                </div>
+                <div class="h-1 bg-[#111111]"></div>
+            </div>
 
-        <!-- 异常提示浮层 -->
-        <div id="error-overlay" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-4 z-30 hidden px-6 text-center">
-            <i data-lucide="alert-circle" class="w-12 h-12 text-[#f23645]"></i>
-            <h3 class="text-sm font-bold text-gray-800" id="error-title">渲染出错</h3>
-            <p class="text-xs text-gray-500 max-w-sm" id="error-message">检测到未知格式异常。</p>
-            <button onclick="hideErrorAndShowBackup()" class="bg-[#2962ff] hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-md transition shadow-sm">
-                重新加载数据或使用自定义数据
-            </button>
-        </div>
+            <!-- 控制区 -->
+            <div class="flex-1 p-4 space-y-5">
+                
+                <!-- 1. 周期控制面板 -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-[9px] font-black tracking-widest uppercase text-gray-400">
+                        <span>[ 01 // K线周期 SYSTEM_PERIOD ]</span>
+                        <div class="w-1.5 h-1.5 bg-[#111111]"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-0.5 border border-[#111111] p-0.5 bg-white">
+                        <button id="period-D" class="py-1 text-center text-[10px] font-black transition-all bg-[#111111] text-white" onclick="changePeriod('D')">日 (D)</button>
+                        <button id="period-W" class="py-1 text-center text-[10px] font-black text-gray-500 hover:text-black hover:bg-gray-100 transition-all" onclick="changePeriod('W')">周 (W)</button>
+                        <button id="period-M" class="py-1 text-center text-[10px] font-black text-gray-500 hover:text-black hover:bg-gray-100 transition-all" onclick="changePeriod('M')">月 (M)</button>
+                    </div>
+                </div>
 
-        <!-- 全局 loading -->
-        <div id="loading-overlay" class="absolute inset-0 bg-white/80 flex flex-col items-center justify-center space-y-2 z-20">
-            <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-gray-400">更新走势数据中...</p>
-        </div>
-    </main>
+                <!-- 2. 主图指标控制 (工业表单) -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-[9px] font-black tracking-widest uppercase text-gray-400">
+                        <span>[ 02 // 主图叠加 OVERLAY_PARAMS ]</span>
+                        <div class="w-1.5 h-1.5 bg-[#111111]"></div>
+                    </div>
+                    
+                    <div class="space-y-2 bg-white border border-[#111111] p-3">
+                        <!-- MA1 -->
+                        <div class="flex items-center justify-between text-[11px] font-bold">
+                            <label class="flex items-center space-x-2 cursor-pointer text-[#f25f22]">
+                                <input type="checkbox" id="enable-ma1" checked class="accent-[#f25f22] rounded-none w-3.5 h-3.5 border border-[#111111]">
+                                <span class="tracking-wider">MA1 LINE</span>
+                            </label>
+                            <div class="flex items-center border border-gray-300">
+                                <span class="px-1 text-[8px] text-gray-400 border-r border-gray-300">N</span>
+                                <input type="number" id="ma1-period" value="5" min="2" max="200" class="w-10 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-[#111111]">
+                            </div>
+                        </div>
 
-    <!-- 底部状态栏 -->
-    <footer class="h-7 bg-white border-t border-[#e0e3eb] flex items-center justify-between px-6 text-[11px] text-gray-400 shrink-0 select-none">
-        <div class="flex items-center space-x-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#089981]"></span>
-            <span id="data-source-status">数据源：载入中...</span>
-        </div>
+                        <!-- MA2 -->
+                        <div class="flex items-center justify-between text-[11px] font-bold border-t border-gray-100 pt-2">
+                            <label class="flex items-center space-x-2 cursor-pointer text-[#3b82f6]">
+                                <input type="checkbox" id="enable-ma2" checked class="accent-[#3b82f6] rounded-none w-3.5 h-3.5 border border-[#111111]">
+                                <span class="tracking-wider">MA2 LINE</span>
+                            </label>
+                            <div class="flex items-center border border-gray-300">
+                                <span class="px-1 text-[8px] text-gray-400 border-r border-gray-300">N</span>
+                                <input type="number" id="ma2-period" value="10" min="2" max="200" class="w-10 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-[#111111]">
+                            </div>
+                        </div>
+
+                        <!-- MA3 -->
+                        <div class="flex items-center justify-between text-[11px] font-bold border-t border-gray-100 pt-2">
+                            <label class="flex items-center space-x-2 cursor-pointer text-[#9c27b0]">
+                                <input type="checkbox" id="enable-ma3" class="accent-[#9c27b0] rounded-none w-3.5 h-3.5 border border-[#111111]">
+                                <span class="tracking-wider">MA3 LINE</span>
+                            </label>
+                            <div class="flex items-center border border-gray-300">
+                                <span class="px-1 text-[8px] text-gray-400 border-r border-gray-300">N</span>
+                                <input type="number" id="ma3-period" value="30" min="2" max="200" class="w-10 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-[#111111]">
+                            </div>
+                        </div>
+
+                        <!-- BOLL -->
+                        <div class="flex items-center justify-between border-t border-gray-100 pt-2">
+                            <label class="flex items-center space-x-2 cursor-pointer text-[11px] text-[#00b060] font-bold">
+                                <input type="checkbox" id="enable-boll" class="accent-[#00b060] rounded-none w-3.5 h-3.5 border border-[#111111]">
+                                <span class="tracking-wider">BOLL CHANNEL</span>
+                            </label>
+                            <span class="text-[9px] text-gray-400 font-mono font-bold">[20, 2]</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 副图选择控制 -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-[9px] font-black tracking-widest uppercase text-gray-400">
+                        <span>[ 03 // 辅助分析 AUXILIARY_VIEWS ]</span>
+                        <div class="w-1.5 h-1.5 bg-[#111111]"></div>
+                    </div>
+                    
+                    <div class="border border-[#111111] bg-white divide-y divide-[#111111]">
+                        <button id="sub-none" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50" onclick="selectSubIndicator('none')">
+                            <span>00 // 隐藏全部副图</span>
+                            <span class="text-gray-300">[ OFF ]</span>
+                        </button>
+                        <button id="sub-macd" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all bg-[#111111]/5 text-black" onclick="selectSubIndicator('macd')">
+                            <span>01 // 指数变动率 MACD</span>
+                            <span class="text-[#f25f22]">[ ACTIVE ]</span>
+                        </button>
+                        <button id="sub-kdj" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50" onclick="selectSubIndicator('kdj')">
+                            <span>02 // 随机振荡指标 KDJ</span>
+                            <span class="text-gray-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-rsi" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50" onclick="selectSubIndicator('rsi')">
+                            <span>03 // 强弱指标 RSI</span>
+                            <span class="text-gray-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-obv" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50" onclick="selectSubIndicator('obv')">
+                            <span>04 // 能量潮 OBV</span>
+                            <span class="text-gray-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-dmi" class="w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50" onclick="selectSubIndicator('dmi')">
+                            <span>05 // 动向指标 DMI</span>
+                            <span class="text-gray-300">[ STANDBY ]</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 控制面板尾部 -->
+            <div class="p-4 border-t border-[#111111]/10 bg-white space-y-1">
+                <div class="flex justify-between items-center text-[8px] text-gray-400 font-bold font-mono">
+                    <span>@ Kawasaki kusako</span>
+                    <span> Github</span>
+                </div>
+                <div class="w-full h-1 bg-gray-100">
+                    <div class="h-full bg-[#00b060] w-2/5"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧图表主区域 -->
+        <main class="flex-1 flex flex-col bg-white overflow-hidden relative">
+            
+            <!-- 主 K 线图容器 -->
+            <div id="main-chart-container" class="flex-1 w-full relative min-h-[300px]"></div>
+            
+            <!-- 动态副图容器 (坚实刚性灰边界划分) -->
+            <div id="sub-chart-container" class="h-[180px] w-full border-t border-[#111111] relative hidden bg-white">
+                <div class="absolute top-2 left-4 z-10 text-[8px] text-gray-400 font-mono font-black select-none tracking-widest border border-gray-300 px-2 bg-white" id="sub-title">副图</div>
+            </div>
+
+            <!-- 异常提示浮层 (硬核特种工业警告面板) -->
+            <div id="error-overlay" class="absolute inset-0 bg-white flex flex-col items-center justify-center space-y-4 z-30 hidden px-6 text-center">
+                <div class="w-16 h-16 bg-[#d12f2f]/5 border-2 border-[#d12f2f] flex items-center justify-center text-[#d12f2f]">
+                    <i data-lucide="alert-triangle" class="w-10 h-10"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-sm font-black text-[#111111] tracking-widest uppercase">// 警告: 终端系统渲染出错 TERMINAL_FATAL_ERROR //</h3>
+                    <p class="text-[10px] text-gray-400 max-w-sm font-mono tracking-tight" id="error-message">检测到未知格式异常。</p>
+                </div>
+                <button onclick="hideErrorAndShowBackup()" class="border-2 border-[#111111] bg-[#111111] hover:bg-gray-800 text-white text-[10px] font-black px-6 py-2 rounded-none transition-all tracking-widest">
+                    RESET TERMINAL ENGINE // 重启系统渲染
+                </button>
+            </div>
+
+            <!-- 全局 loading (直角方框循环，无圆角) -->
+            <div id="loading-overlay" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-3 z-20">
+                <div class="w-6 h-6 border-2 border-[#111111] border-t-transparent rounded-none animate-spin"></div>
+                <p class="text-[9px] text-[#111111] font-black tracking-widest uppercase">// INITIATING TELEMETRY ENGINE ...</p>
+            </div>
+        </main>
+        
+    </div>
+
+    <!-- 底部硬核工业仪表状态栏 -->
+    <footer class="h-8 bg-white border-t border-[#111111] flex items-center justify-between px-6 text-[10px] text-gray-400 shrink-0 select-none">
         <div class="flex items-center space-x-3">
-            <span id="stat-days">-- 数据点</span>
+            <span class="w-2.5 h-2.5 rounded-none bg-[#00b060] flex items-center justify-center">
+                <span class="w-1 h-1 bg-white"></span>
+            </span>
+            <span id="data-source-status" class="font-bold text-gray-700 uppercase tracking-widest text-[9px]">SYS_SOURCE: STABLE_CONNECT</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="stat-days" class="font-mono text-gray-600 tracking-wider">-- DATA_POINTS</span>
             <span>|</span>
-            <span>Github © Kawasaki Kusako 2026</span><span>川羽大霄A股家务指数</span><span>|</span><span>指数仅供参考，不代表任何投资建议</span>
+            <span class="tracking-tighter hidden sm:inline">GITHUB © KAWASAKI KUSAKO 2026</span>
+            <span class="text-gray-900 font-bold tracking-widest">// KVIX - 川羽A股恐慌指数</span>
+            <span>|</span>
+            <span class="text-gray-400 uppercase font-black">FOR TACTICAL USE ONLY</span>
         </div>
     </footer>
 
@@ -175,6 +362,49 @@
         // 重新调用./index.csv
         const DEFAULT_CSV_DATA = 'https://kawasakikusako.github.io/generalExp/vix/index.csv';
 
+        let windowResizeTimeout;
+        window.addEventListener('resize', () => {
+            if (windowResizeTimeout) {
+                clearTimeout(windowResizeTimeout);
+            }
+            
+            windowResizeTimeout = setTimeout(() => {
+                // 处理移动端菜单自动关闭
+                if (window.innerWidth >= 768) {
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                }
+                
+                // 重新计算图表尺寸
+                if (mainChart) {
+                    const mainContainer = document.getElementById('main-chart-container');
+                    mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+                }
+                
+                if (subChart) {
+                    const subContainer = document.getElementById('sub-chart-container');
+                    if (!subContainer.classList.contains('hidden')) {
+                        subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+                    }
+                }
+            }, 150);
+        });
+
+        // 移动端菜单切换函数
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 用于将移动端独立的多选框行为同步到主逻辑中
+        function syncCheckbox(mainId, mCheckbox) {
+            const mainEl = document.getElementById(mainId);
+            if (mainEl) {
+                mainEl.checked = mCheckbox.checked;
+                // 触发主图重新渲染
+                updateMainIndicators();
+            }
+        }
+        
         // 图表实例及系列管理器
         let mainChart = null;
         let subChart = null;
@@ -203,8 +433,10 @@
         let subDmiAdxSeries = null;
 
         // 状态变量
-        let currentParsedData = [];
+        let baseDailyData = [];      // 缓存原始日线数据
+        let currentParsedData = [];  // 当前展示周期的数据(日/周/月)
         let currentSubIndicator = 'macd'; // 默认为 MACD
+        let currentPeriod = 'D';     // 当前周期：'D' 日，'W' 周，'M' 月
 
         // 初始化 Lucide 图标
         lucide.createIcons();
@@ -230,25 +462,25 @@
             const commonOptions = {
                 layout: {
                     background: { type: 'solid', color: '#ffffff' },
-                    textColor: '#1e222d',
-                    fontSize: 11,
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    textColor: '#111111',
+                    fontSize: 10,
+                    fontFamily: 'monospace, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                 },
                 grid: {
-                    vertLines: { color: '#f0f3fa' },
-                    horzLines: { color: '#f0f3fa' },
+                    vertLines: { color: '#f2f2f2', style: 0 },
+                    horzLines: { color: '#f2f2f2', style: 0 },
                 },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
-                    vertLine: { width: 1, color: '#758696', style: 3 },
-                    horzLine: { width: 1, color: '#758696', style: 3 }
+                    vertLine: { width: 1, color: '#111111', style: 3 },
+                    horzLine: { width: 1, color: '#111111', style: 3 }
                 },
                 rightPriceScale: {
-                    borderColor: '#e0e3eb',
+                    borderColor: '#111111',
                     visible: true,
                 },
                 timeScale: {
-                    borderColor: '#e0e3eb',
+                    borderColor: '#111111',
                     timeVisible: true,
                     secondsVisible: false,
                 },
@@ -263,35 +495,35 @@
                 height: mainContainer.clientHeight || 450,
             });
 
-            // 1. K 线主系列 (采用无宽边呼吸配色)
+            // 1. K 线主系列 (精确定制的无渐变饱和色)
             candleSeries = mainChart.addCandlestickSeries({
-                upColor: '#31BD65',
-                downColor: '#f23645',
+                upColor: '#00b060',      // 终末地绿色
+                downColor: '#d12f2f',    // 战术警戒红
                 borderVisible: false,
-                wickUpColor: '#089981',
-                wickDownColor: '#f23645',
+                wickUpColor: '#00b060',
+                wickDownColor: '#d12f2f',
             });
 
             // 2. 主图叠加：成交量层 (放置在主图底部作为淡色虚影，不遮挡 K 线)
             mainVolumeSeries = mainChart.addHistogramSeries({
-                color: '#26a69a',
+                color: '#111111',
                 priceFormat: { type: 'volume' },
                 priceScaleId: 'volume_scale',
             });
             mainChart.priceScale('volume_scale').applyOptions({
                 visible: false,
-                scaleMargins: { top: 0.82, bottom: 0 },
+                scaleMargins: { top: 0.85, bottom: 0 },
             });
 
             // 3. 主图叠加：三组 MA 均线
-            ma1Series = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
-            ma2Series = mainChart.addLineSeries({ color: '#ff9800', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
-            ma3Series = mainChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma1Series = mainChart.addLineSeries({ color: '#f25f22', lineWidth: 1.5, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma2Series = mainChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.5, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma3Series = mainChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.5, crosshairMarkerVisible: false, lastValueVisible: false });
 
             // 4. 主图叠加：布林带 BOLL 三根曲线
-            bollMiddleSeries = mainChart.addLineSeries({ color: '#ff9800', lineWidth: 1.5, crosshairMarkerVisible: false, lastValueVisible: false });
-            bollUpperSeries = mainChart.addLineSeries({ color: '#5B9CF6', lineWidth: 1.2, lineStyle: 0, crosshairMarkerVisible: false, lastValueVisible: false });
-            bollLowerSeries = mainChart.addLineSeries({ color: '#5B9CF6', lineWidth: 1.2, lineStyle: 0, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollMiddleSeries = mainChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.2, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollUpperSeries = mainChart.addLineSeries({ color: '#00b060', lineWidth: 1.0, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollLowerSeries = mainChart.addLineSeries({ color: '#00b060', lineWidth: 1.0, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
             
             // 调整主图 K 线渲染边缘
             candleSeries.priceScale().applyOptions({
@@ -379,6 +611,68 @@
                 return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             }
             return null;
+        }
+
+        /**
+         * 核心数据聚合算法：将日线聚合为周线或月线
+         */
+        function aggregateData(dailyData, period) {
+            if (!dailyData || dailyData.length === 0) return [];
+            if (period === 'D') return dailyData;
+
+            const aggregated = [];
+            let groupKeyFn;
+
+            if (period === 'W') {
+                groupKeyFn = (dateStr) => {
+                    const d = new Date(dateStr);
+                    const tempDate = new Date(d.valueOf());
+                    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+                    const year = tempDate.getFullYear();
+                    const startOfYear = new Date(year, 0, 1);
+                    const weekNo = Math.ceil((((tempDate - startOfYear) / 86400000) + 1) / 7);
+                    return `${year}-W${String(weekNo).padStart(2, '0')}`;
+                };
+            } else if (period === 'M') {
+                groupKeyFn = (dateStr) => {
+                    const parts = dateStr.split('-');
+                    return `${parts[0]}-${parts[1]}`;
+                };
+            }
+
+            let currentGroupKey = null;
+            let currentCandle = null;
+
+            for (let i = 0; i < dailyData.length; i++) {
+                const day = dailyData[i];
+                const key = groupKeyFn(day.time);
+
+                if (key !== currentGroupKey) {
+                    if (currentCandle) {
+                        aggregated.push(currentCandle);
+                    }
+                    currentGroupKey = key;
+                    currentCandle = {
+                        time: day.time,
+                        open: day.open,
+                        high: day.high,
+                        low: day.low,
+                        close: day.close,
+                        volume: day.volume
+                    };
+                } else {
+                    currentCandle.high = Math.max(currentCandle.high, day.high);
+                    currentCandle.low = Math.min(currentCandle.low, day.low);
+                    currentCandle.close = day.close;
+                    currentCandle.volume += day.volume;
+                }
+            }
+
+            if (currentCandle) {
+                aggregated.push(currentCandle);
+            }
+
+            return aggregated;
         }
 
         // 算术移动平均线 MA
@@ -500,12 +794,11 @@
         // 强弱指标 RSI (14)
         function calculateRSI(data, period = 14) {
             const rsiList = [];
-            if (data.length < period + 1) return rsiList;
             if (data.length < period + 1) {
                 for (let i = 0; i < data.length; i++) {
                     rsiList.push({ time: data[i].time, value: 50 });
                 }
-                return rsiList;  // ← 返回填充50值的完整数组
+                return rsiList;
             }
             let avgGain = 0;
             let avgLoss = 0;
@@ -536,18 +829,16 @@
             return rsiList;
         }
 
-
         // DMI (趋向指标)
         function calculateDMI(data, period = 14) {
             const dmi = { pdi: [], mdi: [], adx: [] };
-            if (data.length < period + 1) return dmi;
             if (data.length < period + 1) {
                 for (let i = 0; i < data.length; i++) {
                     dmi.pdi.push({ time: data[i].time, value: 50 });
                     dmi.mdi.push({ time: data[i].time, value: 50 });
                     dmi.adx.push({ time: data[i].time, value: 50 });
                 }
-                return dmi;  // ← 返回填充50值的完整数组
+                return dmi;
             }
             const plusDM = [];
             const minusDM = [];
@@ -636,7 +927,6 @@
             return obvList;
         }
 
-
         // ------------------ 数据导入逻辑 ------------------
 
         function parseCSV(csvText) {
@@ -656,7 +946,6 @@
 
             const headers = lines[0].split(separator).map(h => h.trim().replace(/^["']|["']$/g, ''));
             
-            // 模糊搜寻对应的栏目索引
             const dateIdx = headers.findIndex(h => h.includes('日期') || h.includes('时间') || h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
             const openIdx = headers.findIndex(h => h.includes('开盘') || h.toLowerCase().includes('open'));
             const closeIdx = headers.findIndex(h => h.includes('收盘') || h.toLowerCase().includes('close'));
@@ -696,23 +985,64 @@
                 });
             }
 
-            // 依据日期串按字母严格递增升序，避开图表组件抛错
             parsed.sort((a, b) => a.time.localeCompare(b.time));
             return parsed;
         }
 
+        // ------------------ 周期切换控制 ------------------
+
+        function changePeriod(period) {
+            currentPeriod = period;
+
+            // 1. 更新 PC 端侧栏的按钮状态
+            ['D', 'W', 'M'].forEach(p => {
+                const el = document.getElementById(`period-${p}`);
+                if (el) {
+                    if (p === period) {
+                        el.className = "py-1 text-center text-[10px] font-black bg-[#111111] text-white transition-all";
+                    } else {
+                        el.className = "py-1 text-center text-[10px] font-black text-gray-500 hover:text-black hover:bg-gray-100 transition-all";
+                    }
+                }
+            });
+
+            // 2. 更新移动端控制下拉条
+            ['D', 'W', 'M'].forEach(p => {
+                const el = document.getElementById(`mobile-period-${p}`);
+                if (el) {
+                    if (p === period) {
+                        el.className = "p-2 text-sm rounded-none bg-[#111111] text-white font-bold";
+                    } else {
+                        el.className = "p-2 text-sm rounded-none border border-gray-300 hover:border-[#111111]";
+                    }
+                }
+            });
+
+            const targetData = aggregateData(baseDailyData, period);
+            renderData(targetData, false);
+        }
+
         // ------------------ 指标装载与渲染 ------------------
 
-        function renderData(data) {
+        function renderData(data, isNewSource = true) {
             if (!data || data.length === 0) return;
-            currentParsedData = data;
+            
+            if (isNewSource) {
+                baseDailyData = data;
+                if (currentPeriod !== 'D') {
+                    currentParsedData = aggregateData(baseDailyData, currentPeriod);
+                } else {
+                    currentParsedData = data;
+                }
+            } else {
+                currentParsedData = data;
+            }
 
             document.getElementById('loading-overlay').classList.remove('hidden');
 
             setTimeout(() => {
                 try {
-                    // 装填核心 K 线
-                    const candles = data.map(item => ({
+                    const candles = currentParsedData.map(item => ({
                         time: item.time,
                         open: item.open,
                         high: item.high,
@@ -721,24 +1051,21 @@
                     }));
                     candleSeries.setData(candles);
 
-                    // 装填主图成交量
-                    const volumes = data.map(item => ({
+                    const volumes = currentParsedData.map(item => ({
                         time: item.time,
                         value: item.volume,
-                        color: item.close >= item.open ? 'rgba(8, 153, 129, 0.16)' : 'rgba(242, 54, 69, 0.16)'
+                        color: item.close >= item.open ? 'rgba(0, 176, 96, 0.16)' : 'rgba(209, 47, 47, 0.16)'
                     }));
                     mainVolumeSeries.setData(volumes);
 
-                    // 同步并加载更新所有配置好的主、副图指标
                     updateMainIndicators();
                     updateSubIndicatorView();
 
-                    // 让主图自适应范围显示
                     mainChart.timeScale().fitContent();
 
-                    // 更新面板状态显示
-                    document.getElementById('stat-days').innerText = data.length + ' 天数据';
-                    displayOHLCV(data[data.length - 1]);
+                    const periodNames = { 'D': '日线', 'W': '周线', 'M': '月线' };
+                    document.getElementById('stat-days').innerText = `${currentParsedData.length}个${periodNames[currentPeriod]}数据点 // SYS_METRICS`;
+                    displayOHLCV(currentParsedData[currentParsedData.length - 1]);
                 } catch (err) {
                     showError('渲染引擎异常', '数据合并入 Canvas 时失败：' + err.message);
                 } finally {
@@ -747,7 +1074,6 @@
             }, 50);
         }
 
-        // 刷新主图上叠加的指标：MA, BOLL
         function updateMainIndicators() {
             if (currentParsedData.length === 0) return;
 
@@ -788,7 +1114,6 @@
             }
         }
 
-        // 清理所有已加载的副图指标系列
         function clearAllSubSeries() {
             if (subMacdDifSeries) { subChart.removeSeries(subMacdDifSeries); subMacdDifSeries = null; }
             if (subMacdDeaSeries) { subChart.removeSeries(subMacdDeaSeries); subMacdDeaSeries = null; }
@@ -803,18 +1128,17 @@
             if (subDmiAdxSeries) { subChart.removeSeries(subDmiAdxSeries); subDmiAdxSeries = null; }
         }
 
-        // 切换副图指标展示 (MACD / KDJ / RSI / 无)
         function selectSubIndicator(type) {
             currentSubIndicator = type;
 
-            // 改变选中按钮样式
+            // 更改左侧参数配置台的激活高亮样式
             ['none', 'macd', 'kdj', 'rsi', 'obv', 'dmi'].forEach(t => {
                 const el = document.getElementById(`sub-${t}`);
                 if (el) {
                     if (t === type) {
-                        el.className = "px-2.5 py-1 rounded-md bg-white text-[#2962ff] shadow-sm font-bold transition";
+                        el.className = "w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all bg-[#111111]/5 text-black border-l-2 border-[#f25f22]";
                     } else {
-                        el.className = "px-2.5 py-1 rounded-md text-gray-500 hover:text-black transition";
+                        el.className = "w-full text-left px-3 py-1.5 text-[10px] font-black flex justify-between items-center transition-all hover:bg-gray-50 text-gray-500";
                     }
                 }
             });
@@ -824,18 +1148,15 @@
                 subContainer.classList.add('hidden');
             } else {
                 subContainer.classList.remove('hidden');
-                document.getElementById('sub-title').innerText = type.toUpperCase() + "指标";
+                document.getElementById('sub-title').innerText = `// AUX_INDEX // SLAVE_${type.toUpperCase()}_ENGINE`;
             }
 
-            // 强行刷新布局尺寸
             const mainContainer = document.getElementById('main-chart-container');
             if (mainChart) mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
             if (subChart) subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
 
-            // 重新装填指标内容
             updateSubIndicatorView();
 
-            // 延迟同步时间范围，确保副图完全渲染后再同步
             setTimeout(() => {
                 const mainRange = mainChart.timeScale().getVisibleRange();
                 if (mainRange) {
@@ -843,25 +1164,14 @@
                 }
             }, 100);
 
-            // 延迟同步时间范围，确保副图完全渲染后再同步
-            setTimeout(() => {
-                const mainRange = mainChart.timeScale().getVisibleRange();
-                if (mainRange) {
-                    subChart.timeScale().setVisibleRange(mainRange);
-                }
-            }, 100);
-
-            // 重新建立时间轴同步
             reestablishTimeSync();
         }
 
-        // 重新建立时间轴同步（在副图显示后调用）
         function reestablishTimeSync() {
             if (!mainChart || !subChart) return;
             
             let isSyncing = false;
             
-            // 主图变化时同步到副图
             mainChart.timeScale().subscribeVisibleTimeRangeChange(range => {
                 if (isSyncing || !range) return;
                 isSyncing = true;
@@ -869,7 +1179,6 @@
                 isSyncing = false;
             });
             
-            // 副图变化时同步到主图
             subChart.timeScale().subscribeVisibleTimeRangeChange(range => {
                 if (isSyncing || !range) return;
                 isSyncing = true;
@@ -881,37 +1190,33 @@
         function updateSubIndicatorView() {
             if (!subChart || currentParsedData.length === 0) return;
 
-            // 首先移除并清除所有已有副图指标，防止画线堆叠
             clearAllSubSeries();
 
             if (currentSubIndicator === 'none') return;
 
             if (currentSubIndicator === 'macd') {
-                // 1. MACD
                 subMacdHistSeries = subChart.addHistogramSeries({
                     priceFormat: { type: 'volume' },
-                    color: '#26a69a'
+                    color: '#111111'
                 });
-                subMacdDifSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
-                subMacdDeaSeries = subChart.addLineSeries({ color: '#ff9800', lineWidth: 1.2, lastValueVisible: false });
+                subMacdDifSeries = subChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.2, lastValueVisible: false });
+                subMacdDeaSeries = subChart.addLineSeries({ color: '#f25f22', lineWidth: 1.2, lastValueVisible: false });
 
                 const macd = calculateMACD(currentParsedData);
                 subMacdDifSeries.setData(macd.dif);
                 subMacdDeaSeries.setData(macd.dea);
 
-                // 柱子变色 (DIF-DEA 差值决定红绿)
                 const histData = macd.hist.map(item => ({
                     time: item.time,
                     value: item.value,
-                    color: item.value >= 0 ? 'rgba(8, 153, 129, 0.5)' : 'rgba(242, 54, 69, 0.5)'
+                    color: item.value >= 0 ? 'rgba(0, 176, 96, 0.4)' : 'rgba(209, 47, 47, 0.4)'
                 }));
                 subMacdHistSeries.setData(histData);
 
             } else if (currentSubIndicator === 'kdj') {
-                // 2. KDJ
-                subKdjKSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
-                subKdjDSeries = subChart.addLineSeries({ color: '#ff9800', lineWidth: 1.2, lastValueVisible: false });
-                subKdjJSeries = subChart.addLineSeries({ color: '#e91e63', lineWidth: 1.2, lastValueVisible: false });
+                subKdjKSeries = subChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.2, lastValueVisible: false });
+                subKdjDSeries = subChart.addLineSeries({ color: '#f25f22', lineWidth: 1.2, lastValueVisible: false });
+                subKdjJSeries = subChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.2, lastValueVisible: false });
 
                 const kdj = calculateKDJ(currentParsedData);
                 subKdjKSeries.setData(kdj.k);
@@ -919,20 +1224,17 @@
                 subKdjJSeries.setData(kdj.j);
 
             } else if (currentSubIndicator === 'rsi') {
-                // 3. RSI
                 subRsiSeries = subChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.5, lastValueVisible: false });
                 const rsi = calculateRSI(currentParsedData);
                 subRsiSeries.setData(rsi);
             } else if (currentSubIndicator === 'obv') {
-                // 4. OBV
-                subObvSeries = subChart.addLineSeries({ color: '#26a69a', lineWidth: 1.5, lastValueVisible: false });
+                subObvSeries = subChart.addLineSeries({ color: '#111111', lineWidth: 1.5, lastValueVisible: false });
                 const obv = calculateOBV(currentParsedData);
                 subObvSeries.setData(obv);
             } else if (currentSubIndicator === 'dmi') {
-                // 5. DMI
-                subDmiPdiSeries = subChart.addLineSeries({ color: '#089981', lineWidth: 1.2, lastValueVisible: false });
-                subDmiMdiSeries = subChart.addLineSeries({ color: '#f23645', lineWidth: 1.2, lastValueVisible: false });
-                subDmiAdxSeries = subChart.addLineSeries({ color: '#2962ff', lineWidth: 1.2, lastValueVisible: false });
+                subDmiPdiSeries = subChart.addLineSeries({ color: '#00b060', lineWidth: 1.2, lastValueVisible: false });
+                subDmiMdiSeries = subChart.addLineSeries({ color: '#d12f2f', lineWidth: 1.2, lastValueVisible: false });
+                subDmiAdxSeries = subChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.2, lastValueVisible: false });
 
                 const dmi = calculateDMI(currentParsedData);
                 subDmiPdiSeries.setData(dmi.pdi);
@@ -940,7 +1242,6 @@
                 subDmiAdxSeries.setData(dmi.adx);
             }
 
-            // 同步主图的时间范围到副图，而不是自适应
             const mainRange = mainChart.timeScale().getVisibleRange();
             if (mainRange) {
                 subChart.timeScale().setVisibleRange(mainRange);
@@ -963,7 +1264,7 @@
             
             const changeEl = document.getElementById('info-change');
             changeEl.innerText = `${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${changePercent.toFixed(2)}%)`;
-            changeEl.className = isUp ? 'text-[#089981] font-bold' : 'text-[#f23645] font-bold';
+            changeEl.className = isUp ? 'text-[#00b060] font-bold' : 'text-[#d12f2f] font-bold';
 
             const formatVol = (val) => {
                 if (val >= 1e9) return (val / 1e9).toFixed(2) + ' B';
@@ -975,14 +1276,26 @@
 
             const lastPriceBadge = document.getElementById('last-price-badge');
             lastPriceBadge.innerText = item.close.toFixed(2);
-            lastPriceBadge.className = `text-xs px-1.5 py-0.5 rounded font-mono ${isUp ? 'bg-[#089981]/10 text-[#089981]' : 'bg-[#f23645]/10 text-[#f23645]'}`;
+            lastPriceBadge.className = `text-[10px] px-2.5 py-0.5 font-bold rounded-none ${isUp ? 'bg-[#00b060]/10 border border-[#00b060] text-[#00b060]' : 'bg-[#d12f2f]/10 border border-[#d12f2f] text-[#d12f2f]'}`;
         }
 
         function loadBackupData() {
-            const parsed = parseCSV(DEFAULT_CSV_DATA);
-            renderData(parsed);
-            document.getElementById('ticker-name').innerText = 'VIX INDEX';
-            document.getElementById('data-source-status').innerText = '数据源：川羽大霄A股VIX INDEX';
+            fetch(DEFAULT_CSV_DATA)
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('未能在本地找到 ./index.csv 资产或受到跨域安全访问限制');
+                })
+                .then(csvText => {
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('ticker-name').innerText = 'VIX INDEX';
+                        document.getElementById('data-source-status').innerText = 'SYS_SOURCE: REMOTE_VIX';
+                        renderData(parsed, true);
+                    }
+                })
+                .catch(err => {
+                    showError('网络连接失败', '未能成功读取备用云端数据。请检查网络。');
+                });
         }
 
         // ------------------ 启动与事件绑定 ------------------
@@ -994,9 +1307,7 @@
             }
 
             try {
-                // 初始化图表结构
                 initCharts();
-                // 默认选择 MACD 并在副图激活
                 selectSubIndicator('macd');
             } catch (err) {
                 showError('图表引擎错误', '在构建 canvas 容器时发生错误：' + err.message);
@@ -1012,9 +1323,9 @@
                 .then(csvText => {
                     const parsed = parseCSV(csvText);
                     if (parsed && parsed.length > 0) {
-                        renderData(parsed);
                         document.getElementById('ticker-name').innerText = 'INDEX.CSV';
-                        document.getElementById('data-source-status').innerText = '数据源：自动同步 ./index.csv';
+                        document.getElementById('data-source-status').innerText = 'SYS_SOURCE: AUTO_INDEX';
+                        renderData(parsed, true);
                     } else {
                         loadBackupData();
                     }
@@ -1036,9 +1347,9 @@
                     const parsed = parseCSV(csvText);
                     if (parsed && parsed.length > 0) {
                         document.getElementById('error-overlay').classList.add('hidden');
-                        renderData(parsed);
                         document.getElementById('ticker-name').innerText = file.name.replace('.csv', '').toUpperCase();
-                        document.getElementById('data-source-status').innerText = `数据源：导入自 ${file.name}`;
+                        document.getElementById('data-source-status').innerText = `SYS_SOURCE: IMPORT_${file.name.toUpperCase()}`;
+                        renderData(parsed, true);
                     }
                 };
                 reader.readAsText(file);
