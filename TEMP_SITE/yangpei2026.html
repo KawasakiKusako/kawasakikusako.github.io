@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KawasakiKusako - STUDY TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MathJax Configuration and Script for LaTeX Support -->
+    <!-- MathJax 渲染 LaTeX 公式配置与脚本 -->
     <script>
         window.MathJax = {
             tex: {
@@ -335,7 +335,6 @@
             if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
                 setTimeout(() => {
                     try {
-                        // 如果传入指定元素，执行精准强绘
                         const target = element || document.getElementById('question-wrapper');
                         if (target) {
                             window.MathJax.typesetClear([target]);
@@ -351,18 +350,61 @@
             }
         }
 
+        // 高鲁棒性符合 RFC 4180 标准的 CSV 解析器（支持双引号内部逗号与转义双引号）
         function parseCSV(text) {
-            const lines = text.trim().split('\n');
+            const lines = text.split(/\r?\n/);
             if (lines.length < 2) return [];
-            const headers = lines[0].split(',').map(h => h.trim());
-            return lines.slice(1).map(line => {
-                const values = line.split(',');
+
+            // 状态机解析单行 CSV
+            function parseCSVLine(line) {
+                const fields = [];
+                let currentField = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+
+                    if (char === '"') {
+                        // 处理连续双引号 "" 表示的转义引号
+                        if (inQuotes && line[i + 1] === '"') {
+                            currentField += '"';
+                            i++; // 跳过下一个引号
+                        } else {
+                            // 切换引号状态
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        // 遇到英文逗号且不处于引号内部，执行分列
+                        fields.push(currentField.trim());
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                fields.push(currentField.trim());
+                return fields;
+            }
+
+            const headers = parseCSVLine(lines[0]);
+            const results = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue; // 过滤空白行
+
+                const values = parseCSVLine(line);
                 let obj = {};
-                headers.forEach((header, i) => {
-                    obj[header] = values[i] ? values[i].trim() : '';
+                headers.forEach((header, index) => {
+                    let value = values[index] !== undefined ? values[index] : '';
+                    // 去除可能残留在首尾的多余双引号包裹
+                    if (value.startsWith('"') && value.endsWith('"')) {
+                        value = value.substring(1, value.length - 1);
+                    }
+                    obj[header] = value;
                 });
-                return obj;
-            });
+                results.push(obj);
+            }
+            return results;
         }
 
         function switchMode(mode) {
@@ -374,7 +416,6 @@
             const btnCode = document.getElementById('btn-code');
             const btnCalc = document.getElementById('btn-calc');
 
-            // 初始化所有板块为隐藏
             quizSec.classList.add('hidden');
             codeSec.classList.add('hidden');
             calcSec.classList.add('hidden');
@@ -542,7 +583,7 @@
                 container.appendChild(div);
             });
 
-            // 深度重绘新加载的 PRACTICE 题目和选项
+            // 深度重排新加载的 PRACTICE 题目和选项
             typesetMath(document.getElementById('question-wrapper'));
         }
 
@@ -582,7 +623,7 @@
             const mainBtn = document.getElementById('main-action-btn');
             mainBtn.textContent = currentIndex < displayQuestions.length - 1 ? "NEXT_ENTRY" : "FINALIZE";
 
-            // 解析反馈框（如参考答案等）中的 LaTeX 公式
+            // 解析反馈区（如参考答案等）中的 LaTeX 公式
             typesetMath(document.getElementById('result-area'));
         }
 
@@ -650,7 +691,6 @@
                     const section = document.createElement('div');
                     section.className = "ark-panel p-10 md:p-16";
                     
-                    // 支持 questions 或直接包含公式/原理的卡片
                     let questionsHtml = "";
                     if (item.questions && Array.isArray(item.questions)) {
                         questionsHtml = item.questions.map((q) => `
@@ -661,7 +701,6 @@
                             </div>
                         `).join('');
                     } else if (item.formula || item.solution) {
-                        // 兼容单卡片式的计算题背景与解法
                         questionsHtml = `
                             <div class="py-8">
                                 ${item.formula ? `<p class="font-mono text-xl mb-4 text-emerald-600 bg-emerald-50/50 p-4 border border-emerald-500/20">${item.formula}</p>` : ''}
@@ -671,7 +710,6 @@
                         `;
                     }
 
-                    // 渲染主背景代码/公式块
                     let codeBlockHtml = "";
                     if (item.code || item.background || item.formula_block) {
                         const content = item.code || item.background || item.formula_block;
