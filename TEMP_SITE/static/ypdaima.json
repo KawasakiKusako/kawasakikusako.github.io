@@ -1,0 +1,186 @@
+[
+    {
+        "id": 1,
+        "title": "AlexNet网络代码理解",
+        "code": "from torch import nn\nfrom torch.nn import functional as F\n\nclass AlexNet(nn.Module):\n    def __init__(self):\n        super(AlexNet, self).__init__()\n        self.relu = nn.ReLU()\n        self.c1 = nn.Conv2d(in_channels=1, out_channels=96, kernel_size=11, stride=4)\n        self.s2 = nn.MaxPool2d(kernel_size=3, stride=2)\n        self.c2 = nn.Conv2d(in_channels=96, out_channels=256, kernel_size=5, padding=2)\n        self.flatten = nn.Flatten()\n        self.f1 = nn.Linear(6*6*256, 4096)\n\n    def forward(self, x):\n        x = self.s2(self.relu(self.c1(x)))\n        x = self.s2(self.relu(self.c2(x)))\n        x = self.flatten(x)\n        x = self.f1(x)\n        return x",
+        "questions": [
+            {
+                "q": "该网络输入图像的通道数是多少？对应彩色图还是灰度图？",
+                "a": "输入通道数为1，对应灰度图像。"
+            },
+            {
+                "q": "简述MaxPool2d和Flatten两个层在网络中的作用。",
+                "a": "MaxPool2d用于下采样，压缩特征图尺寸、减少计算量并保留核心特征；Flatten将二维特征图展平为一维向量，实现卷积层与全连接层的衔接。"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "title": "YOLO模型推理代码理解",
+        "code": "from ultralytics import YOLO\n\n# Load a model\nmodel = YOLO(\"yolo26n.pt\")  # pretrained YOLO26n model\n\n# Run batched inference on a list of images\nresults = model([\"img_1.png\"])  # return a list of Results objects\n\n# Process results list\nfor result in results:\n    boxes = result.boxes  # Boxes object for bounding box outputs\n    masks = result.masks  # Masks object for segmentation masks outputs\n    result.show()  # display to screen\nresult.save(filename=\"result.jpg\")  # save to disk",
+        "questions": [
+            {
+                "q": "model([\"img_1.png\"]) 执行的核心操作是什么？返回的数据类型是什么？",
+                "a": "加载模型并对图片img_1.png执行批量目标检测推理，返回Results对象列表。"
+            },
+            {
+                "q": "说明result.boxes和result.masks分别存储什么数据，以及show()方法的功能。",
+                "a": "boxes存储目标检测框的坐标、置信度、类别等信息；masks存储实例分割掩码数据；show()方法用于在界面可视化检测结果。"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "title": "TextRNN文本模型代码理解",
+        "code": "from torch import nn\nfrom torch.nn.utils.rnn import pack_padded_sequence\n\nclass TextRNN(nn.Module):\n    def __init__(self):\n        super(TextRNN, self).__init__()\n        self.embedding = nn.Embedding(len(vocab), 128, padding_idx=word2idx[pad])\n        self.lstm = nn.LSTM(128, 128, bidirectional=True, batch_first=True)\n        self.linear = nn.Linear(128 * 2, n_class)\n\n    def forward(self, x, lengths):\n        embed = self.embedding(x)\n        packed = pack_padded_sequence(embed, lengths.cpu(), batch_first=True, enforce_sorted=False)\n        lstm_out, (hn, _) = self.lstm(packed)\n        feat = torch.cat([hn[-2, :, :], hn[-1, :, :]], dim=-1)\n        out = self.linear(feat)\n        return out",
+        "questions": [
+            {
+                "q": "代码中nn.Embedding层的作用是什么？padding_idx参数的意义？",
+                "a": "Embedding层将文本数字索引转为稠密词向量；padding_idx用于指定填充符对应的索引，使填充位不参与向量学习。"
+            },
+            {
+                "q": "解释pack_padded_sequence的作用，以及代码中拼接hn的原因。",
+                "a": "pack_padded_sequence用于压缩padding填充部分，跳过无效字符，提升LSTM计算效率；拼接hn是为了融合双向LSTM前向、后向的最后时刻隐藏状态。"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "title": "模型训练损失函数代码理解",
+        "code": "# 损失函数定义\nloss_function = nn.CrossEntropyLoss(ignore_index=label2idx['<pad>'])\n\n# 训练循环核心逻辑\nfor x, y, length in train_loader:\n    x, y, length = x.to(device), y.to(device), length.to(device)\n    optimizer.zero_grad()\n    pred = model(x, length)\n    # 维度重塑\n    pred = pred.reshape(-1, n_class)\n    y = y.reshape(-1)\n    loss = loss_function(pred, y)\n    loss.backward()\n    optimizer.step()",
+        "questions": [
+            {
+                "q": "损失函数设置ignore_index=label2idx['<pad>']的目的是什么？",
+                "a": "让损失函数忽略填充符<pad>对应的位置，仅对真实字符计算损失，避免无效样本干扰训练。"
+            },
+            {
+                "q": "为什么需要对pred和y执行reshape维度变换？",
+                "a": "NER模型输出形状为[批次, 序列长度, 标签数]，而交叉熵损失要求输入为二维[样本数, 类别数]，reshape将序列维度展平，适配损失函数输入格式。"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "title": "BiLSTM-CRF损失与解码代码理解",
+        "code": "def neg_log_likelihood(self, sentence, tags):\n    # 获取BiLSTM输出的发射特征\n    feats = self._get_lstm_features(sentence)\n    # 计算所有标签路径的总得分（配分函数）\n    forward_score = self._forward_alg(feats)\n    # 计算真实标签路径的得分\n    gold_score = self._score_sentence(feats, tags)\n    # 计算CRF损失\n    return forward_score - gold_score\n\ndef forward(self, sentence):\n    lstm_feats = self._get_lstm_features(sentence)\n    # 维特比算法解码最优标签序列\n    score, tag_seq = self._viterbi_decode(lstm_feats)\n    return score, tag_seq",
+        "questions": [
+            {
+                "q": "neg_log_likelihood函数实现的是什么损失？",
+                "a": "实现CRF层的负对数似然损失，是BiLSTM-CRF模型的训练损失。"
+            },
+            {
+                "q": "简述_viterbi_decode在模型推理阶段的作用。",
+                "a": "基于LSTM输出的特征，使用维特比算法，在所有标签路径中筛选出概率最大的合法标签序列。"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "title": "Seq2Seq模型代码理解",
+        "code": "class Seq2Seq(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.encoder = Encoder()\n        self.decoder = Decoder()\n\n    def forward(self, encoder_inputs, encoder_len, max_dec_len):\n        enc_hidden = self.encoder(encoder_inputs, encoder_len)\n        dec_hidden = enc_hidden.unsqueeze(0)\n        batch_size = encoder_inputs.size(0)\n        # 解码器初始输入：起始符SOS\n        dec_input = torch.full((batch_size,), decoder_word2idx[SOS],\n                               device=encoder_inputs.device)\n        outputs = []\n        # 自回归逐一生成\n        for _ in range(max_dec_len):\n            logits, dec_hidden = self.decoder(dec_input, dec_hidden)\n            outputs.append(logits)\n            dec_input = logits.argmax(dim=1)\n        return torch.stack(outputs, dim=1)",
+        "questions": [
+            {
+                "q": "解码器初始输入设置为SOS符号的原因是什么？",
+                "a": "SOS是序列起始标记，作为解码器生成第一个词汇的初始输入。"
+            },
+            {
+                "q": "该代码属于无 Teacher Forcing模式，解释dec_input = logits.argmax(dim=1)的逻辑。",
+                "a": "每一步使用模型上一步预测的结果作为当前步输入，不使用真实标签，是自回归生成的典型逻辑。"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "title": "BERT文本预处理代码理解",
+        "code": "from transformers import AutoTokenizer\n\nmodel_name = \"D:/bert-base-chinese\"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\n\ndef preprocess_func(examples):\n    inputs = tokenizer(\n        examples[\"text\"],\n        max_length=64,\n        truncation=True,\n        padding=\"max_length\"\n    )\n    return inputs\n\n# 批量处理数据集\ntokenized_dataset = dataset.map(preprocess_func, batched=True)",
+        "questions": [
+            {
+                "q": "解释truncation=True和padding=\"max_length\"两个参数的作用。",
+                "a": "truncation=True表示对超过最大长度的文本自动截断；padding=\"max_length\"表示对短文本补全占位符，统一所有样本长度。"
+            },
+            {
+                "q": "说明batched=True和dataset.map()方法的优势。",
+                "a": "batched=True实现批量处理样本，提升预处理速度；map方法可对数据集批量应用预处理函数，代码简洁且适配HuggingFace数据集标准格式。"
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "title": "Transformer掩码代码理解",
+        "code": "def pad_mask(seq_q, seq_k):\n    batch_size, len_q = seq_q.size()\n    batch_size, len_k = seq_k.size()\n    pad_attn_mask = seq_k.data.eq(src_pad_idx).unsqueeze(1)\n    return pad_attn_mask.expand(batch_size, len_q, len_k).to(device)\n\ndef tgt_mask(tgt_seq):\n    batch_size, tgt_seq_len = tgt_seq.size()\n    attn_shape = [batch_size, tgt_seq_len, tgt_seq_len]\n    # 生成上三角矩阵\n    tgt_mask_np = np.triu(np.ones(attn_shape), k=1)\n    return torch.from_numpy(tgt_mask_np).byte().to(device)",
+        "questions": [
+            {
+                "q": "分别说明pad_mask和tgt_mask的名称与核心作用。",
+                "a": "pad_mask为填充掩码，作用是屏蔽PAD占位符；tgt_mask为前瞻掩码/上三角掩码，作用是屏蔽未来位置。"
+            },
+            {
+                "q": "解释解码器中同时使用两种掩码的原因。",
+                "a": "填充掩码防止注意力机制关注无效的填充字符；前瞻掩码在训练时禁止解码器看到当前位置之后的文本，模拟自回归生成逻辑，二者共同保证Transformer解码器训练有效性。"
+            },
+            {
+                "q": "为什么推理时无法使用teaching force？",
+                "a": "推理阶段没有真实标签可以使用。"
+            }
+        ]
+    },
+    {
+        "id": 9,
+        "title": "线性空间滤波代码理解",
+        "code": "import numpy as np\n\nwindow = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 2]])\nimg = np.array([[1, 2, 1, 0, 2, 3], [0, 1, 1, 2, 0, 1],\n                [3, 0, 2, 1, 2, 2], [0, 1, 1, 0, 0, 1],\n                [1, 1, 3, 2, 2, 0], [0, 0, 1, 0, 1, 0]])\n\ndef corre12d(img, window):\n    m = window.shape[0]\n    n = window.shape[1]\n    img_border = np.zeros((img.shape[0] + m - 1, img.shape[1] + n - 1))\n    img_border[(m - 1) // 2:(img.shape[0] + (m - 1) // 2), (n - 1) // 2:(img.shape[1] + (n - 1) // 2)] = img\n    img_result = np.zeros(img.shape)\n    for i in range(img_result.shape[0]):\n        for j in range(img_result.shape[1]):\n            temp = img_border[i:i + m, j:j + n]\n            img_result[i, j] = np.sum(np.multiply(temp, window))\n    return img_border, img_result",
+        "questions": [
+            {
+                "q": "代码中 img_border 的作用是什么？为什么要创建这个矩阵？",
+                "a": "img_border用于对原始图像进行零填充边界扩展，目的是防止滤波时模板超出图像边界，保证输出图像尺寸与原图一致。"
+            },
+            {
+                "q": "np.sum(np.multiply(temp, window)) 实现了什么计算？对应图像处理中的什么操作？",
+                "a": "实现模板与图像局部区域对应位置相乘后求和，对应线性空间滤波、卷积或相关运算。"
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "title": "拉普拉斯锐化增强代码理解",
+        "code": "from skimage import data, filters\nfrom matplotlib import pyplot as plt\n\nimg = data.camera()\nimg_laplace = filters.laplace(img, ksize=3, mask=None)\nimg_enhance = img + img_laplace\n\nplt.figure()\nplt.imshow(img, cmap='gray')\nplt.show()\n\nplt.figure()\nplt.imshow(img_laplace, cmap='gray')\nplt.show()\n\nplt.imshow(img_enhance, cmap='gray')\nplt.show()",
+        "questions": [
+            {
+                "q": "img_laplace 中存储的是什么图像？",
+                "a": "存储拉普拉斯算子提取的图像边缘与高频信息。"
+            },
+            {
+                "q": "为什么使用 img_enhance = img + img_laplace 就能实现锐化增强？",
+                "a": "拉普拉斯计算结果包含图像边缘信息，原图叠加边缘信息可以突出轮廓，让图像变得更加清晰。"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "title": "二维理想低通滤波器代码理解",
+        "code": "f1 = np.fft.fft2(new_img)\nf1_shift = np.fft.fftshift(f1)\n\nrows, cols = new_img.shape\ncrow, ccol = int(rows / 2), int(cols / 2)\nmask = np.zeros((rows, cols), dtype='uint8')\nfor i in range(rows):\n    for j in range(cols):\n        if np.sqrt(i * i + j * j) <= D:\n            mask[crow - D:crow + D, ccol - D:ccol + D] = 1\n\nf1_shift = f1_shift * mask\nf_ishift = np.fft.ifftshift(f1_shift)\nimg_back = np.fft.ifft2(f_ishift)",
+        "questions": [
+            {
+                "q": "np.fft.fftshift(f1) 的作用是什么？",
+                "a": "将频谱零频分量移到图像中心，方便频谱观察与滤波操作。"
+            },
+            {
+                "q": "代码中的 mask 矩阵作用是什么？mask=1 的区域保留了什么信息？",
+                "a": "mask是理想低通滤波模板；mask=1的区域保留图像低频信息，抑制高频信息。"
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "title": "理想高通滤波器代码理解",
+        "code": "mask = np.zeros((rows, cols), dtype='uint8')\nfor i in range(rows):\n    for j in range(cols):\n        if np.sqrt(i * i + j * j) <= D:\n            mask[crow - D:crow + D, ccol - D:ccol + D] = 1\n\nmask = 1 - mask  # 关键行\nf1_shift = f1_shift * mask",
+        "questions": [
+            {
+                "q": "注释标注的关键行 mask = 1 - mask 实现了什么功能？",
+                "a": "将低通滤波模板进行反相，转换为理想高通滤波模板。"
+            },
+            {
+                "q": "高通滤波处理后，图像会突出什么信息？",
+                "a": "突出图像的边缘、轮廓以及各类高频细节信息。"
+            }
+        ]
+    }
+]
