@@ -19,7 +19,7 @@
 18,双向RNN的输出合并方式是？,相加,相乘,拼接,取平均值,C
 19,多层RNN的主要作用是？,减少计算量,多次提取序列特征,加快训练速度,解决梯度爆炸,B
 20,命名实体识别任务通常使用的损失函数是？,均方误差,交叉熵,绝对值损失,对比损失,B
-21,PyTorch中，LSTM的输入形状为[batch_size, seq_len, embed_size]时，需设置哪个参数为True？,num_layers,batch_first,dropout,bidirectional,B
+21,PyTorch中，LSTM的输入形状为[batch_size， seq_len， embed_size]时，需设置哪个参数为True？,num_layers,batch_first,dropout,bidirectional,B
 22,CRF层的转移矩阵用于约束？,词向量维度,标签之间的转移关系,句子长度,模型层数,B
 23,在LSTM中，遗忘门的作用是？,过滤新信息,过滤旧信息,控制输出内容,控制梯度方向,B
 24,命名实体识别任务的评价指标不包括？,准确率,召回率,F1值,均方误差,D
