@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIX 零售恐慌指数多因子量化回测系统</title>
-    <!-- Tailwind CSS for sleek styling -->
+    <title>autoPoiesis™ | Gravity™ Index Orbital Backtest Terminal</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for beautiful interactive charts -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Zoom Plugin for panning and zooming -->
+    <!-- Chart.js Zoom Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-    <!-- PapaParse for parsing user uploaded CSVs -->
+    <!-- PapaParse for parsing CSVs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Tailwind configuration to customize colors -->
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                            700: '#6d28d9',
-                            900: '#4c1d95',
+                            dark: '#09090b', // zinc-950
+                            charcoal: '#18181b', // zinc-900
+                            muted: '#71717a', // zinc-500
+                            border: '#e4e4e7', // zinc-200
+                            bg: '#fbfbfb',
+                            blue: '#0066cc',
+                            emerald: '#097969',
+                            rose: '#df1b1b'
                         }
                     }
                 }
@@ -32,304 +34,334 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #fbfbfb;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+            background: #e4e4e7;
+            border-radius: 2px;
+        }
+        /* Sliders styling: ultra minimal, no-AI-bloat aesthetics */
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: #e4e4e7;
+            height: 2px;
+            border-radius: 9999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #09090b;
+            cursor: pointer;
+            -webkit-appearance: none;
+            border: 1px solid #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: transform 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        /* Architectural grid lines representing order */
+        .line-grid {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.012) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 0, 0, 0.012) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col custom-scrollbar">
+<body class="bg-[#fafafa] text-brand-charcoal min-h-screen flex flex-col custom-scrollbar line-grid">
 
-    <!-- Header bar -->
-    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <!-- OpenAI Style Premium Top Navigation -->
+    <header class="border-b border-brand-border bg-white/70 backdrop-blur-md sticky top-0 z-50 px-6 lg:px-12 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 select-none">
         <div class="flex items-center gap-3">
-            <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-500/30">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
-            </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                    VIX 零售恐慌指数 <span class="text-indigo-600">量化回测终端</span>
+                <h1 class="text-sm font-bold tracking-[-0.03em] text-brand-dark flex items-center gap-2">
+                    autoPoiesis<span class="text-[9px] align-super font-normal text-brand-muted">™</span>
+                    <span class="text-zinc-300 font-light">/</span>
+                    <span class="text-zinc-500 font-medium text-xs tracking-tight">Gravity™ Lite 快速量化回测终端</span>
                 </h1>
-                <p class="text-xs text-slate-500">基于布林带 + MA均线 + 指数配比买入的多因子轮动策略</p>
+                <p class="text-[10px] text-brand-muted font-light mt-0.5">基于 Singularity™ Lite 轨道带 + 移动均线短线过滤的多因子自创生回测引擎</p>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2.5 self-end md:self-auto">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
-                初始资金: ¥10,000
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-medium bg-white border border-brand-border text-brand-charcoal font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                BASE_EQUITY: ¥10,000
             </span>
-            <span id="allocation-badge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                分配比例: 上证50% | 沪深30% | 创业20%
+            <span id="allocation-badge" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-medium bg-white border border-brand-border text-brand-blue font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                RATIO: SSE 50% | HS 30% | CY 20%
             </span>
         </div>
     </header>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6">
+    <!-- Main Backtest Arena -->
+    <main class="flex-grow p-6 lg:p-12 grid grid-cols-1 xl:grid-cols-4 gap-8 max-w-[1600px] w-full mx-auto">
         
-        <!-- Left Panel: Configurations & CSV upload -->
+        <!-- Left Panel: Signal & Matrix configurations -->
         <div class="xl:col-span-1 flex flex-col gap-6">
             
             <!-- File Import Card -->
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                    数据源导入 (CSV)
+            <div class="bg-white border border-brand-border rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <h2 class="text-[10px] font-bold uppercase tracking-wider text-brand-muted mb-4 flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    数据轨道导入 (CSV)
                 </h2>
                 
-                <div class="space-y-3">
-                    <!-- Multiple files input -->
-                    <div id="dropzone" class="border-2 border-dashed border-slate-200 hover:border-indigo-500/50 rounded-lg p-4 text-center cursor-pointer transition bg-slate-50/50">
+                <div class="space-y-4">
+                    <div id="dropzone" class="border border-dashed border-zinc-200 hover:border-brand-dark rounded-xl p-5 text-center cursor-pointer transition-colors bg-[#fafafa]">
                         <input type="file" id="csv-files" multiple accept=".csv" class="hidden" />
-                        <p class="text-xs text-slate-700 font-semibold">拖拽或点击上传本地数据</p>
-                        <p class="text-[10px] text-slate-400 mt-1">需包含: VIX.csv, 上证.csv, 沪深.csv, 创业.csv</p>
+                        <p class="text-xs text-brand-charcoal font-semibold">拖拽或点击上传本地 CSV</p>
+                        <p class="text-[10px] text-zinc-400 mt-1">需包含: VIX.csv, 上证.csv, 沪深.csv, 创业.csv</p>
                     </div>
                     
-                    <div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-100 space-y-1.5">
+                    <div class="text-[10px] text-zinc-500 bg-[#fcfcfd] p-3.5 rounded-lg border border-brand-border space-y-2 font-mono">
                         <div class="flex justify-between items-center">
-                            <span>VIX 数据：</span>
-                            <span id="vix-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                            <span>Gravity™ (VIX):</span>
+                            <span id="vix-status" class="text-amber-600 font-bold">同步中...</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span>上证指数：</span>
-                            <span id="sz-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                            <span>上证指数 (SSE):</span>
+                            <span id="sz-status" class="text-amber-600 font-bold">同步中...</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span>沪深300：</span>
-                            <span id="hs-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                            <span>沪深300 (HS300):</span>
+                            <span id="hs-status" class="text-amber-600 font-bold">同步中...</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span>创业板指：</span>
-                            <span id="cy-status" class="text-amber-600 font-semibold">使用内置模拟数据</span>
+                            <span>创业板指 (Chinext):</span>
+                            <span id="cy-status" class="text-amber-600 font-bold">同步中...</span>
                         </div>
                     </div>
-                    <button id="reset-data" class="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded transition">
-                        还原为内置高保真测试数据
+                    <button id="reset-data" class="w-full h-8 text-[11px] font-medium border border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-full transition shadow-[0_1px_2px_rgba(0,0,0,0.05)] bg-white">
+                        还原并自动对齐云端历史轨距
                     </button>
                 </div>
             </div>
 
-            <!-- Strategy Parameters Card -->
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex-1 flex flex-col">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                    策略因子配置
-                </h2>
-                
-                <div class="space-y-4 flex-1">
-                    <!-- BB Period -->
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-500">布林带计算周期 (BB Period)</span>
-                            <span id="val-bb-period" class="text-indigo-600 font-bold">20 天</span>
-                        </div>
-                        <input type="range" id="param-bb-period" min="5" max="50" value="20" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
-                    </div>
-
-                    <!-- BB StdDev -->
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-500">布林带倍数 (Standard Deviation)</span>
-                            <span id="val-bb-std" class="text-indigo-600 font-bold">2.0 倍</span>
-                        </div>
-                        <input type="range" id="param-bb-std" min="1.0" max="3.0" step="0.1" value="2.0" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
-                    </div>
-
-                    <!-- MA Period -->
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-500">VIX 短期过滤均线 (MA)</span>
-                            <span id="val-ma" class="text-indigo-600 font-bold">5 天</span>
-                        </div>
-                        <input type="range" id="param-ma" min="2" max="30" value="5" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
-                    </div>
-
-                    <hr class="border-slate-100 my-2">
-
-                    <!-- Allocation Config (Requirement 2) -->
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-700">指数买入资产占比设定</span>
-                            <span id="val-total-alloc" class="text-xs font-bold text-emerald-600">合计: 100%</span>
-                        </div>
-                        
-                        <!-- SSE % -->
+            <!-- Strategy Parameters Config Card -->
+            <div class="bg-white border border-brand-border rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex-grow flex flex-col justify-between">
+                <div>
+                    <h2 class="text-[10px] font-bold uppercase tracking-wider text-brand-muted mb-5 flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                        情绪引擎轨道配置
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <!-- BB Period -->
                         <div>
-                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
-                                <span>上证指数配比</span>
-                                <span id="val-alloc-sse" class="font-semibold text-slate-700">50%</span>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-brand-muted font-medium">轨道计算窗口 (Singularity™ Window)</span>
+                                <span id="val-bb-period" class="text-brand-blue font-mono font-bold">20 天</span>
                             </div>
-                            <input type="range" id="alloc-sse" min="0" max="100" step="5" value="50" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                            <input type="range" id="param-bb-period" min="5" max="50" value="20" class="w-full" />
                         </div>
-                        
-                        <!-- HS300 % -->
+
+                        <!-- BB StdDev -->
                         <div>
-                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
-                                <span>沪深300配比</span>
-                                <span id="val-alloc-hs" class="font-semibold text-slate-700">30%</span>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-brand-muted font-medium">轨道标准差倍数 (Standard Deviation)</span>
+                                <span id="val-bb-std" class="text-brand-blue font-mono font-bold">2.0 倍</span>
                             </div>
-                            <input type="range" id="alloc-hs" min="0" max="100" step="5" value="30" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                            <input type="range" id="param-bb-std" min="1.0" max="3.0" step="0.1" value="2.0" class="w-full" />
                         </div>
 
-                        <!-- Chinext % -->
+                        <!-- MA Period -->
                         <div>
-                            <div class="flex justify-between text-[11px] text-slate-500 mb-0.5">
-                                <span>创业板指配比</span>
-                                <span id="val-alloc-cy" class="font-semibold text-slate-700">20%</span>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-brand-muted font-medium">引力平滑过滤器 (Smooth MA)</span>
+                                <span id="val-ma" class="text-brand-blue font-mono font-bold">5 天</span>
                             </div>
-                            <input type="range" id="alloc-cy" min="0" max="100" step="5" value="20" class="w-full accent-indigo-600 bg-slate-100 rounded-lg appearance-none h-1.5" />
+                            <input type="range" id="param-ma" min="2" max="30" value="5" class="w-full" />
                         </div>
-                        
-                        <!-- Real-time weight warning message -->
-                        <div id="alloc-warning" class="hidden text-[10px] text-rose-500 font-medium bg-rose-50 p-2 rounded border border-rose-100">
-                            ⚠ 资产分配比例之和必须等于 100% 才能执行回测。
+
+                        <hr class="border-zinc-100 my-1">
+
+                        <!-- Allocation Config -->
+                        <div class="space-y-3.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-zinc-800">配比资产设置 (Weight Allocation)</span>
+                                <span id="val-total-alloc" class="text-xs font-bold text-brand-emerald">合计: 100%</span>
+                            </div>
+                            
+                            <!-- SSE % -->
+                            <div>
+                                <div class="flex justify-between text-[11px] text-zinc-500 mb-1">
+                                    <span>上证指数配比 (SSE)</span>
+                                    <span id="val-alloc-sse" class="font-semibold text-brand-charcoal font-mono">50%</span>
+                                </div>
+                                <input type="range" id="alloc-sse" min="0" max="100" step="5" value="50" class="w-full" />
+                            </div>
+                            
+                            <!-- HS300 % -->
+                            <div>
+                                <div class="flex justify-between text-[11px] text-zinc-500 mb-1">
+                                    <span>沪深300配比 (HS300)</span>
+                                    <span id="val-alloc-hs" class="font-semibold text-brand-charcoal font-mono">30%</span>
+                                </div>
+                                <input type="range" id="alloc-hs" min="0" max="100" step="5" value="30" class="w-full" />
+                            </div>
+
+                            <!-- Chinext % -->
+                            <div>
+                                <div class="flex justify-between text-[11px] text-zinc-500 mb-1">
+                                    <span>创业板指配比 (Chinext)</span>
+                                    <span id="val-alloc-cy" class="font-semibold text-brand-charcoal font-mono">20%</span>
+                                </div>
+                                <input type="range" id="alloc-cy" min="0" max="100" step="5" value="20" class="w-full" />
+                            </div>
+                            
+                            <!-- Real-time weight warning message -->
+                            <div id="alloc-warning" class="hidden text-[10px] text-brand-rose bg-red-50 p-2 rounded-lg border border-red-100 font-medium">
+                                ⚠ 配比比例之和必须等于 100% 才能执行回测。
+                            </div>
+                        </div>
+
+                        <hr class="border-zinc-100 my-1">
+
+                        <!-- Buy Trigger -->
+                        <div class="space-y-2">
+                            <label class="block text-[11px] font-bold text-zinc-800">近日点买入触发机制 (Perihelion™ Trigger)</label>
+                            <select id="buy-logic" class="w-full bg-white border border-brand-border text-xs rounded-lg p-2 text-brand-charcoal focus:outline-none focus:border-brand-dark transition-all">
+                                <option value="cross_below_upper" selected>Gravity™ 跌破 Singularity™ 上轨 (恐慌退散)</option>
+                                <option value="cross_above_upper">Gravity™ 突破 Singularity™ 上轨 (极端恐慌)</option>
+                                <option value="above_sma">Gravity™ 运行于中轨之上</option>
+                            </select>
+                        </div>
+
+                        <!-- Sell Trigger -->
+                        <div class="space-y-2">
+                            <label class="block text-[11px] font-bold text-zinc-800">远日点清仓离场信号 (Aphelion™ Exit)</label>
+                            <select id="sell-logic" class="w-full bg-white border border-brand-border text-xs rounded-lg p-2 text-brand-charcoal focus:outline-none focus:border-brand-dark transition-all">
+                                <option value="cross_below_lower" selected>Gravity™ 跌破 Singularity™ 下轨 (极致乐观见顶)</option>
+                                <option value="cross_above_lower">Gravity™ 自下轨向上拉起 (贪婪情绪衰退)</option>
+                                <option value="cross_below_sma">Gravity™ 跌破 轨道中轨</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <hr class="border-slate-100 my-2">
-
-                    <!-- Strategy Trigger logic Selection -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-slate-700">买入触发信号 (最底部区域)</label>
-                        <select id="buy-logic" class="w-full bg-white border border-slate-200 text-xs rounded-lg p-2 text-slate-700 focus:outline-none focus:border-indigo-500">
-                            <option value="cross_below_upper" selected>VIX收盘价 跌破 布林带上轨 (恐慌退散)</option>
-                            <option value="cross_above_upper">VIX收盘价 突破 布林带上轨 (极端恐慌)</option>
-                            <option value="above_sma">VIX收盘价 高于 布林带中轨</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-slate-700">清仓离场信号 (泡沫贪婪出逃)</label>
-                        <select id="sell-logic" class="w-full bg-white border border-slate-200 text-xs rounded-lg p-2 text-slate-700 focus:outline-none focus:border-indigo-500">
-                            <option value="cross_below_lower" selected>VIX收盘价 跌破 布林带下轨 (极度贪婪狂热)</option>
-                            <option value="cross_above_lower">VIX收盘价 从下轨向上拉起 (贪婪高点已过)</option>
-                            <option value="cross_below_sma">VIX收盘价 跌破 中轨 (情绪见顶)</option>
-                        </select>
-                    </div>
-
-                    <div class="pt-3">
-                        <button id="run-backtest-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg shadow-md shadow-indigo-600/10 transition flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            运行量化回测
-                        </button>
-                    </div>
+                <div class="pt-6">
+                    <button id="run-backtest-btn" class="w-full h-10 bg-brand-dark hover:bg-zinc-850 text-white text-xs font-semibold rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.15)] transition-all flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        启动轨道量化回测
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Right Panels: Charts, Performance Metrics, Logs -->
+        <!-- Right Panels: Interactive Plots and Logs -->
         <div class="xl:col-span-3 flex flex-col gap-6">
             
             <!-- Performance Statistics Board -->
-            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">期末总资产</span>
-                    <span id="metric-final-equity" class="text-lg font-bold text-slate-900 mt-1">¥10,000.00</span>
-                    <span class="text-[10px] text-slate-400 mt-1">初始本金 ¥10,000</span>
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 select-none">
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">期末总资产</span>
+                    <span id="metric-final-equity" class="text-base font-bold tracking-tight text-brand-dark mt-1 font-mono">¥10,000.00</span>
+                    <span class="text-[9px] text-zinc-400 font-mono uppercase mt-1">BASE ¥10K</span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">策略累计收益</span>
-                    <span id="metric-total-return" class="text-lg font-bold text-emerald-600 mt-1">+0.00%</span>
-                    <span id="metric-vs-benchmark" class="text-[10px] text-slate-500 mt-1">超额收益: --</span>
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">策略累计收益</span>
+                    <span id="metric-total-return" class="text-base font-bold tracking-tight text-brand-emerald mt-1 font-mono">+0.00%</span>
+                    <span id="metric-vs-benchmark" class="text-[9px] text-zinc-400 font-mono mt-1">ALPHA_DIFF: --</span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">基准持有收益</span>
-                    <span id="metric-benchmark-return" class="text-lg font-bold text-slate-600 mt-1">+0.00%</span>
-                    <span id="metric-benchmark-weights" class="text-[10px] text-slate-400 mt-1">按配置权重持有至今</span>
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">基准持有收益</span>
+                    <span id="metric-benchmark-return" class="text-base font-bold tracking-tight text-zinc-500 mt-1 font-mono">+0.00%</span>
+                    <span id="metric-benchmark-weights" class="text-[9px] text-zinc-400 font-mono mt-1">STATIC HOLD</span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">历史最大回撤</span>
-                    <span id="metric-max-drawdown" class="text-lg font-bold text-rose-600 mt-1">0.00%</span>
-                    <span class="text-[10px] text-slate-400 mt-1">回撤风控核心指标</span>
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">历史最大回撤</span>
+                    <span id="metric-max-drawdown" class="text-base font-bold tracking-tight text-brand-rose mt-1 font-mono">0.00%</span>
+                    <span class="text-[9px] text-zinc-400 font-mono mt-1">DOWN_RISK</span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">年化夏普比率</span>
-                    <span id="metric-sharpe" class="text-lg font-bold text-sky-600 mt-1">0.00</span>
-                    <span class="text-[10px] text-slate-400 mt-1">Risk-Adjusted Ratio</span>
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">年化夏普比率</span>
+                    <span id="metric-sharpe" class="text-base font-bold tracking-tight text-brand-blue mt-1 font-mono">0.00</span>
+                    <span class="text-[9px] text-zinc-400 font-mono mt-1">SHARPE RATIO</span>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-medium">交易胜率 / 次数</span>
-                    <span id="metric-win-rate" class="text-lg font-bold text-amber-600 mt-1">0% / 0次</span>
-                    <span id="metric-win-count" class="text-[10px] text-slate-400 mt-1">盈利 0 次 | 亏损 0 次</span>
+                <div class="bg-white border border-brand-border rounded-xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[11px] text-brand-muted font-medium">交易胜率 / 次数</span>
+                    <span id="metric-win-rate" class="text-xs font-bold tracking-tight text-zinc-800 mt-1 font-mono">0% / 0次</span>
+                    <span id="metric-win-count" class="text-[9px] text-zinc-400 font-mono mt-1">WIN 0 | LOSS 0</span>
                 </div>
             </div>
 
-            <!-- Chart Panels tabs (Requirement 4: Zoom added) -->
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-2">
+            <!-- Plot Dashboard Tabs -->
+            <div class="bg-white border border-brand-border rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 pb-3 gap-2">
                     <div class="flex flex-wrap gap-2">
-                        <button id="tab-equity" class="text-xs font-bold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 transition">
-                            策略资产净值曲线 (Equity Curve)
+                        <button id="tab-equity" class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-zinc-100 text-brand-charcoal transition shadow-sm border border-brand-border/40">
+                            策略资产净值曲线 (Equity Growth)
                         </button>
-                        <button id="tab-vix" class="text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition">
-                            VIX恐慌指数与布林通道
+                        <button id="tab-vix" class="text-[11px] font-bold px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 transition border border-transparent">
+                            Gravity™ 引力通道布林带
                         </button>
                     </div>
-                    <div class="flex items-center gap-3 self-end sm:self-auto">
-                        <button id="reset-zoom-btn" class="px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100 rounded-md transition flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12"></path></svg>
-                            重置缩放
+                    <div class="flex items-center gap-3 self-end sm:self-auto select-none">
+                        <button id="reset-zoom-btn" class="h-7 px-3 rounded-full text-[10px] font-semibold text-zinc-500 hover:text-brand-charcoal border border-brand-border hover:bg-zinc-50 transition flex items-center gap-1 shadow-sm">
+                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12"></path></svg>
+                            恢复初始焦距
                         </button>
-                        <div class="text-[11px] text-slate-400 font-medium" id="data-range-label">
-                            回测区间: -- 至 --
+                        <div class="text-[10px] font-mono text-zinc-400 font-bold" id="data-range-label">
+                            SIM_RANGE: -- TO --
                         </div>
                     </div>
                 </div>
                 
-                <!-- Chart Info Indicator -->
-                <div class="text-[10px] text-slate-400 -mt-2">
-                    💡 提示：支持图表滑动与缩放。您可以使用**鼠标滚轮/手机双指捏合进行横向缩放**，按住并**拖拽图表以左右平移**细节。
+                <!-- Zoom Hints -->
+                <div class="text-[10px] text-zinc-400 -mt-2">
+                    💡 交互说明：使用**鼠标滚轮进行横向缩放**，按住并**拖动图表以平移时序细节**。
                 </div>
 
-                <!-- Chart Area -->
+                <!-- Plot container -->
                 <div class="relative w-full h-[400px]">
                     <canvas id="mainChart"></canvas>
                 </div>
             </div>
 
-            <!-- Backtest Log & Trade List (Requirement 3: Export added) -->
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex-1 flex flex-col">
-                <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <!-- Trade History Datatable -->
+            <div class="bg-white border border-brand-border rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex-grow flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4 border-b border-zinc-100 pb-3">
+                    <h2 class="text-[11px] font-bold uppercase tracking-wider text-brand-muted flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         交易成交记录与仓位变动历史
                     </h2>
                     <div class="flex items-center gap-3">
-                        <button id="export-csv-btn" class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-md transition flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            导出 CSV 记录
+                        <button id="export-csv-btn" class="h-7 px-3 bg-white border border-brand-border text-brand-charcoal hover:border-zinc-900 text-[10px] font-semibold rounded-full transition flex items-center gap-1 shadow-sm">
+                            <i data-lucide="download" class="w-3 h-3 text-zinc-400"></i>
+                            <span>导出交易记录 (.csv)</span>
                         </button>
-                        <span id="log-count" class="text-xs text-slate-400 font-medium">共 0 条记录</span>
+                        <span id="log-count" class="text-[10px] text-brand-muted font-bold">共 0 条记录</span>
                     </div>
                 </div>
                 
-                <div class="overflow-y-auto max-h-[250px] custom-scrollbar rounded-lg border border-slate-100 bg-slate-50/50">
-                    <table class="w-full text-left text-xs text-slate-700">
-                        <thead class="text-[10px] uppercase text-slate-500 bg-slate-100 sticky top-0 border-b border-slate-200">
+                <div class="overflow-y-auto max-h-[250px] custom-scrollbar rounded-lg border border-zinc-200 bg-white">
+                    <table class="w-full text-left text-[11px] text-zinc-700 font-sans">
+                        <thead class="text-[9px] uppercase text-zinc-400 bg-zinc-50 border-b border-brand-border sticky top-0">
                             <tr>
                                 <th class="py-2.5 px-4 font-bold">序号</th>
                                 <th class="py-2.5 px-4 font-bold">下单日期</th>
                                 <th class="py-2.5 px-4 font-bold">动作</th>
-                                <th class="py-2.5 px-4 font-bold">上证变动份数 (¥值)</th>
-                                <th class="py-2.5 px-4 font-bold">沪深变动份数 (¥值)</th>
-                                <th class="py-2.5 px-4 font-bold">创业变动份数 (¥值)</th>
-                                <th class="py-2.5 px-4 font-bold">期末权益值 (现金)</th>
-                                <th class="py-2.5 px-4 font-bold">相对初始盈亏比</th>
+                                <th class="py-2.5 px-4 font-bold">上证轨份 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">沪深轨份 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">创业轨份 (¥值)</th>
+                                <th class="py-2.5 px-4 font-bold">权益总值 (现金)</th>
+                                <th class="py-2.5 px-4 font-bold">相对初始盈亏</th>
                             </tr>
                         </thead>
                         <tbody id="trade-log-body">
                             <tr>
-                                <td colspan="8" class="text-center py-8 text-slate-400">暂无交易信号生成。点击“运行量化回测”开始。</td>
+                                <td colspan="8" class="text-center py-8 text-zinc-400">暂无交易信号生成。点击“运行量化回测”开始。</td>
                             </tr>
                         </tbody>
                     </table>
@@ -340,16 +372,55 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-4 px-6 text-center text-xs text-slate-400 flex flex-col md:flex-row justify-between items-center gap-2">
-        <p>© 2026 VIX 量化投资系统. 本终端运行在本地浏览器沙盒环境中，所有回测皆为模拟计算。</p>
-        <div class="flex gap-4">
-            <a href="#" class="hover:text-slate-600 transition">算法文档</a>
-            <a href="#" class="hover:text-slate-600 transition">策略免责声明</a>
+    <footer class="border-t border-brand-border bg-white py-5 px-6 lg:px-12 text-center text-xs text-zinc-400 flex flex-col md:flex-row justify-between items-center gap-2 select-none">
+        <p>© 2026 autoPoiesis™. Powered by KawasakiKusako 投资有风险，入市需谨慎。</p>
+        <div class="flex gap-4 text-zinc-500 font-semibold text-[11px]">
+            <a href="https://kawasakikusako.github.io/generalExp/vix/" class="hover:text-zinc-800 transition">项目介绍</a>
+            <span>|</span>
+            <a href="https://kawasakikusako.github.io/generalExp/vix/calc.html" class="hover:text-zinc-800 transition">Lite 简易计算与评估</a>
         </div>
     </footer>
 
+    <!-- Minimal Modern Toast (OpenAI style) -->
+    <div id="toast-notif" class="fixed bottom-6 right-6 z-[99999] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-zinc-950 text-white px-4 py-3 rounded-lg shadow-xl flex items-center space-x-3 max-w-sm text-xs font-sans border border-zinc-800">
+            <span id="toast-dot" class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            <span id="toast-message" class="font-medium">消息通知提示</span>
+        </div>
+    </div>
+
     <script>
-        // High fidelity mock data generator mimicking Chinese Stock Market + Custom VIX in 2014-2015
+        // Default Cloud Datasets URLs
+        const CLOUD_VIX_URL = 'https://kawasakikusako.github.io/generalExp/vix/VIX.csv';
+        const CLOUD_SZ_URL = 'https://kawasakikusako.github.io/generalExp/vix/上证.csv';
+        const CLOUD_HS_URL = 'https://kawasakikusako.github.io/generalExp/vix/沪深.csv';
+        const CLOUD_CY_URL = 'https://kawasakikusako.github.io/generalExp/vix/创业.csv';
+
+        // High-end Toast notification system instead of blocking native alerts
+        function showNotification(message, type = 'info') {
+            const toast = document.getElementById('toast-notif');
+            const dot = document.getElementById('toast-dot');
+            const msgEl = document.getElementById('toast-message');
+
+            msgEl.textContent = message;
+            if (type === 'error') {
+                dot.className = "w-1.5 h-1.5 rounded-full bg-brand-rose animate-ping";
+            } else if (type === 'success') {
+                dot.className = "w-1.5 h-1.5 rounded-full bg-brand-emerald";
+            } else {
+                dot.className = "w-1.5 h-1.5 rounded-full bg-brand-blue";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
+        // Realistic Mock Data generator aligning with China A-Share 2014-2015 parabolic phase and crash
         function generateRealisticMockData() {
             const data = [];
             const startDate = new Date('2014-08-12');
@@ -358,35 +429,31 @@
             let hsVal = 2300.0;
             let cyVal = 1400.0;
 
-            const days = 300; // Simulating roughly 300 trading days (~15 months of highly volatile bull-bear phase)
+            const days = 300; 
 
             for (let i = 0; i < days; i++) {
                 const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + Math.floor(i * 1.45)); // Generate trading days (skipping some weekends)
+                currentDate.setDate(startDate.getDate() + Math.floor(i * 1.45)); 
                 
-                // Keep weekends out
                 const dayOfWeek = currentDate.getDay();
                 if (dayOfWeek === 0 || dayOfWeek === 6) {
                     continue;
                 }
                 const dateString = currentDate.toISOString().split('T')[0];
 
-                // Simulating market movement trend (The great 2014-2015 bull market phase and then sharp plunge)
-                let trend = 0.0005; // standard slow drift
+                let trend = 0.0005; 
                 if (i > 40 && i < 180) {
-                    trend = 0.0045; // Huge parabolic rally
+                    trend = 0.0045; 
                 } else if (i >= 180 && i < 240) {
-                    trend = -0.0075; // Violent crash
+                    trend = -0.0075; 
                 } else if (i >= 240) {
-                    trend = -0.001; // Consolidation
+                    trend = -0.001; 
                 }
 
-                // Random walk noise
                 const noiseSz = (Math.random() - 0.48) * 0.025 + trend;
                 const noiseHs = (Math.random() - 0.48) * 0.028 + trend * 1.1;
-                const noiseCy = (Math.random() - 0.46) * 0.038 + trend * 1.5; // Chinext has higher volatility
+                const noiseCy = (Math.random() - 0.46) * 0.038 + trend * 1.5; 
 
-                // Calculate daily open/close
                 const prevSz = szVal;
                 szVal = szVal * (1 + noiseSz);
                 const szOpen = prevSz * (1 + (Math.random() - 0.5) * 0.005);
@@ -405,12 +472,11 @@
                 const cyHigh = Math.max(cyOpen, cyVal) * (1 + Math.random() * 0.012);
                 const cyLow = Math.min(cyOpen, cyVal) * (1 - Math.random() * 0.012);
 
-                // Retail Panic Index (VIX) calculation
                 const marketAvgRet = (noiseSz + noiseHs + noiseCy) / 3;
                 
                 let vixChange = -marketAvgRet * 6.5 + (Math.random() - 0.5) * 0.12;
                 if (marketAvgRet < -0.015) {
-                    vixChange += Math.abs(marketAvgRet) * 9.0; // Panic multiplier on crashes
+                    vixChange += Math.abs(marketAvgRet) * 9.0; 
                 }
                 
                 const prevVix = vixVal;
@@ -430,13 +496,11 @@
             return data;
         }
 
-        // Global dataset stores
-        let activeDataset = generateRealisticMockData();
+        let activeDataset = [];
         let activeChartInstance = null;
-        let activeTab = 'equity'; // 'equity' or 'vix'
-        let currentTradeLogGlobal = []; // Keeps track of logs for exporting
+        let activeTab = 'equity'; 
+        let currentTradeLogGlobal = []; 
 
-        // UI Value bindings
         const params = {
             bbPeriod: document.getElementById('param-bb-period'),
             bbStd: document.getElementById('param-bb-std'),
@@ -460,7 +524,6 @@
             runBtn: document.getElementById('run-backtest-btn')
         };
 
-        // Validate Asset Allocation Weights (Requirement 2)
         function validateAllocation() {
             const sseVal = parseInt(params.allocSse.value);
             const hsVal = parseInt(params.allocHs.value);
@@ -473,13 +536,13 @@
             valDisplays.totalAlloc.textContent = '当前合计: ' + total + '%';
 
             if (total === 100) {
-                valDisplays.totalAlloc.className = "text-xs font-bold text-emerald-600";
+                valDisplays.totalAlloc.className = "text-xs font-bold text-brand-emerald";
                 valDisplays.warning.classList.add('hidden');
                 valDisplays.runBtn.removeAttribute('disabled');
                 valDisplays.runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 return true;
             } else {
-                valDisplays.totalAlloc.className = "text-xs font-bold text-rose-500";
+                valDisplays.totalAlloc.className = "text-xs font-bold text-brand-rose";
                 valDisplays.warning.classList.remove('hidden');
                 valDisplays.runBtn.setAttribute('disabled', 'true');
                 valDisplays.runBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -487,7 +550,6 @@
             }
         }
 
-        // Update indicators slider readouts
         params.bbPeriod.addEventListener('input', (e) => { valDisplays.bbPeriod.textContent = e.target.value + ' 天'; });
         params.bbStd.addEventListener('input', (e) => { valDisplays.bbStd.textContent = parseFloat(e.target.value).toFixed(1) + ' 倍'; });
         params.maPeriod.addEventListener('input', (e) => { valDisplays.maPeriod.textContent = e.target.value + ' 天'; });
@@ -496,7 +558,6 @@
         params.allocHs.addEventListener('input', validateAllocation);
         params.allocCy.addEventListener('input', validateAllocation);
 
-        // CSV upload handling
         const fileInput = document.getElementById('csv-files');
         const dropzone = document.getElementById('dropzone');
         const resetBtn = document.getElementById('reset-data');
@@ -511,14 +572,14 @@
         dropzone.addEventListener('click', () => fileInput.click());
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.classList.add('border-indigo-500', 'bg-slate-100');
+            dropzone.classList.add('border-brand-charcoal', 'bg-zinc-50');
         });
         dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('border-indigo-500', 'bg-slate-100');
+            dropzone.classList.remove('border-brand-charcoal', 'bg-zinc-50');
         });
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.classList.remove('border-indigo-500', 'bg-slate-100');
+            dropzone.classList.remove('border-brand-charcoal', 'bg-zinc-50');
             handleFiles(e.dataTransfer.files);
         });
         fileInput.addEventListener('change', (e) => {
@@ -526,28 +587,17 @@
         });
 
         resetBtn.addEventListener('click', () => {
-            activeDataset = generateRealisticMockData();
-            uploadedCSVs = { vix: null, sz: null, hs: null, cy: null };
-            document.getElementById('vix-status').className = "text-amber-600 font-semibold";
-            document.getElementById('vix-status').textContent = "使用内置模拟数据";
-            document.getElementById('sz-status').className = "text-amber-600 font-semibold";
-            document.getElementById('sz-status').textContent = "使用内置模拟数据";
-            document.getElementById('hs-status').className = "text-amber-600 font-semibold";
-            document.getElementById('hs-status').textContent = "使用内置模拟数据";
-            document.getElementById('cy-status').className = "text-amber-600 font-semibold";
-            document.getElementById('cy-status').textContent = "使用内置模拟数据";
-            runBacktest();
+            fetchCloudDataset();
         });
 
-        // Parse files dynamically
         function handleFiles(files) {
             Array.from(files).forEach(file => {
                 const name = file.name.toLowerCase();
                 let type = '';
                 if (name.includes('vix')) type = 'vix';
-                else if (name.includes('上证')) type = 'sz';
-                else if (name.includes('沪深')) type = 'hs';
-                else if (name.includes('创业')) type = 'cy';
+                else if (name.includes('上证') || name.includes('sz')) type = 'sz';
+                else if (name.includes('沪深') || name.includes('hs')) type = 'hs';
+                else if (name.includes('创业') || name.includes('cy')) type = 'cy';
 
                 if (type) {
                     Papa.parse(file, {
@@ -556,8 +606,9 @@
                         complete: function(results) {
                             uploadedCSVs[type] = results.data;
                             const statusElem = document.getElementById(`${type}-status`);
-                            statusElem.textContent = "已导入 " + results.data.length + " 条";
-                            statusElem.className = "text-emerald-600 font-semibold";
+                            statusElem.textContent = "已导入 " + results.data.length + " 轨";
+                            statusElem.className = "text-brand-emerald font-bold";
+                            showNotification(`[ ${file.name} ] 校验对齐成功`, "success");
                             checkAndMergeDatasets();
                         }
                     });
@@ -565,12 +616,10 @@
             });
         }
 
-        // Merge datasets together aligning on date
         function checkAndMergeDatasets() {
             if (uploadedCSVs.vix && uploadedCSVs.sz && uploadedCSVs.hs && uploadedCSVs.cy) {
                 const aligned = [];
                 
-                // Helper to build date index mapping
                 const createMap = (dataArr) => {
                     const map = {};
                     dataArr.forEach(row => {
@@ -588,46 +637,40 @@
                 const hsMap = createMap(uploadedCSVs.hs);
                 const cyMap = createMap(uploadedCSVs.cy);
 
-                // Use all dates in VIX as baseline
                 const vixDates = Object.keys(vixMap).sort();
                 
+                const cleanNum = (val) => {
+                    if (!val) return 0;
+                    return parseFloat(String(val).replace(/[%,\s]/g, ''));
+                };
+
                 vixDates.forEach(date => {
                     if (szMap[date] && hsMap[date] && cyMap[date]) {
-                        const v = vixMap[date];
-                        const s = szMap[date];
-                        const h = hsMap[date];
-                        const c = cyMap[date];
-
-                        const cleanNum = (val) => {
-                            if (!val) return 0;
-                            return parseFloat(String(val).replace(/[%,\s]/g, ''));
-                        };
-
                         aligned.push({
                             date: date,
                             vix: {
-                                open: cleanNum(v['开盘'] || v['open'] || v['Open']),
-                                close: cleanNum(v['收盘'] || v['close'] || v['Close']),
-                                high: cleanNum(v['最高'] || v['high'] || v['High']),
-                                low: cleanNum(v['最低'] || v['low'] || v['Low'])
+                                open: cleanNum(vixMap[date]['开盘'] || vixMap[date]['open'] || vixMap[date]['Open']),
+                                close: cleanNum(vixMap[date]['收盘'] || vixMap[date]['close'] || vixMap[date]['Close']),
+                                high: cleanNum(vixMap[date]['最高'] || vixMap[date]['high'] || vixMap[date]['High']),
+                                low: cleanNum(vixMap[date]['最低'] || vixMap[date]['low'] || vixMap[date]['Low'])
                             },
                             sz: {
-                                open: cleanNum(s['开盘'] || s['open'] || s['Open']),
-                                close: cleanNum(s['收盘'] || s['close'] || s['Close']),
-                                high: cleanNum(s['最高'] || s['high'] || s['High']),
-                                low: cleanNum(s['最低'] || s['low'] || s['Low'])
+                                open: cleanNum(szMap[date]['开盘'] || szMap[date]['open'] || szMap[date]['Open']),
+                                close: cleanNum(szMap[date]['收盘'] || szMap[date]['close'] || szMap[date]['Close']),
+                                high: cleanNum(szMap[date]['最高'] || szMap[date]['high'] || szMap[date]['High']),
+                                low: cleanNum(szMap[date]['最低'] || szMap[date]['low'] || szMap[date]['Low'])
                             },
                             hs: {
-                                open: cleanNum(h['开盘'] || h['open'] || h['Open']),
-                                close: cleanNum(h['收盘'] || h['close'] || h['Close']),
-                                high: cleanNum(h['最高'] || h['high'] || h['High']),
-                                low: cleanNum(h['最低'] || h['low'] || h['Low'])
+                                open: cleanNum(hsMap[date]['开盘'] || hsMap[date]['open'] || hsMap[date]['Open']),
+                                close: cleanNum(hsMap[date]['收盘'] || hsMap[date]['close'] || hsMap[date]['Close']),
+                                high: cleanNum(hsMap[date]['最高'] || hsMap[date]['high'] || hsMap[date]['High']),
+                                low: cleanNum(hsMap[date]['最低'] || hsMap[date]['low'] || hsMap[date]['Low'])
                             },
                             cy: {
-                                open: cleanNum(c['开盘'] || c['open'] || c['Open']),
-                                close: cleanNum(c['收盘'] || c['close'] || c['Close']),
-                                high: cleanNum(c['最高'] || c['high'] || c['High']),
-                                low: cleanNum(c['最低'] || c['low'] || c['Low'])
+                                open: cleanNum(cyMap[date]['开盘'] || cyMap[date]['open'] || cyMap[date]['Open']),
+                                close: cleanNum(cyMap[date]['收盘'] || cyMap[date]['close'] || cyMap[date]['Close']),
+                                high: cleanNum(cyMap[date]['最高'] || cyMap[date]['high'] || cyMap[date]['High']),
+                                low: cleanNum(cyMap[date]['最低'] || cyMap[date]['low'] || cyMap[date]['Low'])
                             }
                         });
                     }
@@ -635,16 +678,126 @@
 
                 if (aligned.length > 0) {
                     activeDataset = aligned.sort((a,b) => new Date(a.date) - new Date(b.date));
-                    console.log("Successfully aligned user CSVs:", activeDataset.length, "trading days mapped.");
+                    showNotification(`自组时序对齐：成功合并并激活 ${activeDataset.length} 个交易周期的数据`, "success");
                     runBacktest();
                 } else {
-                    // Create a visual indicator block instead of block alerts
-                    alert("错误：数据日期未重合。请确保四个文件的 日期 字段格式一致（例如 YYYY-MM-DD）。");
+                    showNotification("时空轨道日期对齐失败，请检查所有 CSV 日期列格式 (YYYY-MM-DD)", "error");
                 }
             }
         }
 
-        // Technical Analysis Indicators Calculations
+        // Fetch Cloud Real Datasets (Automatic alignment)
+        async function fetchCloudDataset() {
+            showNotification("正在联机拉取 A股 12年实证轨距数据...", "info");
+            document.getElementById('vix-status').className = "text-zinc-400 font-bold animate-pulse";
+            document.getElementById('vix-status').textContent = "正在拉取...";
+            document.getElementById('sz-status').className = "text-zinc-400 font-bold animate-pulse";
+            document.getElementById('sz-status').textContent = "正在拉取...";
+            document.getElementById('hs-status').className = "text-zinc-400 font-bold animate-pulse";
+            document.getElementById('hs-status').textContent = "正在拉取...";
+            document.getElementById('cy-status').className = "text-zinc-400 font-bold animate-pulse";
+            document.getElementById('cy-status').textContent = "正在拉取...";
+
+            try {
+                const [vixRes, szRes, hsRes, cyRes] = await Promise.all([
+                    fetch(CLOUD_VIX_URL).then(r => { if (!r.ok) throw new Error("VIX拉取故障"); return r.text(); }),
+                    fetch(CLOUD_SZ_URL).then(r => { if (!r.ok) throw new Error("上证拉取故障"); return r.text(); }),
+                    fetch(CLOUD_HS_URL).then(r => { if (!r.ok) throw new Error("沪深拉取故障"); return r.text(); }),
+                    fetch(CLOUD_CY_URL).then(r => { if (!r.ok) throw new Error("创业拉取故障"); return r.text(); })
+                ]);
+
+                const vixParsed = Papa.parse(vixRes, { header: true, skipEmptyLines: true }).data;
+                const szParsed = Papa.parse(szRes, { header: true, skipEmptyLines: true }).data;
+                const hsParsed = Papa.parse(hsRes, { header: true, skipEmptyLines: true }).data;
+                const cyParsed = Papa.parse(cyRes, { header: true, skipEmptyLines: true }).data;
+
+                const aligned = [];
+                const createMap = (dataArr) => {
+                    const map = {};
+                    dataArr.forEach(row => {
+                        const d = row['日期'] || row['date'] || row['Date'];
+                        if (d) map[d.trim()] = row;
+                    });
+                    return map;
+                };
+
+                const vixMap = createMap(vixParsed);
+                const szMap = createMap(szParsed);
+                const hsMap = createMap(hsParsed);
+                const cyMap = createMap(cyParsed);
+
+                const vixDates = Object.keys(vixMap).sort();
+                
+                const cleanNum = (val) => {
+                    if (!val) return 0;
+                    return parseFloat(String(val).replace(/[%,\s]/g, ''));
+                };
+
+                vixDates.forEach(date => {
+                    if (szMap[date] && hsMap[date] && cyMap[date]) {
+                        aligned.push({
+                            date: date,
+                            vix: {
+                                open: cleanNum(vixMap[date]['开盘'] || vixMap[date]['open'] || vixMap[date]['Open']),
+                                close: cleanNum(vixMap[date]['close'] || vixMap[date]['收盘'] || vixMap[date]['Close']),
+                                high: cleanNum(vixMap[date]['最高'] || vixMap[date]['high'] || vixMap[date]['High']),
+                                low: cleanNum(vixMap[date]['最低'] || vixMap[date]['low'] || vixMap[date]['Low'])
+                            },
+                            sz: {
+                                open: cleanNum(szMap[date]['开盘'] || szMap[date]['open'] || szMap[date]['Open']),
+                                close: cleanNum(szMap[date]['close'] || szMap[date]['收盘'] || szMap[date]['Close']),
+                                high: cleanNum(szMap[date]['最高'] || szMap[date]['high'] || szMap[date]['High']),
+                                low: cleanNum(szMap[date]['最低'] || szMap[date]['low'] || szMap[date]['Low'])
+                            },
+                            hs: {
+                                open: cleanNum(hsMap[date]['开盘'] || hsMap[date]['open'] || hsMap[date]['Open']),
+                                close: cleanNum(hsMap[date]['close'] || hsMap[date]['收盘'] || hsMap[date]['Close']),
+                                high: cleanNum(hsMap[date]['最高'] || hsMap[date]['high'] || hsMap[date]['High']),
+                                low: cleanNum(hsMap[date]['最低'] || hsMap[date]['low'] || hsMap[date]['Low'])
+                            },
+                            cy: {
+                                open: cleanNum(cyMap[date]['开盘'] || cyMap[date]['open'] || cyMap[date]['Open']),
+                                close: cleanNum(cyMap[date]['close'] || cyMap[date]['收盘'] || cyMap[date]['Close']),
+                                high: cleanNum(cyMap[date]['最高'] || cyMap[date]['high'] || cyMap[date]['High']),
+                                low: cleanNum(cyMap[date]['最低'] || cyMap[date]['low'] || cyMap[date]['Low'])
+                            }
+                        });
+                    }
+                });
+
+                if (aligned.length > 0) {
+                    activeDataset = aligned.sort((a,b) => new Date(a.date) - new Date(b.date));
+                    
+                    document.getElementById('vix-status').className = "text-brand-emerald font-bold";
+                    document.getElementById('vix-status').textContent = "云端同步 (" + vixParsed.length + " 轨)";
+                    document.getElementById('sz-status').className = "text-brand-emerald font-bold";
+                    document.getElementById('sz-status').textContent = "云端同步 (" + szParsed.length + " 轨)";
+                    document.getElementById('hs-status').className = "text-brand-emerald font-bold";
+                    document.getElementById('hs-status').textContent = "云端同步 (" + hsParsed.length + " 轨)";
+                    document.getElementById('cy-status').className = "text-brand-emerald font-bold";
+                    document.getElementById('cy-status').textContent = "云端同步 (" + cyParsed.length + " 轨)";
+                    
+                    showNotification("实证数据同步成功，恢复默认状态！", "success");
+                    runBacktest();
+                } else {
+                    throw new Error("对齐数据不匹配");
+                }
+            } catch (e) {
+                console.warn("云端同步失败，降级模拟:", e.message);
+                activeDataset = generateRealisticMockData();
+                document.getElementById('vix-status').className = "text-amber-600 font-bold";
+                document.getElementById('vix-status').textContent = "模拟 (异常降级)";
+                document.getElementById('sz-status').className = "text-amber-600 font-bold";
+                document.getElementById('sz-status').textContent = "模拟 (异常降级)";
+                document.getElementById('hs-status').className = "text-amber-600 font-bold";
+                document.getElementById('hs-status').textContent = "模拟 (异常降级)";
+                document.getElementById('cy-status').className = "text-amber-600 font-bold";
+                document.getElementById('cy-status').textContent = "模拟 (异常降级)";
+                showNotification("云端轨道拉取超时，已无缝切换至高保真内置模拟数据", "warning");
+                runBacktest();
+            }
+        }
+
         function computeIndicators(data, bbPeriod, bbStd, maPeriod) {
             const vixCloses = data.map(d => d.vix.close);
             
@@ -653,9 +806,7 @@
             const lowerBB = [];
             const filterMA = [];
 
-            // Compute Simple Moving Average (SMA) and Bollinger Bands
             for (let i = 0; i < data.length; i++) {
-                // SMA / Mid Band
                 if (i < bbPeriod - 1) {
                     sma.push(null);
                     upperBB.push(null);
@@ -666,7 +817,6 @@
                     const mean = sum / bbPeriod;
                     sma.push(mean);
 
-                    // Standard deviation
                     const variance = window.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / bbPeriod;
                     const stdDev = Math.sqrt(variance);
 
@@ -674,7 +824,6 @@
                     lowerBB.push(mean - bbStd * stdDev);
                 }
 
-                // Short Filter MA on VIX
                 if (i < maPeriod - 1) {
                     filterMA.push(null);
                 } else {
@@ -687,7 +836,6 @@
             return { sma, upperBB, lowerBB, filterMA };
         }
 
-        // BACKTEST ENGINE
         function runBacktest() {
             if (!validateAllocation()) return;
 
@@ -697,24 +845,19 @@
             const buyLogic = params.buyLogic.value;
             const sellLogic = params.sellLogic.value;
 
-            // Target Allocations adjusted from User Sliders (Requirement 2)
             const allocSse = parseInt(params.allocSse.value) / 100;
             const allocHs = parseInt(params.allocHs.value) / 100;
             const allocCy = parseInt(params.allocCy.value) / 100;
 
-            // Dynamic header update
             document.getElementById('allocation-badge').textContent = `分配比例: 上证${(allocSse*100).toFixed(0)}% | 沪深${(allocHs*100).toFixed(0)}% | 创业${(allocCy*100).toFixed(0)}%`;
             document.getElementById('metric-benchmark-weights').textContent = `${(allocSse*100).toFixed(0)}/${(allocHs*100).toFixed(0)}/${(allocCy*100).toFixed(0)} 固定配置权重`;
 
-            // Calculate indicators
             const indicators = computeIndicators(activeDataset, bbP, bbS, maP);
             const { sma, upperBB, lowerBB, filterMA } = indicators;
 
-            // Initial simulation state
             let initialCash = 10000;
             let currentCash = initialCash;
             
-            // Portfolios holdings quantities
             let sseUnits = 0;
             let hsUnits = 0;
             let cyUnits = 0;
@@ -724,19 +867,16 @@
             const benchmarkCurve = [];
             const tradeLog = [];
 
-            // Tracking benchmark (Always buy & hold with configured ratio from Day 0)
             const bch_sz_initial = activeDataset[0].sz.close;
             const bch_hs_initial = activeDataset[0].hs.close;
             const bch_cy_initial = activeDataset[0].cy.close;
 
-            // Generate trade signals day-by-day
             const signals = new Array(activeDataset.length).fill(null);
 
             for (let t = 0; t < activeDataset.length; t++) {
                 const today = activeDataset[t];
                 let signal = null;
 
-                // Check indicators validity
                 if (t >= bbP && t >= maP) {
                     const prevVix = activeDataset[t-1].vix.close;
                     const currVix = today.vix.close;
@@ -747,7 +887,6 @@
                     const prevSma = sma[t-1];
                     const currSma = sma[t];
 
-                    // BUY Signal Evaluation
                     if (!isHolding) {
                         let buyTriggered = false;
                         if (buyLogic === 'cross_below_upper') {
@@ -762,7 +901,6 @@
                             signal = 'BUY';
                         }
                     } 
-                    // SELL Signal Evaluation
                     else {
                         let sellTriggered = false;
                         if (sellLogic === 'cross_below_lower') {
@@ -781,17 +919,14 @@
 
                 signals[t] = signal;
 
-                // Execute trade execution on NEXT day Open (T+1)
                 if (t > 0 && signals[t-1] !== null) {
                     const execSignal = signals[t-1];
                     
                     if (execSignal === 'BUY' && !isHolding) {
-                        // Allocation proportions
                         const sseAllocated = currentCash * allocSse;
                         const hsAllocated = currentCash * allocHs;
                         const cyAllocated = currentCash * allocCy;
 
-                        // Minimum unit = 1% of index price
                         const sseUnitVal = 0.01 * today.sz.open;
                         const hsUnitVal = 0.01 * today.hs.open;
                         const cyUnitVal = 0.01 * today.cy.open;
@@ -845,7 +980,6 @@
                     }
                 }
 
-                // Daily net worth (equity) at CLOSE
                 const todaySseUnitVal = 0.01 * today.sz.close;
                 const todayHsUnitVal = 0.01 * today.hs.close;
                 const todayCyUnitVal = 0.01 * today.cy.close;
@@ -859,7 +993,6 @@
                     cash: currentCash
                 });
 
-                // Record daily Benchmark (Hold-and-Buy ratio aligned with slider setting)
                 const benchmarkVal = 10000 * (
                     allocSse * (today.sz.close / bch_sz_initial) + 
                     allocHs * (today.hs.close / bch_hs_initial) + 
@@ -871,14 +1004,11 @@
                 });
             }
 
-            // Expose trade log globally for exporting
             currentTradeLogGlobal = tradeLog;
 
-            // Calculate Performance Metrics
             const totalRet = ((equityCurve[equityCurve.length - 1].val - initialCash) / initialCash) * 100;
             const benchRet = ((benchmarkCurve[benchmarkCurve.length - 1].val - initialCash) / initialCash) * 100;
 
-            // Max Drawdown
             let maxDrawdown = 0;
             let peak = -Infinity;
             for (let i = 0; i < equityCurve.length; i++) {
@@ -891,7 +1021,6 @@
                 }
             }
 
-            // Win Rate & Trade Count
             let winCount = 0;
             let lossCount = 0;
             let totalTrades = 0;
@@ -900,7 +1029,7 @@
                 if (tradeLog[i].action === 'SELL') {
                     totalTrades++;
                     const sellEq = tradeLog[i].equity;
-                    const buyEq = tradeLog[i - 1].equity; // corresponding preceding buy
+                    const buyEq = tradeLog[i - 1].equity; 
                     if (sellEq > buyEq) {
                         winCount++;
                     } else {
@@ -910,7 +1039,6 @@
             }
             const winRate = totalTrades > 0 ? (winCount / totalTrades) * 100 : 0;
 
-            // Sharpe Ratio
             const dailyReturns = [];
             for (let i = 1; i < equityCurve.length; i++) {
                 dailyReturns.push((equityCurve[i].val - equityCurve[i - 1].val) / equityCurve[i - 1].val);
@@ -920,65 +1048,61 @@
             const stdDailyRet = Math.sqrt(varianceDailyRet);
             const sharpe = stdDailyRet > 0 ? (meanDailyRet / stdDailyRet) * Math.sqrt(244) : 0;
 
-            // Update Metrics in DOM
             const finalEquityVal = equityCurve[equityCurve.length - 1].val;
             document.getElementById('metric-final-equity').textContent = '¥' + finalEquityVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
             const trElem = document.getElementById('metric-total-return');
             trElem.textContent = (totalRet >= 0 ? '+' : '') + totalRet.toFixed(2) + '%';
-            trElem.className = `text-lg font-bold mt-1 ${totalRet >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            trElem.className = `text-xl font-bold tracking-tight mt-2 ${totalRet >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`;
 
             const activeVsBench = totalRet - benchRet;
             const vsBenchElem = document.getElementById('metric-vs-benchmark');
-            vsBenchElem.textContent = `超额收益: ${activeVsBench >= 0 ? '+' : ''}${activeVsBench.toFixed(2)}%`;
-            vsBenchElem.className = `text-[10px] mt-1 font-semibold ${activeVsBench >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            vsBenchElem.textContent = `ALPHA_DIFF: ${activeVsBench >= 0 ? '+' : ''}${activeVsBench.toFixed(2)}%`;
+            vsBenchElem.className = `text-[9px] mt-1 font-mono font-bold ${activeVsBench >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`;
 
             document.getElementById('metric-benchmark-return').textContent = (benchRet >= 0 ? '+' : '') + benchRet.toFixed(2) + '%';
             document.getElementById('metric-max-drawdown').textContent = maxDrawdown.toFixed(2) + '%';
             document.getElementById('metric-sharpe').textContent = sharpe.toFixed(2);
             document.getElementById('metric-win-rate').textContent = `${winRate.toFixed(0)}% / ${totalTrades}次`;
-            document.getElementById('metric-win-count').textContent = `盈利 ${winCount} 次 | 亏损 ${lossCount} 次`;
-            document.getElementById('data-range-label').textContent = `回测区间: ${activeDataset[0].date} 至 ${activeDataset[activeDataset.length - 1].date}`;
+            document.getElementById('metric-win-count').textContent = `WIN ${winCount} | LOSS ${lossCount}`;
+            document.getElementById('data-range-label').textContent = `SIM_RANGE: ${activeDataset[0].date} TO ${activeDataset[activeDataset.length - 1].date}`;
 
-            // Render Transaction Log Table
             const tbody = document.getElementById('trade-log-body');
             document.getElementById('log-count').textContent = `共 ${tradeLog.length} 条记录`;
             
             if (tradeLog.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">在当前的参数设置下没有触发任何买卖信号。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-zinc-400 font-sans">在当前的参数设置下没有触发任何买卖信号。</td></tr>`;
             } else {
                 tbody.innerHTML = tradeLog.map((log, idx) => {
-                    const actionClass = log.action === 'BUY' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100';
-                    const indexDetailsBuy = log.action === 'BUY' ? '买入' : '平仓变现';
+                    const actionClass = log.action === 'BUY' ? 'bg-emerald-50 text-brand-emerald border-brand-emerald/20' : 'bg-red-50 text-brand-rose border-brand-rose/20';
+                    const indexDetailsBuy = log.action === 'BUY' ? '轮入' : '平仓';
                     return `
-                        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
-                            <td class="py-3 px-4 font-mono text-slate-400">${idx + 1}</td>
-                            <td class="py-3 px-4 font-medium">${log.date}</td>
-                            <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${actionClass}">${log.action}</span>
+                        <tr class="border-b border-zinc-100 hover:bg-zinc-50/50">
+                            <td class="py-3.5 px-4 font-mono text-zinc-400">${idx + 1}</td>
+                            <td class="py-3.5 px-4 font-medium text-zinc-850">${log.date}</td>
+                            <td class="py-3.5 px-4">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold border ${actionClass}">${log.action}</span>
                             </td>
-                            <td class="py-3 px-4 font-mono">${log.sseUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.sseVal.toFixed(1)})</span></td>
-                            <td class="py-3 px-4 font-mono">${log.hsUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.hsVal.toFixed(1)})</span></td>
-                            <td class="py-3 px-4 font-mono">${log.cyUnits.toLocaleString()}份 <span class="text-slate-400">(${indexDetailsBuy} ¥${log.cyVal.toFixed(1)})</span></td>
-                            <td class="py-3 px-4 font-mono font-semibold text-slate-900">¥${log.equity.toLocaleString(undefined, {maximumFractionDigits:1})} <span class="text-[10px] text-slate-400 font-normal">(余额: ¥${log.cash.toFixed(1)})</span></td>
-                            <td class="py-3 px-4 font-mono text-slate-600">${((log.equity - initialCash)/initialCash*100).toFixed(1)}%</td>
+                            <td class="py-3.5 px-4 font-mono text-zinc-600">${log.sseUnits.toLocaleString()} 份 <span class="text-zinc-400">(${indexDetailsBuy} ¥${log.sseVal.toFixed(1)})</span></td>
+                            <td class="py-3.5 px-4 font-mono text-zinc-600">${log.hsUnits.toLocaleString()} 份 <span class="text-zinc-400">(${indexDetailsBuy} ¥${log.hsVal.toFixed(1)})</span></td>
+                            <td class="py-3.5 px-4 font-mono text-zinc-600">${log.cyUnits.toLocaleString()} 份 <span class="text-zinc-400">(${indexDetailsBuy} ¥${log.cyVal.toFixed(1)})</span></td>
+                            <td class="py-3.5 px-4 font-mono font-bold text-zinc-800">¥${log.equity.toLocaleString(undefined, {maximumFractionDigits:1})} <span class="text-[9px] text-zinc-400 font-normal">(CASH: ¥${log.cash.toFixed(1)})</span></td>
+                            <td class="py-3.5 px-4 font-mono font-bold ${((log.equity - initialCash) >= 0) ? 'text-brand-emerald' : 'text-brand-rose'}">${((log.equity - initialCash)/initialCash*100).toFixed(1)}%</td>
                         </tr>
                     `;
                 }).join('');
             }
 
-            // Draw Charts
             renderChart(equityCurve, benchmarkCurve, signals, indicators);
         }
 
-        // Export CSV Function (Requirement 3)
         function exportTradeLogToCSV() {
             if (currentTradeLogGlobal.length === 0) {
-                alert("当前无交易记录可供导出！");
+                showNotification("导出失败：暂无回测交易记录可供下载", "error");
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,\ufeff"; // Added BOM for Excel Chinese compatibility
+            let csvContent = "data:text/csv;charset=utf-8,\ufeff"; 
             csvContent += "序号,交易日期,交易动作,上证变动份数,上证交易额(元),沪深变动份数,沪深交易额(元),创业变动份数,创业交易额(元),总权益(元),剩余现金(元)\r\n";
 
             currentTradeLogGlobal.forEach((log, index) => {
@@ -1001,13 +1125,13 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `VIX_量化策略交易成交记录_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `autoPoiesis_Gravity_Backtest_Logs_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showNotification("交易变动日志 CSV 成功导出并开始下载", "success");
         }
 
-        // CHART RENDERING ENGINE with zoom configured (Requirement 4)
         function renderChart(equityCurve, benchmarkCurve, signals, indicators) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             
@@ -1021,19 +1145,19 @@
             if (activeTab === 'equity') {
                 datasets = [
                     {
-                        label: '零售恐慌VIX 轮动策略净值',
+                        label: 'autoPoiesis™ Gravity™ 策略净值 (Equity)',
                         data: equityCurve.map(e => e.val),
-                        borderColor: '#4f46e5', // Brand Indigo
-                        borderWidth: 2.5,
-                        backgroundColor: 'rgba(79, 70, 229, 0.04)',
+                        borderColor: '#0d0d0d', 
+                        borderWidth: 2,
+                        backgroundColor: 'rgba(13, 13, 13, 0.02)',
                         fill: true,
-                        tension: 0.1,
+                        tension: 0.15,
                         pointRadius: 0
                     },
                     {
-                        label: '自定义指数配比买入持有基准',
+                        label: '配置比例指数持有基准 (Benchmark)',
                         data: benchmarkCurve.map(b => b.val),
-                        borderColor: '#94a3b8', // slate 400
+                        borderColor: 'rgba(0, 102, 204, 0.35)', 
                         borderWidth: 1.5,
                         borderDash: [4, 4],
                         fill: false,
@@ -1043,37 +1167,37 @@
             } else {
                 datasets = [
                     {
-                        label: 'VIX 恐慌收盘价',
+                        label: 'Gravity™ 情绪引力收盘价',
                         data: activeDataset.map(d => d.vix.close),
-                        borderColor: '#d97706', // amber 600
+                        borderColor: '#e28743', 
                         borderWidth: 1.8,
                         fill: false,
-                        pointRadius: 1.5,
-                        pointBackgroundColor: '#d97706',
-                        tension: 0.1
+                        pointRadius: 1,
+                        pointBackgroundColor: '#e28743',
+                        tension: 0.15
                     },
                     {
-                        label: '布林带上轨 (压力顶)',
+                        label: 'Singularity™ 轨道上轨 (压力阻力顶)',
                         data: indicators.upperBB,
-                        borderColor: '#dc2626', // red 600
-                        borderWidth: 1.2,
-                        borderDash: [4, 4],
+                        borderColor: '#ea4335', 
+                        borderWidth: 1,
+                        borderDash: [3, 3],
                         fill: false,
                         pointRadius: 0
                     },
                     {
-                        label: '布林带下轨 (极度贪婪支撑)',
+                        label: 'Singularity™ 轨道下轨 (极端乐观支撑)',
                         data: indicators.lowerBB,
-                        borderColor: '#059669', // emerald 600
-                        borderWidth: 1.2,
-                        borderDash: [4, 4],
+                        borderColor: '#34a853', 
+                        borderWidth: 1,
+                        borderDash: [3, 3],
                         fill: false,
                         pointRadius: 0
                     },
                     {
-                        label: '布林带中轨 / SMA均线',
+                        label: '轨道中轴线 / 移动均线 (SMA)',
                         data: indicators.sma,
-                        borderColor: '#64748b', // slate 500
+                        borderColor: '#71717a', 
                         borderWidth: 1,
                         fill: false,
                         pointRadius: 0
@@ -1092,29 +1216,29 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            grid: { color: 'rgba(71, 85, 105, 0.06)' },
-                            ticks: { color: '#64748b', font: { size: 10 } }
+                            grid: { color: '#f4f4f5' },
+                            ticks: { color: '#71717a', font: { family: 'ui-sans-serif, system-ui', size: 9 } }
                         },
                         y: {
-                            grid: { color: 'rgba(71, 85, 105, 0.08)' },
-                            ticks: { color: '#64748b', font: { size: 10 } }
+                            grid: { color: '#f4f4f5' },
+                            ticks: { color: '#71717a', font: { family: 'ui-sans-serif, system-ui', size: 9 } }
                         }
                     },
                     plugins: {
                         legend: {
-                            labels: { color: '#334155', font: { size: 11, weight: '500' } }
+                            labels: { color: '#0d0d0d', font: { family: 'ui-sans-serif, system-ui', size: 10, weight: '500' } }
                         },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
                             backgroundColor: '#ffffff',
-                            titleColor: '#1e293b',
-                            bodyColor: '#475569',
-                            borderColor: '#e2e8f0',
+                            titleColor: '#0d0d0d',
+                            bodyColor: '#71717a',
+                            borderColor: '#e5e5e7',
                             borderWidth: 1,
-                            shadowColor: 'rgba(0,0,0,0.05)'
+                            boxPadding: 4,
+                            bodyFont: { family: 'ui-sans-serif, system-ui' }
                         },
-                        // ZOOM PLUGIN CONFIGURATION (Requirement 4)
                         zoom: {
                             pan: {
                                 enabled: true,
@@ -1136,41 +1260,40 @@
             });
         }
 
-        // Reset Zoom Button Trigger
         document.getElementById('reset-zoom-btn').addEventListener('click', () => {
             if (activeChartInstance) {
                 activeChartInstance.resetZoom();
+                showNotification("图表焦距缩放重置成功", "success");
             }
         });
 
-        // Export CSV Button Event Listener (Requirement 3)
         document.getElementById('export-csv-btn').addEventListener('click', exportTradeLogToCSV);
 
-        // Tab toggle buttons
         const btnEquity = document.getElementById('tab-equity');
         const btnVix = document.getElementById('tab-vix');
 
         btnEquity.addEventListener('click', () => {
             activeTab = 'equity';
-            btnEquity.className = "text-xs font-bold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 transition";
-            btnVix.className = "text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition";
+            btnEquity.className = "text-xs font-bold px-4 py-2 rounded-full bg-zinc-100 border border-brand-border text-brand-charcoal transition shadow-sm";
+            btnVix.className = "text-xs font-bold px-4 py-2 rounded-full text-zinc-500 hover:text-zinc-900 transition";
             runBacktest();
         });
 
         btnVix.addEventListener('click', () => {
             activeTab = 'vix';
-            btnVix.className = "text-xs font-bold px-3 py-1.5 rounded-md bg-amber-50 text-amber-700 border border-amber-100 transition";
-            btnEquity.className = "text-xs font-bold px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 bg-slate-50 transition";
+            btnVix.className = "text-xs font-bold px-4 py-2 rounded-full bg-zinc-100 border border-brand-border text-brand-charcoal transition shadow-sm";
+            btnEquity.className = "text-xs font-bold px-4 py-2 rounded-full text-zinc-500 hover:text-zinc-900 transition";
             runBacktest();
         });
 
-        // Trigger Backtest Button Listener
-        document.getElementById('run-backtest-btn').addEventListener('click', runBacktest);
+        document.getElementById('run-backtest-btn').addEventListener('click', () => {
+            runBacktest();
+            showNotification("轨道多因子量化仿真运算完毕", "success");
+        });
 
-        // Auto run initial backtest on load
         window.addEventListener('load', () => {
             validateAllocation();
-            runBacktest();
+            fetchCloudDataset();
         });
 
     </script>
