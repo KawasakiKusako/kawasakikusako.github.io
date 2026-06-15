@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full bg-white text-[#0d0d0d]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>autoPoiesis | Gravity™ Index Observation Terminal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lightweight Charts (v4.1.1) -->
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Hidden Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden bg-white selection:bg-zinc-100 selection:text-zinc-900">
+
+    <!-- OpenAI Style Clean Top Header -->
+    <header class="h-14 bg-white border-b border-zinc-200 flex items-center justify-between px-6 shrink-0 select-none relative z-40">
+        <!-- Mobile menu toggle -->
+        <button class="mobile-menu-btn hidden md:hidden p-1.5 border border-zinc-200 hover:bg-zinc-50 rounded-full" onclick="toggleMobileMenu()">
+            <i data-lucide="menu" class="w-4 h-4 text-zinc-800"></i>
+        </button>
+
+        <!-- Mobile pull-down panel -->
+        <div id="mobile-menu" class="hidden absolute top-14 left-0 right-0 bg-white border-b border-zinc-200 shadow-lg z-50 md:hidden">
+            <div class="p-4 space-y-4 bg-white border-t border-zinc-100">
+                <div class="space-y-2">
+                    <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">// Period 运行周期 //</p>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button onclick="changePeriod('D')" id="mobile-period-D" class="p-2 text-xs rounded-full border border-zinc-900 bg-zinc-900 text-white font-semibold">日线 (D)</button>
+                        <button onclick="changePeriod('W')" id="mobile-period-W" class="p-2 text-xs rounded-full border border-zinc-200 hover:border-zinc-900 font-medium">周线 (W)</button>
+                        <button onclick="changePeriod('M')" id="mobile-period-M" class="p-2 text-xs rounded-full border border-zinc-200 hover:border-zinc-900 font-medium">月线 (M)</button>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">// Overlays 主图叠加 //</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 border border-zinc-200 p-2 rounded-lg">
+                            <input type="checkbox" id="m-enable-ma1" checked onchange="syncCheckbox('enable-ma1', this)" class="accent-zinc-900 w-3.5 h-3.5 rounded">
+                            <span class="text-xs font-semibold text-zinc-700">MA1</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-zinc-200 p-2 rounded-lg">
+                            <input type="checkbox" id="m-enable-ma2" checked onchange="syncCheckbox('enable-ma2', this)" class="accent-zinc-900 w-3.5 h-3.5 rounded">
+                            <span class="text-xs font-semibold text-zinc-700">MA2</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-zinc-200 p-2 rounded-lg">
+                            <input type="checkbox" id="m-enable-ma3" onchange="syncCheckbox('enable-ma3', this)" class="accent-zinc-900 w-3.5 h-3.5 rounded">
+                            <span class="text-xs font-semibold text-zinc-700">MA3</span>
+                        </label>
+                        <label class="flex items-center space-x-2 border border-zinc-200 p-2 rounded-lg">
+                            <input type="checkbox" id="m-enable-boll" onchange="syncCheckbox('enable-boll', this)" class="accent-zinc-900 w-3.5 h-3.5 rounded">
+                            <span class="text-xs font-semibold text-zinc-700">BOLL</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Header Left: Brand Identity -->
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2.5 select-none">
+                <div class="flex flex-col">
+                    <span class="font-sans text-base font-bold tracking-[-0.04em] text-zinc-950">autoPoiesis<span class="text-[9px] align-super font-normal text-zinc-400">™</span></span>
+                    <span class="text-[8px] text-zinc-400 font-bold tracking-widest leading-none">OBSERVATION TERMINAL // VER 0.2.1</span>
+                </div>
+            </div>
+            
+            <div class="h-6 w-[1px] bg-zinc-200"></div>
+            
+            <!-- Index Name Ticker -->
+            <div class="flex items-center space-x-4">
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest leading-none">TARGET_INDEX</span>
+                    <span class="font-bold text-xs text-zinc-800 tracking-tight mt-1" id="ticker-name">Gravity™ INDEX</span>
+                </div>
+                <span class="text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-200 px-2.5 py-0.5 rounded-full font-mono shadow-sm" id="last-price-badge">--</span>
+            </div>
+        </div>
+
+        <!-- Header Right: Import & Reset -->
+        <div class="flex items-center space-x-3">
+            <div class="text-right hidden xl:block mr-2 select-none">
+                <p class="text-[8px] text-zinc-400 font-bold leading-none uppercase">INTERFACE_STATUS</p>
+                <p class="text-[10px] text-emerald-600 font-semibold tracking-tight mt-0.5">[ SECURE_MONITOR ]</p>
+            </div>
+
+            <!-- Import CSV -->
+            <label class="inline-flex items-center justify-center space-x-1.5 h-8 px-4 rounded-full border border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950 text-xs font-semibold cursor-pointer transition-all bg-white shadow-sm">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                <span class="tracking-tight text-[11px]">导入本地数据 (.csv)</span>
+                <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+            </label>
+            
+            <!-- Reset default data -->
+            <button id="reset-data-btn" class="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-200 hover:border-zinc-900 bg-white transition-all shadow-sm" title="重置回默认云端数据">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-zinc-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Telemetry Float Bar (Subtle Micro Grid Style) -->
+    <div class="h-10 bg-zinc-50/50 border-b border-zinc-200 flex items-center px-6 text-[10px] text-zinc-500 select-none overflow-x-auto no-scrollbar shrink-0 font-mono">
+        <div class="flex items-center space-x-6 w-full justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="text-zinc-700 font-bold tracking-widest text-[9px] border border-zinc-200 px-2 bg-white rounded shadow-sm">TELEMETRY_DAT_FLOAT</span>
+                <div class="h-3 w-[1px] bg-zinc-200"></div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">OPEN:</span><span id="info-open" class="text-zinc-800 font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">HIGH:</span><span id="info-high" class="text-[#ea4335] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">LOW:</span><span id="info-low" class="text-[#34a853] font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">CLOSE:</span><span id="info-close" class="text-zinc-800 font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">CHG:</span><span id="info-change" class="text-zinc-800 font-bold">--</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-zinc-400">VOL:</span><span id="info-volume" class="text-[#0066cc] font-bold">--</span>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-2 text-[9px] text-zinc-400 font-bold">
+                <span>ORBITAL_PLANE // APHELION_SYS_02</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Sidebar Controls Panel -->
+        <aside class="w-[280px] bg-zinc-50/50 border-r border-zinc-200 shrink-0 hidden md:flex flex-col select-none justify-between overflow-y-auto no-scrollbar relative z-30 font-sans">
+            
+            <!-- Sidebar Header -->
+            <div class="p-5 border-b border-zinc-200 space-y-3 bg-white/80 backdrop-blur-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold tracking-widest text-zinc-700">// PARAMETER_CALIBRATION</span>
+                    <span class="text-[8px] text-zinc-400 font-bold font-mono">CFG_G.02</span>
+                </div>
+                <div class="h-0.5 bg-zinc-900 rounded"></div>
+            </div>
+
+            <!-- Configuration panels -->
+            <div class="flex-1 p-5 space-y-6">
+                
+                <!-- 1. Period control -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between text-[9px] font-bold tracking-widest uppercase text-zinc-400">
+                        <span>[ 01 // K线周期 SYSTEM_PERIOD ]</span>
+                        <div class="w-1 h-1 bg-zinc-900"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 border border-zinc-200 rounded-full p-1 bg-white shadow-sm">
+                        <button id="period-D" class="py-1 text-center text-[10px] font-semibold rounded-full transition-all bg-zinc-950 text-white" onclick="changePeriod('D')">日线 (D)</button>
+                        <button id="period-W" class="py-1 text-center text-[10px] font-semibold rounded-full text-zinc-500 hover:text-zinc-900 transition-all" onclick="changePeriod('W')">周线 (W)</button>
+                        <button id="period-M" class="py-1 text-center text-[10px] font-semibold rounded-full text-zinc-500 hover:text-zinc-900 transition-all" onclick="changePeriod('M')">月线 (M)</button>
+                    </div>
+                </div>
+
+                <!-- 2. Overlay Indicators -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-[9px] font-bold tracking-widest uppercase text-zinc-400">
+                        <span>[ 02 // 主图叠加 OVERLAY_PARAMS ]</span>
+                        <div class="w-1 h-1 bg-zinc-900"></div>
+                    </div>
+                    
+                    <div class="space-y-2 bg-white border border-zinc-200 rounded-xl p-4 shadow-sm">
+                        <!-- MA1 -->
+                        <div class="flex items-center justify-between text-[11px] font-semibold">
+                            <label class="flex items-center space-x-2.5 cursor-pointer text-zinc-800">
+                                <input type="checkbox" id="enable-ma1" checked class="accent-zinc-900 rounded border-zinc-300 w-3.5 h-3.5">
+                                <span class="tracking-wide text-zinc-800 font-semibold">MA 1 轨线</span>
+                            </label>
+                            <div class="flex items-center border border-zinc-200 rounded">
+                                <span class="px-1.5 text-[8px] text-zinc-400 border-r border-zinc-200">N</span>
+                                <input type="number" id="ma1-period" value="5" min="2" max="200" class="w-9 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-zinc-900">
+                            </div>
+                        </div>
+
+                        <!-- MA2 -->
+                        <div class="flex items-center justify-between text-[11px] font-semibold border-t border-zinc-100 pt-2.5">
+                            <label class="flex items-center space-x-2.5 cursor-pointer text-[#0066cc]">
+                                <input type="checkbox" id="enable-ma2" checked class="accent-[#0066cc] rounded border-zinc-300 w-3.5 h-3.5">
+                                <span class="tracking-wide font-bold">MA 2 轨线</span>
+                            </label>
+                            <div class="flex items-center border border-zinc-200 rounded">
+                                <span class="px-1.5 text-[8px] text-zinc-400 border-r border-zinc-200">N</span>
+                                <input type="number" id="ma2-period" value="10" min="2" max="200" class="w-9 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-zinc-900">
+                            </div>
+                        </div>
+
+                        <!-- MA3 -->
+                        <div class="flex items-center justify-between text-[11px] font-semibold border-t border-zinc-100 pt-2.5">
+                            <label class="flex items-center space-x-2.5 cursor-pointer text-[#e28743]">
+                                <input type="checkbox" id="enable-ma3" class="accent-[#e28743] rounded border-zinc-300 w-3.5 h-3.5">
+                                <span class="tracking-wide font-bold">MA 3 轨线</span>
+                            </label>
+                            <div class="flex items-center border border-zinc-200 rounded">
+                                <span class="px-1.5 text-[8px] text-zinc-400 border-r border-zinc-200">N</span>
+                                <input type="number" id="ma3-period" value="30" min="2" max="200" class="w-9 text-center font-mono outline-none bg-transparent py-0.5 text-xs text-zinc-900">
+                            </div>
+                        </div>
+
+                        <!-- BOLL -->
+                        <div class="flex items-center justify-between border-t border-zinc-100 pt-2.5">
+                            <label class="flex items-center space-x-2.5 cursor-pointer text-[11px] text-[#34a853] font-bold">
+                                <input type="checkbox" id="enable-boll" class="accent-[#34a853] rounded border-zinc-300 w-3.5 h-3.5">
+                                <span class="tracking-wide">BOLL 布林带</span>
+                            </label>
+                            <span class="text-[9px] text-zinc-400 font-mono font-bold">[20, 2]</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Sub-indicators -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between text-[9px] font-bold tracking-widest uppercase text-zinc-400">
+                        <span>[ 03 // 辅助分析 AUXILIARY_VIEWS ]</span>
+                        <div class="w-1 h-1 bg-zinc-900"></div>
+                    </div>
+                    
+                    <div class="border border-zinc-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-zinc-100">
+                        <button id="sub-none" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50" onclick="selectSubIndicator('none')">
+                            <span>00 // 隐藏全部副图</span>
+                            <span class="text-zinc-300">[ OFF ]</span>
+                        </button>
+                        <button id="sub-macd" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all bg-zinc-50 text-zinc-950 border-l-2 border-zinc-900" onclick="selectSubIndicator('macd')">
+                            <span>01 // 指数变动率 MACD</span>
+                            <span class="text-[#0066cc]">[ DEFAULT]</span>
+                        </button>
+                        <button id="sub-kdj" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50" onclick="selectSubIndicator('kdj')">
+                            <span>02 // 随机振荡指标 KDJ</span>
+                            <span class="text-zinc-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-rsi" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50" onclick="selectSubIndicator('rsi')">
+                            <span>03 // 强弱指标 RSI</span>
+                            <span class="text-zinc-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-obv" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50" onclick="selectSubIndicator('obv')">
+                            <span>04 // 能量潮 OBV</span>
+                            <span class="text-zinc-300">[ STANDBY ]</span>
+                        </button>
+                        <button id="sub-dmi" class="w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50" onclick="selectSubIndicator('dmi')">
+                            <span>05 // 动向指标 DMI</span>
+                            <span class="text-zinc-300">[ STANDBY ]</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar footer -->
+            <div class="p-5 border-t border-zinc-200 bg-white space-y-1.5">
+                <div class="flex justify-between items-center text-[9px] text-zinc-400 font-bold font-mono">
+                    <span>@ autoPoiesis™</span>
+                    <span>Github</span>
+                </div>
+                <div class="w-full h-1 bg-zinc-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-[#0066cc] w-2/5"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Main Chart Panel -->
+        <main class="flex-grow flex flex-col bg-white overflow-hidden relative">
+            
+            <!-- Main candle chart -->
+            <div id="main-chart-container" class="flex-1 w-full relative min-h-[300px]"></div>
+            
+            <!-- Auxiliary sub indicator view -->
+            <div id="sub-chart-container" class="h-[180px] w-full border-t border-zinc-200 relative hidden bg-white">
+                <div class="absolute top-2 left-4 z-10 text-[9px] text-zinc-500 font-mono font-bold select-none tracking-tight border border-zinc-200 px-2.5 py-0.5 rounded-full bg-white shadow-sm" id="sub-title">副图</div>
+            </div>
+
+            <!-- Terminal system alert modal -->
+            <div id="error-overlay" class="absolute inset-0 bg-white flex flex-col items-center justify-center space-y-4 z-30 hidden px-6 text-center">
+                <div class="w-12 h-12 bg-red-50 border border-red-200 flex items-center justify-center text-[#ea4335] rounded-full shadow-sm">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <div class="space-y-1.5">
+                    <h3 class="text-sm font-bold text-zinc-800 tracking-tight uppercase">// 终端系统渲染出错 ENGINE_FATAL_ERROR //</h3>
+                    <p class="text-[11px] text-zinc-400 max-w-sm font-mono tracking-tight" id="error-message">检测到未知格式异常。</p>
+                </div>
+                <button onclick="hideErrorAndShowBackup()" class="border border-zinc-200 hover:border-zinc-950 hover:bg-zinc-50 text-zinc-800 text-[10px] font-bold px-5 h-9 rounded-full transition-all tracking-tight bg-white shadow-sm">
+                    RESET TERMINAL ENGINE // 重新初始化渲染
+                </button>
+            </div>
+
+            <!-- Global loading -->
+            <div id="loading-overlay" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center space-y-3 z-20">
+                <div class="w-5 h-5 border border-zinc-400 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-[10px] text-zinc-500 font-bold tracking-tight uppercase">// INITIATING GRAVITY CORE ...</p>
+            </div>
+        </main>
+        
+    </div>
+
+    <!-- Bottom premium telemetry status bar -->
+    <footer class="h-8 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between px-6 text-[10px] text-zinc-400 shrink-0 select-none">
+        <div class="flex items-center space-x-3">
+            <span class="w-2 h-2 rounded-full bg-[#34a853] flex items-center justify-center shadow-sm">
+                <span class="w-1 h-1 bg-white rounded-full"></span>
+            </span>
+            <span id="data-source-status" class="font-bold text-zinc-600 uppercase tracking-tight text-[9px]">GRAVITY_PLANE: SECURE_MONITORING</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="stat-days" class="font-mono text-zinc-500 tracking-wider">-- DATA_POINTS</span>
+            <span>|</span>
+            <span class="tracking-tight hidden sm:inline">GITHUB © KAWASAKI KUSAKO 2026</span>
+            <span class="text-zinc-800 font-bold tracking-tight">// autoPoiesis™ Gravity™ Index Board</span>
+            <span>|</span>
+            <span class="text-zinc-400 uppercase font-black">FOR TACTICAL USE ONLY</span>
+        </div>
+    </footer>
+
+    <script>
+        // Default CSV path
+        const DEFAULT_CSV_DATA = 'https://kawasakikusako.github.io/generalExp/vix/index.csv';
+
+        let windowResizeTimeout;
+        window.addEventListener('resize', () => {
+            if (windowResizeTimeout) {
+                clearTimeout(windowResizeTimeout);
+            }
+            
+            windowResizeTimeout = setTimeout(() => {
+                if (window.innerWidth >= 768) {
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                }
+                
+                if (mainChart) {
+                    const mainContainer = document.getElementById('main-chart-container');
+                    mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+                }
+                
+                if (subChart) {
+                    const subContainer = document.getElementById('sub-chart-container');
+                    if (!subContainer.classList.contains('hidden')) {
+                        subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+                    }
+                }
+            }, 150);
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Synchronize check state from mobile panel
+        function syncCheckbox(mainId, mCheckbox) {
+            const mainEl = document.getElementById(mainId);
+            if (mainEl) {
+                mainEl.checked = mCheckbox.checked;
+                updateMainIndicators();
+            }
+        }
+        
+        // Chart series variables
+        let mainChart = null;
+        let subChart = null;
+
+        let candleSeries = null;
+        let mainVolumeSeries = null;
+        let ma1Series = null;
+        let ma2Series = null;
+        let ma3Series = null;
+        let bollMiddleSeries = null;
+        let bollUpperSeries = null;
+        let bollLowerSeries = null;
+
+        // Sub chart series
+        let subMacdDifSeries = null;
+        let subMacdDeaSeries = null;
+        let subMacdHistSeries = null;
+        let subKdjKSeries = null;
+        let subKdjDSeries = null;
+        let subKdjJSeries = null;
+        let subRsiSeries = null;
+        let subObvSeries = null;
+        let subDmiPdiSeries = null;
+        let subDmiMdiSeries = null;
+        let subDmiAdxSeries = null;
+
+        // Current rendering states
+        let baseDailyData = [];      
+        let currentParsedData = [];  
+        let currentSubIndicator = 'macd'; 
+        let currentPeriod = 'D';     
+
+        // Create Icons
+        lucide.createIcons();
+
+        function showError(title, msg) {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            const overlay = document.getElementById('error-overlay');
+            document.getElementById('error-title').innerText = title;
+            document.getElementById('error-message').innerText = msg;
+            overlay.classList.remove('hidden');
+        }
+
+        function hideErrorAndShowBackup() {
+            document.getElementById('error-overlay').classList.add('hidden');
+            loadBackupData();
+        }
+
+        function initCharts() {
+            const mainContainer = document.getElementById('main-chart-container');
+            const subContainer = document.getElementById('sub-chart-container');
+
+            const commonOptions = {
+                layout: {
+                    background: { type: 'solid', color: '#ffffff' },
+                    textColor: '#18181b',
+                    fontSize: 9,
+                    fontFamily: 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                },
+                grid: {
+                    vertLines: { color: '#f4f4f5', style: 0 },
+                    horzLines: { color: '#f4f4f5', style: 0 },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { width: 1, color: 'rgba(24, 24, 27, 0.15)', style: 3 },
+                    horzLine: { width: 1, color: 'rgba(24, 24, 27, 0.15)', style: 3 }
+                },
+                rightPriceScale: {
+                    borderColor: '#e5e5e7',
+                    visible: true,
+                },
+                timeScale: {
+                    borderColor: '#e5e5e7',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                handleScale: { mouseWheel: true, pinch: true },
+                handleScroll: { mouseDrag: true, touchDrag: true }
+            };
+
+            // Main chart creation
+            mainChart = LightweightCharts.createChart(mainContainer, {
+                ...commonOptions,
+                width: mainContainer.clientWidth || 800,
+                height: mainContainer.clientHeight || 450,
+            });
+
+            // 1. Core Candlestick series
+            candleSeries = mainChart.addCandlestickSeries({
+                upColor: '#ea4335',      
+                downColor: '#34a853',    
+                borderVisible: false,
+                wickUpColor: '#ea4335',
+                wickDownColor: '#34a853',
+            });
+
+            // 2. Volume Series overlay on core chart
+            mainVolumeSeries = mainChart.addHistogramSeries({
+                color: 'rgba(24, 24, 27, 0.12)',
+                priceFormat: { type: 'volume' },
+                priceScaleId: 'volume_scale',
+            });
+            mainChart.priceScale('volume_scale').applyOptions({
+                visible: false,
+                scaleMargins: { top: 0.85, bottom: 0 },
+            });
+
+            // 3. MA series lines
+            ma1Series = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma2Series = mainChart.addLineSeries({ color: '#e28743', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+            ma3Series = mainChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.0, crosshairMarkerVisible: false, lastValueVisible: false });
+
+            // 4. Bollinger Bands indicators
+            bollMiddleSeries = mainChart.addLineSeries({ color: '#e28743', lineWidth: 1.0, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollUpperSeries = mainChart.addLineSeries({ color: '#34a853', lineWidth: 0.8, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
+            bollLowerSeries = mainChart.addLineSeries({ color: '#34a853', lineWidth: 0.8, lineStyle: 2, crosshairMarkerVisible: false, lastValueVisible: false });
+            
+            candleSeries.priceScale().applyOptions({
+                scaleMargins: { top: 0.08, bottom: 0.2 },
+            });
+
+            // Sub chart creation (MACD, KDJ etc.)
+            subChart = LightweightCharts.createChart(subContainer, {
+                ...commonOptions,
+                width: subContainer.clientWidth || 800,
+                height: subContainer.clientHeight || 180,
+                timeScale: {
+                    ...commonOptions.timeScale,
+                    visible: false, 
+                }
+            });
+
+            // Align scale widths
+            const uniformScaleOptions = { minimumWidth: 85 };
+            mainChart.priceScale('right').applyOptions(uniformScaleOptions);
+            subChart.priceScale('right').applyOptions(uniformScaleOptions);
+
+            // Robust logical range sync (Preventing recursion fight)
+            let isSyncing = false;
+            mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                subChart.timeScale().setVisibleLogicalRange(range);
+                isSyncing = false;
+            });
+            subChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (isSyncing || !range) return;
+                isSyncing = true;
+                mainChart.timeScale().setVisibleLogicalRange(range);
+                isSyncing = false;
+            });
+
+            // Cursor moves update telemetry HUD
+            mainChart.subscribeCrosshairMove(param => {
+                if (param === undefined || param.time === undefined || param.point === undefined) {
+                    if (currentParsedData.length > 0) {
+                        displayOHLCV(currentParsedData[currentParsedData.length - 1]);
+                    }
+                } else {
+                    const candleData = param.seriesData.get(candleSeries);
+                    const volData = param.seriesData.get(mainVolumeSeries);
+                    if (candleData) {
+                        displayOHLCV({
+                            time: param.time,
+                            open: candleData.open,
+                            high: candleData.high,
+                            low: candleData.low,
+                            close: candleData.close,
+                            volume: volData ? volData.value : 0
+                        });
+                    }
+                }
+            });
+
+            const resizeObserver = new ResizeObserver(() => {
+                if (mainContainer.clientWidth > 0 && mainContainer.clientHeight > 0) {
+                    mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+                }
+                if (subContainer.clientWidth > 0 && subContainer.clientHeight > 0) {
+                    subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+                }
+            });
+            resizeObserver.observe(mainContainer);
+            resizeObserver.observe(subContainer);
+        }
+
+        // ------------------ Algorithms & Mathematical Functions ------------------
+
+        function normalizeDate(dateStr) {
+            if (!dateStr) return null;
+            let cleaned = dateStr.trim().replace(/^["']|["']$/g, '').replace(/[\/\.]/g, '-');
+            if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return cleaned;
+            const parts = cleaned.split('-');
+            if (parts.length === 3) {
+                let y = parts[0];
+                let m = parts[1].padStart(2, '0');
+                let d = parts[2].padStart(2, '0');
+                if (y.length === 2) y = '20' + y;
+                if (y.length === 4 && !isNaN(y) && !isNaN(m) && !isNaN(d)) return `${y}-${m}-${d}`;
+            }
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }
+            return null;
+        }
+
+        function aggregateData(dailyData, period) {
+            if (!dailyData || dailyData.length === 0) return [];
+            if (period === 'D') return dailyData;
+
+            const aggregated = [];
+            let groupKeyFn;
+
+            if (period === 'W') {
+                groupKeyFn = (dateStr) => {
+                    const d = new Date(dateStr);
+                    const tempDate = new Date(d.valueOf());
+                    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+                    const year = tempDate.getFullYear();
+                    const startOfYear = new Date(year, 0, 1);
+                    const weekNo = Math.ceil((((tempDate - startOfYear) / 86400000) + 1) / 7);
+                    return `${year}-W${String(weekNo).padStart(2, '0')}`;
+                };
+            } else if (period === 'M') {
+                groupKeyFn = (dateStr) => {
+                    const parts = dateStr.split('-');
+                    return `${parts[0]}-${parts[1]}`;
+                };
+            }
+
+            let currentGroupKey = null;
+            let currentCandle = null;
+
+            for (let i = 0; i < dailyData.length; i++) {
+                const day = dailyData[i];
+                const key = groupKeyFn(day.time);
+
+                if (key !== currentGroupKey) {
+                    if (currentCandle) {
+                        aggregated.push(currentCandle);
+                    }
+                    currentGroupKey = key;
+                    currentCandle = {
+                        time: day.time,
+                        open: day.open,
+                        high: day.high,
+                        low: day.low,
+                        close: day.close,
+                        volume: day.volume
+                    };
+                } else {
+                    currentCandle.high = Math.max(currentCandle.high, day.high);
+                    currentCandle.low = Math.min(currentCandle.low, day.low);
+                    currentCandle.close = day.close;
+                    currentCandle.volume += day.volume;
+                }
+            }
+
+            if (currentCandle) {
+                aggregated.push(currentCandle);
+            }
+
+            return aggregated;
+        }
+
+        function calculateMA(data, period) {
+            const maData = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) continue;
+                let sum = 0;
+                for (let j = 0; j < period; j++) {
+                    sum += data[i - j].close;
+                }
+                maData.push({ time: data[i].time, value: Number((sum / period).toFixed(2)) });
+            }
+            return maData;
+        }
+
+        function calculateBOLL(data, period = 20, multiplier = 2) {
+            const boll = { middle: [], upper: [], lower: [] };
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) continue;
+                let sum = 0;
+                for (let j = 0; j < period; j++) sum += data[i - j].close;
+                const ma = sum / period;
+
+                let variance = 0;
+                for (let j = 0; j < period; j++) {
+                    variance += Math.pow(data[i - j].close - ma, 2);
+                }
+                const stdDev = Math.sqrt(variance / period);
+
+                boll.middle.push({ time: data[i].time, value: Number(ma.toFixed(2)) });
+                boll.upper.push({ time: data[i].time, value: Number((ma + multiplier * stdDev).toFixed(2)) });
+                boll.lower.push({ time: data[i].time, value: Number((ma - multiplier * stdDev).toFixed(2)) });
+            }
+            return boll;
+        }
+
+        function calculateEMARaw(data, period) {
+            const ema = [];
+            if (data.length === 0) return ema;
+            const k = 2 / (period + 1);
+            let val = data[0].close;
+            ema.push(val);
+            for (let i = 1; i < data.length; i++) {
+                val = data[i].close * k + val * (1 - k);
+                ema.push(val);
+            }
+            return ema;
+        }
+
+        /**
+         * FIXED MACD calculation (Eliminated time-type alignment mismatch bugs)
+         */
+        function calculateMACD(data, short = 12, long = 26, signal = 9) {
+            const macd = { dif: [], dea: [], hist: [] };
+            if (data.length === 0) return macd;
+
+            const emaShort = calculateEMARaw(data, short);
+            const emaLong = calculateEMARaw(data, long);
+
+            const dif = [];
+            for (let i = 0; i < data.length; i++) {
+                dif.push({ time: data[i].time, value: emaShort[i] - emaLong[i] });
+            }
+
+            const k = 2 / (signal + 1);
+            let deaVal = dif[0].value;
+            const dea = [{ time: dif[0].time, value: deaVal }];
+
+            for (let i = 1; i < dif.length; i++) {
+                deaVal = dif[i].value * k + deaVal * (1 - k);
+                dea.push({ time: dif[i].time, value: deaVal });
+            }
+
+            for (let i = 0; i < dif.length; i++) {
+                const histVal = 2 * (dif[i].value - dea[i].value);
+                macd.dif.push({ time: data[i].time, value: Number(dif[i].value.toFixed(3)) });
+                macd.dea.push({ time: data[i].time, value: Number(dea[i].value.toFixed(3)) });
+                macd.hist.push({ time: data[i].time, value: Number(histVal.toFixed(3)) });
+            }
+            return macd;
+        }
+
+        function calculateKDJ(data, n = 9, m1 = 3, m2 = 3) {
+            const kdj = { k: [], d: [], j: [] };
+            if (data.length === 0) return kdj;
+
+            let kVal = 50;
+            let dVal = 50;
+
+            for (let i = 0; i < data.length; i++) {
+                if (i < n - 1) {
+                    kdj.k.push({ time: data[i].time, value: 50 });
+                    kdj.d.push({ time: data[i].time, value: 50 });
+                    kdj.j.push({ time: data[i].time, value: 50 });
+                    continue;
+                }
+
+                let lowN = data[i].low;
+                let highN = data[i].high;
+                for (let j = 0; j < n; j++) {
+                    if (data[i - j].low < lowN) lowN = data[i - j].low;
+                    if (data[i - j].high > highN) highN = data[i - j].high;
+                }
+
+                const rsv = (highN === lowN) ? 0 : ((data[i].close - lowN) / (highN - lowN)) * 100;
+                kVal = (2 / m1) * kVal + (1 / m1) * rsv;
+                dVal = (2 / m2) * dVal + (1 / m2) * kVal;
+                const jVal = 3 * kVal - 2 * dVal;
+
+                kdj.k.push({ time: data[i].time, value: Number(kVal.toFixed(2)) });
+                kdj.d.push({ time: data[i].time, value: Number(dVal.toFixed(2)) });
+                kdj.j.push({ time: data[i].time, value: Number(jVal.toFixed(2)) });
+            }
+            return kdj;
+        }
+
+        function calculateRSI(data, period = 14) {
+            const rsiList = [];
+            if (data.length < period + 1) {
+                for (let i = 0; i < data.length; i++) {
+                    rsiList.push({ time: data[i].time, value: 50 });
+                }
+                return rsiList;
+            }
+            let avgGain = 0;
+            let avgLoss = 0;
+
+            for (let i = 1; i <= period; i++) {
+                const diff = data[i].close - data[i - 1].close;
+                if (diff > 0) avgGain += diff;
+                else avgLoss -= diff;
+            }
+
+            avgGain /= period;
+            avgLoss /= period;
+
+            let rsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+
+            for (let i = 0; i < period; i++) {
+                rsiList.push({ time: data[i].time, value: 50 });
+            }
+            rsiList.push({ time: data[period].time, value: Number(rsi.toFixed(2)) });
+
+            for (let i = period + 1; i < data.length; i++) {
+                const diff = data[i].close - data[i - 1].close;
+                avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
+                avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
+                rsi = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+                rsiList.push({ time: data[i].time, value: Number(rsi.toFixed(2)) });
+            }
+            return rsiList;
+        }
+
+        function calculateDMI(data, period = 14) {
+            const dmi = { pdi: [], mdi: [], adx: [] };
+            if (data.length < period + 1) {
+                for (let i = 0; i < data.length; i++) {
+                    dmi.pdi.push({ time: data[i].time, value: 50 });
+                    dmi.mdi.push({ time: data[i].time, value: 50 });
+                    dmi.adx.push({ time: data[i].time, value: 50 });
+                }
+                return dmi;
+            }
+            const plusDM = [];
+            const minusDM = [];
+            const tr = [];
+
+            for (let i = 1; i < data.length; i++) {
+                const highDiff = data[i].high - data[i - 1].high;
+                const lowDiff = data[i - 1].low - data[i].low;
+
+                let pDM = 0;
+                let mDM = 0;
+
+                if (highDiff > lowDiff && highDiff > 0) {
+                    pDM = highDiff;
+                }
+                if (lowDiff > highDiff && lowDiff > 0) {
+                    mDM = lowDiff;
+                }
+
+                plusDM.push(pDM);
+                minusDM.push(mDM);
+
+                const trueRange = Math.max(
+                    data[i].high - data[i].low,
+                    Math.abs(data[i].high - data[i - 1].close),
+                    Math.abs(data[i].low - data[i - 1].close)
+                );
+                tr.push(trueRange);
+            }
+
+            const smoothPlusDM = calculateEMARaw(plusDM.map(v => ({ close: v })), period);
+            const smoothMinusDM = calculateEMARaw(minusDM.map(v => ({ close: v })), period);
+            const smoothTR = calculateEMARaw(tr.map(v => ({ close: v })), period);
+
+            const plusDI = [];
+            const minusDI = [];
+            const dx = [];
+
+            for (let i = 0; i < smoothTR.length; i++) {
+                if (smoothTR[i] === 0) {
+                    plusDI.push(0);
+                    minusDI.push(0);
+                    dx.push(0);
+                } else {
+                    const pDI = (smoothPlusDM[i] / smoothTR[i]) * 100;
+                    const mDI = (smoothMinusDM[i] / smoothTR[i]) * 100;
+                    plusDI.push(pDI);
+                    minusDI.push(mDI);
+
+                    const sum = pDI + mDI;
+                    const dxValue = sum === 0 ? 0 : (Math.abs(pDI - mDI) / sum) * 100;
+                    dx.push(dxValue);
+                }
+            }
+
+            const adxRaw = calculateEMARaw(dx.map(v => ({ close: v })), period);
+
+            for (let i = 0; i < plusDI.length; i++) {
+                const dataIndex = period + i;
+                if (dataIndex < data.length) {
+                    dmi.pdi.push({ time: data[dataIndex].time, value: Number(plusDI[i].toFixed(2)) });
+                    dmi.mdi.push({ time: data[dataIndex].time, value: Number(minusDI[i].toFixed(2)) });
+                    dmi.adx.push({ time: data[dataIndex].time, value: Number(adxRaw[i].toFixed(2)) });
+                }
+            }
+
+            return dmi;
+        }
+
+        function calculateOBV(data) {
+            const obvList = [];
+            if (data.length === 0) return obvList;
+
+            let obv = 0;
+            obvList.push({ time: data[0].time, value: data[0].volume });
+
+            for (let i = 1; i < data.length; i++) {
+                if (data[i].close > data[i - 1].close) {
+                    obv += data[i].volume;
+                } else if (data[i].close < data[i - 1].close) {
+                    obv -= data[i].volume;
+                }
+                obvList.push({ time: data[i].time, value: obv });
+            }
+            return obvList;
+        }
+
+        // ------------------ Data Stream Import logic ------------------
+
+        function parseCSV(csvText) {
+            if (!csvText || csvText.trim() === '') return [];
+
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.slice(1);
+            }
+
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            let separator = ',';
+            if (lines[0].includes(';')) separator = ';';
+            else if (lines[0].includes('\t')) separator = '\t';
+
+            const headers = lines[0].split(separator).map(h => h.trim().replace(/^["']|["']$/g, ''));
+            
+            const dateIdx = headers.findIndex(h => h.includes('日期') || h.includes('时间') || h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
+            const openIdx = headers.findIndex(h => h.includes('开盘') || h.toLowerCase().includes('open'));
+            const closeIdx = headers.findIndex(h => h.includes('收盘') || h.toLowerCase().includes('close'));
+            const highIdx = headers.findIndex(h => h.includes('最高') || h.toLowerCase().includes('high'));
+            const lowIdx = headers.findIndex(h => h.includes('最低') || h.toLowerCase().includes('low'));
+            const volIdx = headers.findIndex(h => h.includes('成交') || h.toLowerCase().includes('volume') || h.toLowerCase().includes('vol'));
+
+            if (dateIdx === -1 || openIdx === -1 || closeIdx === -1 || highIdx === -1 || lowIdx === -1) {
+                showError('CSV 格式解析不匹配', '未能检索到关键列要素（日期、收盘价等），请检查 CSV 首行首列结构。');
+                return [];
+            }
+
+            const parsed = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(separator).map(c => c.trim());
+                if (cols.length < headers.length) continue;
+
+                const dateStr = normalizeDate(cols[dateIdx]);
+                if (!dateStr) continue;
+
+                const openVal = parseFloat(cols[openIdx].replace(/[^\d\.]/g, ''));
+                const closeVal = parseFloat(cols[closeIdx].replace(/[^\d\.]/g, ''));
+                const highVal = parseFloat(cols[highIdx].replace(/[^\d\.]/g, ''));
+                const lowVal = parseFloat(cols[lowIdx].replace(/[^\d\.]/g, ''));
+                const volVal = parseFloat(cols[volIdx] ? cols[volIdx].replace(/[^\d\.]/g, '') : '0') || 0;
+
+                if (isNaN(openVal) || isNaN(closeVal) || isNaN(highVal) || isNaN(lowVal)) continue;
+
+                parsed.push({
+                    time: dateStr,
+                    open: openVal,
+                    high: highVal,
+                    low: lowVal,
+                    close: closeVal,
+                    volume: volVal
+                });
+            }
+
+            parsed.sort((a, b) => a.time.localeCompare(b.time));
+            return parsed;
+        }
+
+        // ------------------ Period controls ------------------
+
+        function changePeriod(period) {
+            currentPeriod = period;
+
+            ['D', 'W', 'M'].forEach(p => {
+                const el = document.getElementById(`period-${p}`);
+                if (el) {
+                    if (p === period) {
+                        el.className = "py-1 text-center text-[10px] font-semibold rounded-full transition-all bg-zinc-950 text-white shadow-sm";
+                    } else {
+                        el.className = "py-1 text-center text-[10px] font-semibold rounded-full text-zinc-500 hover:text-zinc-900 transition-all";
+                    }
+                }
+            });
+
+            ['D', 'W', 'M'].forEach(p => {
+                const el = document.getElementById(`mobile-period-${p}`);
+                if (el) {
+                    if (p === period) {
+                        el.className = "p-2 text-xs rounded-full bg-[#111111] text-white font-semibold";
+                    } else {
+                        el.className = "p-2 text-xs rounded-full border border-zinc-200 hover:border-[#111111]";
+                    }
+                }
+            });
+
+            const targetData = aggregateData(baseDailyData, period);
+            renderData(targetData, false);
+        }
+
+        // ------------------ Data Rendering ------------------
+
+        function renderData(data, isNewSource = true) {
+            if (!data || data.length === 0) return;
+            
+            if (isNewSource) {
+                baseDailyData = data;
+                if (currentPeriod !== 'D') {
+                    currentParsedData = aggregateData(baseDailyData, currentPeriod);
+                } else {
+                    currentParsedData = data;
+                }
+            } else {
+                currentParsedData = data;
+            }
+
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const candles = currentParsedData.map(item => ({
+                        time: item.time,
+                        open: item.open,
+                        high: item.high,
+                        low: item.low,
+                        close: item.close
+                    }));
+                    candleSeries.setData(candles);
+
+                    const volumes = currentParsedData.map(item => ({
+                        time: item.time,
+                        value: item.volume,
+                        color: item.close >= item.open ? 'rgba(234, 67, 53, 0.16)' : 'rgba(52, 168, 83, 0.16)'
+                    }));
+                    mainVolumeSeries.setData(volumes);
+
+                    updateMainIndicators();
+                    updateSubIndicatorView();
+
+                    mainChart.timeScale().fitContent();
+
+                    const periodNames = { 'D': '日线', 'W': '周线', 'M': '月线' };
+                    document.getElementById('stat-days').innerText = `${currentParsedData.length} 个数据点`;
+                    displayOHLCV(currentParsedData[currentParsedData.length - 1]);
+                } catch (err) {
+                    showError('渲染引擎发生严重溢出', '数据合并入 Canvas 时失败：' + err.message);
+                } finally {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                }
+            }, 50);
+        }
+
+        function updateMainIndicators() {
+            if (currentParsedData.length === 0) return;
+
+            // 1. MA1
+            if (document.getElementById('enable-ma1').checked) {
+                const period = parseInt(document.getElementById('ma1-period').value) || 5;
+                ma1Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma1Series.setData([]);
+            }
+
+            // 2. MA2
+            if (document.getElementById('enable-ma2').checked) {
+                const period = parseInt(document.getElementById('ma2-period').value) || 10;
+                ma2Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma2Series.setData([]);
+            }
+
+            // 3. MA3
+            if (document.getElementById('enable-ma3').checked) {
+                const period = parseInt(document.getElementById('ma3-period').value) || 30;
+                ma3Series.setData(calculateMA(currentParsedData, period));
+            } else {
+                ma3Series.setData([]);
+            }
+
+            // 4. BOLL
+            if (document.getElementById('enable-boll').checked) {
+                const boll = calculateBOLL(currentParsedData, 20, 2);
+                bollMiddleSeries.setData(boll.middle);
+                bollUpperSeries.setData(boll.upper);
+                bollLowerSeries.setData(boll.lower);
+            } else {
+                bollMiddleSeries.setData([]);
+                bollUpperSeries.setData([]);
+                bollLowerSeries.setData([]);
+            }
+        }
+
+        function clearAllSubSeries() {
+            if (subMacdDifSeries) { subChart.removeSeries(subMacdDifSeries); subMacdDifSeries = null; }
+            if (subMacdDeaSeries) { subChart.removeSeries(subMacdDeaSeries); subMacdDeaSeries = null; }
+            if (subMacdHistSeries) { subChart.removeSeries(subMacdHistSeries); subMacdHistSeries = null; }
+            if (subKdjKSeries) { subChart.removeSeries(subKdjKSeries); subKdjKSeries = null; }
+            if (subKdjDSeries) { subChart.removeSeries(subKdjDSeries); subKdjDSeries = null; }
+            if (subKdjJSeries) { subChart.removeSeries(subKdjJSeries); subKdjJSeries = null; }
+            if (subRsiSeries) { subChart.removeSeries(subRsiSeries); subRsiSeries = null; }
+            if (subObvSeries) { subChart.removeSeries(subObvSeries); subObvSeries = null; }
+            if (subDmiPdiSeries) { subChart.removeSeries(subDmiPdiSeries); subDmiPdiSeries = null; }
+            if (subDmiMdiSeries) { subChart.removeSeries(subDmiMdiSeries); subDmiMdiSeries = null; }
+            if (subDmiAdxSeries) { subChart.removeSeries(subDmiAdxSeries); subDmiAdxSeries = null; }
+        }
+
+        function selectSubIndicator(type) {
+            currentSubIndicator = type;
+
+            ['none', 'macd', 'kdj', 'rsi', 'obv', 'dmi'].forEach(t => {
+                const el = document.getElementById(`sub-${t}`);
+                if (el) {
+                    if (t === type) {
+                        el.className = "w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all bg-zinc-50 text-zinc-950 border-l-2 border-zinc-900";
+                    } else {
+                        el.className = "w-full text-left px-4 py-2.5 text-[10px] font-bold flex justify-between items-center transition-all hover:bg-zinc-50 text-zinc-500";
+                    }
+                }
+            });
+
+            const subContainer = document.getElementById('sub-chart-container');
+            if (type === 'none') {
+                subContainer.classList.add('hidden');
+            } else {
+                subContainer.classList.remove('hidden');
+                document.getElementById('sub-title').innerText = `// AUX_INDEX // SLAVE_${type.toUpperCase()}_ENGINE`;
+            }
+
+            const mainContainer = document.getElementById('main-chart-container');
+            if (mainChart) mainChart.resize(mainContainer.clientWidth, mainContainer.clientHeight);
+            if (subChart) subChart.resize(subContainer.clientWidth, subContainer.clientHeight);
+
+            updateSubIndicatorView();
+
+            setTimeout(() => {
+                const mainRange = mainChart.timeScale().getVisibleRange();
+                if (mainRange) {
+                    subChart.timeScale().setVisibleRange(mainRange);
+                }
+            }, 100);
+        }
+
+        function updateSubIndicatorView() {
+            if (!subChart || currentParsedData.length === 0) return;
+
+            clearAllSubSeries();
+
+            if (currentSubIndicator === 'none') return;
+
+            if (currentSubIndicator === 'macd') {
+                subMacdHistSeries = subChart.addHistogramSeries({
+                    priceFormat: { type: 'volume' },
+                    color: '#111111'
+                });
+                subMacdDifSeries = subChart.addLineSeries({ color: '#0066cc', lineWidth: 1.2, lastValueVisible: false });
+                subMacdDeaSeries = subChart.addLineSeries({ color: '#e28743', lineWidth: 1.2, lastValueVisible: false });
+
+                const macd = calculateMACD(currentParsedData);
+                subMacdDifSeries.setData(macd.dif);
+                subMacdDeaSeries.setData(macd.dea);
+
+                const histData = macd.hist.map(item => ({
+                    time: item.time,
+                    value: item.value,
+                    color: item.value >= 0 ? 'rgba(234, 67, 53, 0.4)' : 'rgba(52, 168, 83, 0.4)'
+                }));
+                subMacdHistSeries.setData(histData);
+
+            } else if (currentSubIndicator === 'kdj') {
+                subKdjKSeries = subChart.addLineSeries({ color: '#0066cc', lineWidth: 1.2, lastValueVisible: false });
+                subKdjDSeries = subChart.addLineSeries({ color: '#e28743', lineWidth: 1.2, lastValueVisible: false });
+                subKdjJSeries = subChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.2, lastValueVisible: false });
+
+                const kdj = calculateKDJ(currentParsedData);
+                subKdjKSeries.setData(kdj.k);
+                subKdjDSeries.setData(kdj.d);
+                subKdjJSeries.setData(kdj.j);
+
+            } else if (currentSubIndicator === 'rsi') {
+                subRsiSeries = subChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.5, lastValueVisible: false });
+                const rsi = calculateRSI(currentParsedData);
+                subRsiSeries.setData(rsi);
+            } else if (currentSubIndicator === 'obv') {
+                subObvSeries = subChart.addLineSeries({ color: '#09090b', lineWidth: 1.5, lastValueVisible: false });
+                const obv = calculateOBV(currentParsedData);
+                subObvSeries.setData(obv);
+            } else if (currentSubIndicator === 'dmi') {
+                subDmiPdiSeries = subChart.addLineSeries({ color: '#ea4335', lineWidth: 1.2, lastValueVisible: false });
+                subDmiMdiSeries = subChart.addLineSeries({ color: '#34a853', lineWidth: 1.2, lastValueVisible: false });
+                subDmiAdxSeries = subChart.addLineSeries({ color: '#0066cc', lineWidth: 1.2, lastValueVisible: false });
+
+                const dmi = calculateDMI(currentParsedData);
+                subDmiPdiSeries.setData(dmi.pdi);
+                subDmiMdiSeries.setData(dmi.mdi);
+                subDmiAdxSeries.setData(dmi.adx);
+            }
+
+            const mainRange = mainChart.timeScale().getVisibleRange();
+            if (mainRange) {
+                subChart.timeScale().setVisibleRange(mainRange);
+            }
+        }
+
+        // ------------------ Telemetry HUD ------------------
+
+        function displayOHLCV(item) {
+            if (!item) return;
+
+            const change = item.close - item.open;
+            const changePercent = (change / item.open) * 100;
+            const isUp = change >= 0;
+
+            document.getElementById('info-open').innerText = item.open.toFixed(2);
+            document.getElementById('info-high').innerText = item.high.toFixed(2);
+            document.getElementById('info-low').innerText = item.low.toFixed(2);
+            document.getElementById('info-close').innerText = item.close.toFixed(2);
+            
+            const changeEl = document.getElementById('info-change');
+            changeEl.innerText = `${isUp ? '+' : ''}${change.toFixed(2)} (${isUp ? '+' : ''}${changePercent.toFixed(2)}%)`;
+            changeEl.className = isUp ? 'text-[#ea4335] font-bold' : 'text-[#34a853] font-bold';
+
+            const formatVol = (val) => {
+                if (val >= 1e9) return (val / 1e9).toFixed(2) + ' B';
+                if (val >= 1e6) return (val / 1e6).toFixed(2) + ' M';
+                if (val >= 1e3) return (val / 1e3).toFixed(2) + ' K';
+                return val.toString();
+            };
+            document.getElementById('info-volume').innerText = formatVol(item.volume);
+
+            const lastPriceBadge = document.getElementById('last-price-badge');
+            lastPriceBadge.innerText = item.close.toFixed(2);
+            lastPriceBadge.className = `text-[11px] font-bold rounded-full px-3 py-0.5 border ${isUp ? 'bg-red-50 border-red-200 text-[#ea4335]' : 'bg-green-50 border-green-200 text-[#34a853]'}`;
+        }
+
+        function loadBackupData() {
+            fetch(DEFAULT_CSV_DATA)
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('未能在本地找到指定资源走势文件');
+                })
+                .then(csvText => {
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('ticker-name').innerText = 'GRAVITY™ INDEX';
+                        document.getElementById('data-source-status').innerText = '当前数据轨道：已成功连接至 autoPoiesis™ 云端实证数据库';
+                        renderData(parsed, true);
+                    }
+                })
+                .catch(err => {
+                    showError('网络连接失败', '未能成功读取备用云端数据。请检查网络。');
+                });
+        }
+
+        // ------------------ Life-cycle bindings ------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof LightweightCharts === 'undefined') {
+                showError('核心组件加载失败', '由于网络问题未能成功获取图表引擎。请刷新页面再试。');
+                return;
+            }
+
+            try {
+                initCharts();
+                selectSubIndicator('macd');
+            } catch (err) {
+                showError('图表引擎错误', '在构建 canvas 容器时发生错误：' + err.message);
+                return;
+            }
+
+            // Fallback load index.csv
+            fetch('https://kawasakikusako.github.io/generalExp/vix/index.csv')
+                .then(response => {
+                    if (response.ok) return response.text();
+                    throw new Error('未能定位到本地数据库轨道');
+                })
+                .then(csvText => {
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('ticker-name').innerText = 'GRAVITY™ INDEX';
+                        document.getElementById('data-source-status').innerText = '当前数据轨道：已成功连接至 autoPoiesis™ 云端实证数据库';
+                        renderData(parsed, true);
+                    } else {
+                        loadBackupData();
+                    }
+                })
+                .catch(err => {
+                    console.warn(err.message);
+                    loadBackupData();
+                });
+
+            // Local CSV drag & drop parser
+            const fileInput = document.getElementById('csv-file-input');
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const csvText = evt.target.result;
+                    const parsed = parseCSV(csvText);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('error-overlay').classList.add('hidden');
+                        document.getElementById('ticker-name').innerText = file.name.replace('.csv', '').toUpperCase() + '™';
+                        document.getElementById('data-source-status').innerText = `本地私有数据轨道：[ ${file.name.toUpperCase()} ] 映射装载完成`;
+                        renderData(parsed, true);
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Reset back to cloud DB
+            document.getElementById('reset-data-btn').addEventListener('click', () => {
+                document.getElementById('error-overlay').classList.add('hidden');
+                loadBackupData();
+            });
+
+            // Re-render overlays dynamically
+            const mainIndicatorControls = [
+                'enable-ma1', 'ma1-period',
+                'enable-ma2', 'ma2-period',
+                'enable-ma3', 'ma3-period',
+                'enable-boll'
+            ];
+            mainIndicatorControls.forEach(ctrlId => {
+                const el = document.getElementById(ctrlId);
+                if (el) {
+                    el.addEventListener('change', updateMainIndicators);
+                    if (el.tagName === 'INPUT' && el.type === 'number') {
+                        el.addEventListener('input', updateMainIndicators);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
