@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f9f8f5">
+<title>Kawasaki Open Academic Pipeline — From idea to manuscript</title>
+<meta name="description" content="The open-source AI workbench for academic writing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Kawasaki Academic Pipeline 
+   ============================================================ */
+:root{
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+  --ease-glass: cubic-bezier(.3,1.2,.6,1);
+  --font-display: "DM Serif Display","Georgia",serif;
+  --font-body: "Inter",system-ui,sans-serif;
+  --font-mono: "JetBrains Mono",monospace;
+}
+:root,:root[data-theme="light"]{
+  --bg:#faf9f6;--bg-warm:#f5f2ec;--bg-hover:#eeebe3;
+  --fg:#111110;--fg-muted:#5c5b56;--fg-subtle:#9e9b94;
+  --border:#e2ded6;--border-strong:#cdc8be;
+  --accent-yellow:#ffea00;--accent-teal:#00c7bd;--accent-magenta:#ff1aac;
+  --nav-bg:rgba(250,249,246,.82);--nav-border:rgba(0,0,0,.04);
+  --code-bg:rgba(0,0,0,.025);--card-shadow:0 4px 20px rgba(0,0,0,.06);
+  --orb-opacity:.12;--glass-bg:rgba(255,255,255,.42);--glass-border:rgba(255,255,255,.6);
+  --dot-color:rgba(0,0,0,.035);--frame-tint:rgba(0,0,0,.018);
+}
+:root[data-theme="dark"]{
+  --bg:#0c0c0b;--bg-warm:#151413;--bg-hover:#1e1d1b;
+  --fg:#e6e4de;--fg-muted:#9d9a94;--fg-subtle:#615f5a;
+  --border:#2b2925;--border-strong:#3f3c35;
+  --accent-yellow:#fffa00;--accent-teal:#00c7bd;--accent-magenta:#ff1aac;
+  --nav-bg:rgba(12,12,11,.8);--nav-border:rgba(255,255,255,.04);
+  --code-bg:rgba(255,255,255,.04);--card-shadow:0 2px 20px rgba(0,0,0,.5);
+  --orb-opacity:.05;--glass-bg:rgba(30,30,30,.45);--glass-border:rgba(255,255,255,.08);
+  --dot-color:rgba(255,255,255,.02);--frame-tint:rgba(255,255,255,.015);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--fg);
+  font:15.5px/1.75 var(--font-body);font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  transition:background .5s var(--ease-out),color .5s var(--ease-out);
+  overflow-x:hidden;
+}
+/* subtle dot grid texture */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(var(--dot-color) 1px,transparent 1px);
+  background-size:20px 20px;
+  transition:background-image .5s var(--ease-out);
+}
+::selection{background:var(--accent-yellow);color:#000}
+a{color:inherit;text-decoration:none}
+
+/* ── color accents: yellow for decoration only, teal & magenta for text ── */
+.c-t{color:var(--accent-teal)}.c-m{color:var(--accent-magenta)}
+
+/* ── Background orbs ── */
+.bg-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-deco .orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:var(--orb-opacity);transition:opacity .6s var(--ease-out)}
+.bg-deco .o1{width:600px;height:600px;background:var(--accent-magenta);top:-240px;right:-180px}
+.bg-deco .o2{width:480px;height:480px;background:var(--accent-yellow);bottom:-180px;left:-140px}
+.bg-deco .o3{width:360px;height:360px;background:var(--accent-teal);top:50%;left:50%;transform:translate(-50%,-50%)}
+
+/* ── Nav ── */
+nav{
+  position:sticky;top:0;z-index:100;background:var(--nav-bg);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--nav-border);padding:0 32px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .5s var(--ease-out);
+}
+.nav-brand{font-weight:600;font-size:14px;letter-spacing:-.01em;font-family:var(--font-body)}
+.nav-brand::before{content:'';display:inline-block;width:22px;height:5px;margin-right:8px;vertical-align:middle;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal))}
+.nav-links{display:flex;gap:2px}
+.nav-links a{color:var(--fg-muted);padding:6px 12px;font-size:13px;font-weight:500;border-radius:6px;transition:color .3s ease,background .25s ease}
+.nav-links a:hover{background:var(--bg-hover);color:var(--fg)}
+.theme-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:15px;color:var(--fg-muted);transition:all .25s ease;margin-left:8px;font-family:var(--font-body)}
+.theme-btn:hover{border-color:var(--border-strong);color:var(--fg)}
+
+/* ── Sections ── */
+section{padding:90px 32px;position:relative;z-index:1}
+.container{max-width:880px;margin:0 auto}
+.s-label{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--fg-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.s-title{font-family:var(--font-display);font-size:clamp(30px,4.5vw,46px);font-weight:400;line-height:1.14;letter-spacing:-.025em;margin-bottom:20px}
+.s-title em{font-style:italic}
+.s-sub{font-size:15.5px;color:var(--fg-muted);line-height:1.8;max-width:620px;font-weight:400}
+
+/* ── 3-color gradient ── */
+.grad{width:100%;height:2px;margin:20px 0 0;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta) 0 35%,var(--accent-yellow) 35% 82%,var(--accent-teal) 82% 100%);transform-origin:left}
+
+/* ── Reveal ── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .75s var(--ease-out),transform .75s var(--ease-out)}
+.reveal.visible{opacity:1;transform:none}
+.reveal.d1{transition-delay:0s}.reveal.d2{transition-delay:.06s}.reveal.d3{transition-delay:.12s}.reveal.d4{transition-delay:.18s}
+
+/* ── Hero ── */
+.hero{padding:120px 32px 60px;text-align:center}
+.hero .s-title{font-size:clamp(38px,7vw,68px);margin-bottom:28px;font-weight:400;line-height:1.1}
+.hero .s-title em{font-style:italic}
+.hero .grad{width:180px;margin:32px auto 0}
+.tag-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.tag{padding:5px 15px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:10.5px;color:var(--fg-muted);letter-spacing:.05em;transition:all .25s var(--ease-glass)}
+.tag:hover{border-color:var(--border-strong);color:var(--fg);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+
+/* ══════════ DECORATIVE FRAMES ══════════ */
+.frame-box{
+  position:relative;padding:28px 32px;border-radius:16px;
+  background:var(--frame-tint);border:1px solid var(--border);
+  transition:all .35s var(--ease-glass);
+}
+.frame-box::after{
+  content:'';position:absolute;top:-1px;left:32px;right:32px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-yellow),transparent);
+  opacity:0;transition:opacity .35s var(--ease-out);
+}
+.frame-box:hover::after{opacity:1}
+.frame-box .f-title{font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:8px}
+.frame-box .f-body{font-size:14px;color:var(--fg-muted);line-height:1.8}
+
+/* ── Glass Cards (modules) with 3D tilt ── */
+.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;perspective:1200px}
+.mod-card{
+  position:relative;padding:38px 28px 32px;border-radius:18px;
+  background:var(--glass-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--glass-border);overflow:hidden;
+  transition:box-shadow .4s var(--ease-glass),transform .15s ease-out;
+  transform-style:preserve-3d;
+}
+.mod-card::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(135deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal),var(--accent-magenta));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s var(--ease-out);
+}
+.mod-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.mod-card:hover::before{opacity:1}
+.mod-card .mod-inner{transform:translateZ(20px)}
+.mod-card .bar{height:2px;width:32px;margin-bottom:22px;border-radius:2px}
+.mod-card .bar.y{background:var(--accent-yellow)}.mod-card .bar.t{background:var(--accent-teal)}.mod-card .bar.c{background:var(--accent-magenta)}
+.mod-card h3{font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:14px}
+.mod-card p{font-size:13.5px;color:var(--fg-muted);line-height:1.85;margin-bottom:18px}
+.mod-card .pills{display:flex;flex-wrap:wrap;gap:4px}
+.mod-card .pill{padding:3px 10px;border-radius:12px;background:var(--glass-bg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:9.5px;color:var(--fg-muted);letter-spacing:.04em;transition:all .2s ease}
+.mod-card .pill:hover{border-color:var(--border-strong);color:var(--fg)}
+
+/* ══════════ PIPELINE — timeline style ══════════ */
+.timeline{position:relative;padding-left:32px}
+.timeline::before{
+  content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal));
+  border-radius:1px;opacity:.5;
+}
+.tl-item{position:relative;padding:0 0 28px 32px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{
+  content:'';position:absolute;left:-28px;top:5px;width:12px;height:12px;
+  border-radius:50%;border:2px solid var(--accent-yellow);background:var(--bg);
+  transition:all .3s ease;
+}
+.tl-item:hover::before{background:var(--accent-yellow);box-shadow:0 0 12px rgba(255,250,0,.25)}
+.tl-item .tl-num{font-family:var(--font-mono);font-size:10px;color:var(--accent-teal);letter-spacing:.08em;margin-bottom:2px}
+.tl-item .tl-title{font-family:var(--font-display);font-size:18px;font-weight:400;margin-bottom:4px}
+.tl-item .tl-desc{font-size:13px;color:var(--fg-muted);line-height:1.7}
+
+/* ══════════ STAT CARDS (section divider) ══════════ */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:14px;overflow:hidden;border:1px solid var(--border);perspective:800px}
+.stat-cell{
+  text-align:center;padding:28px 16px;background:var(--bg);
+  transition:transform .5s var(--ease-glass);transform-style:preserve-3d;
+  position:relative;min-height:100px;
+}
+.stat-cell:hover{transform:rotateY(180deg)}
+.stat-cell .front,.stat-cell .back{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:20px 12px;
+}
+.stat-cell .back{transform:rotateY(180deg);background:var(--bg-warm)}
+.stat-cell .n{font-family:var(--font-display);font-size:32px;font-weight:400;color:var(--fg)}
+.stat-cell .l{font-family:var(--font-mono);font-size:10px;color:var(--fg-muted);letter-spacing:.06em;margin-top:6px;text-transform:uppercase}
+.stat-cell .b-text{font-size:12.5px;color:var(--fg-muted);line-height:1.6}
+
+/* ── Features ── */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.feat-card{
+  padding:30px 28px;border-radius:16px;
+  background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border);
+  transition:all .3s var(--ease-glass);
+}
+.feat-card:hover{transform:translateY(-2px);box-shadow:var(--card-shadow);border-color:var(--border-strong)}
+.feat-card h3{font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:8px}
+.feat-card h3 .accent-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle;position:relative;top:-1px}
+.feat-card p{font-size:13.5px;color:var(--fg-muted);line-height:1.75}
+
+/* ── Compare ── */
+.cmp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+.cmp-table th{text-align:left;padding:14px 20px;font-family:var(--font-display);font-size:16px;font-weight:400;border-bottom:2px solid var(--border);background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cmp-table th:first-child{border-radius:12px 0 0 0}.cmp-table th:last-child{border-radius:0 12px 0 0}
+.cmp-table td{padding:12px 20px;border-bottom:1px solid var(--border);color:var(--fg-muted);transition:background .25s ease}
+.cmp-table tr:last-child td:first-child{border-radius:0 0 0 12px}.cmp-table tr:last-child td:last-child{border-radius:0 0 12px 0}
+.cmp-table tr:hover td{background:var(--bg-warm)}
+.cmp-table .check{color:var(--accent-teal);font-weight:600}
+
+/* ── Tech ── */
+.tech-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tech-item{padding:6px 16px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:11.5px;color:var(--fg-muted);letter-spacing:.03em;transition:all .25s var(--ease-glass)}
+.tech-item:hover{border-color:var(--border-strong);color:var(--fg);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+
+/* ── Code block ── */
+.code-block{border-radius:14px;overflow:hidden;background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);padding:28px 32px;font-family:var(--font-mono);font-size:13px;line-height:1.9}
+.code-block .c{color:var(--fg-subtle)}
+
+/* ── CTA ── */
+.cta{text-align:center;padding:60px 32px 110px}
+.cta .btn{display:inline-flex;align-items:center;gap:8px;padding:15px 40px;border-radius:14px;font-weight:600;font-size:15px;text-decoration:none;background:var(--fg);color:var(--bg);transition:transform .35s var(--ease-glass),box-shadow .35s ease}
+.cta .btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.cta .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:14px 38px;margin-left:10px;border-radius:14px;font-weight:600;font-size:15px;text-decoration:none;background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--fg);transition:all .3s var(--ease-glass)}
+.cta .btn-ghost:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+
+/* ── Footer ── */
+footer{text-align:center;padding:48px 32px;border-top:1px solid var(--border);color:var(--fg-muted);font-size:13px;line-height:1.9;position:relative;z-index:1;transition:border-color .5s var(--ease-out)}
+footer .fbar{display:inline-block;width:48px;height:2px;margin-bottom:16px;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal))}
+footer a{color:var(--fg);text-decoration:underline;text-underline-offset:4px}
+
+@media(max-width:768px){
+  nav{padding:0 16px}.nav-links{display:none}
+  section{padding:56px 16px}
+  .feat-grid,.mod-grid,.stat-row{grid-template-columns:1fr 1fr}
+  .hero{padding:80px 16px 40px}
+  .timeline{padding-left:20px}.tl-item{padding-left:24px}.tl-item::before{left:-24px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-deco"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+<!-- ═══════ NAV ═══════ -->
+<nav>
+  <div class="nav-brand">Kawasaki Academic Pipeline</div>
+  <div style="display:flex;align-items:center">
+    <div class="nav-links">
+      <a href="#modules">Workbenches</a><a href="#pipeline">Pipeline</a>
+      <a href="#features">Features</a><a href="#compare">Compare</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/KawasakiKusako/openAcademicPipeline">GitHub</a>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">☀</button>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="container">
+    <h1 class="s-title reveal d2">From <em class="c-t">idea</em> to <em class="c-m">manuscript</em>.<br>Research pipeline, <em class="c-t">AI sandbox</em>,<br>peer review — in one place.</h1>
+    <p class="s-sub reveal d3" style="margin:0 auto">The open-source AI workbench for academic writing. Runs on Claude Code CLI, with <span class="c-t">your keys</span>. Research, write, review, revise — all in a <span class="c-m">visual web platform</span>, not a terminal.</p>
+    <div class="grad reveal d4"></div>
+    <div class="tag-row reveal d4">
+      <span class="tag">10-stage pipeline</span><span class="tag">AI sandbox</span><span class="tag">peer review</span><span class="tag">model-agnostic</span><span class="tag">local-first</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ STAT ROW ═══════ -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="stat-row reveal">
+      <div class="stat-cell"><div class="front"><div class="n" style="color:var(--accent-yellow)">10</div><div class="l">Pipeline Stages</div></div><div class="back"><div class="b-text">Deterministic state machine from research to final manuscript</div></div></div>
+      <div class="stat-cell"><div class="front"><div class="n c-t">11</div><div class="l">Data Tables</div></div><div class="back"><div class="b-text">SQLite with SQLAlchemy 2.0 async, auto-migration on startup</div></div></div>
+      <div class="stat-cell"><div class="front"><div class="n c-m">50+</div><div class="l">API Endpoints</div></div><div class="back"><div class="b-text">REST + SSE streaming, full CRUD for projects, sandbox, fixup</div></div></div>
+      <div class="stat-cell"><div class="front"><div class="n">22</div><div class="l">Tests</div></div><div class="back"><div class="b-text">pytest suite covering full state machine, e2e pipeline, revision loops</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ MODULES ═══════ -->
+<section id="modules">
+  <div class="container">
+    <div class="s-label reveal">Three Workbenches</div>
+    <h2 class="s-title reveal d1">Every stage of academic<br>production, <em class="c-t">from exploration</em><br>to submission.</h2>
+    <div class="grad reveal d2" style="width:120px"></div>
+  </div>
+  <div class="container" style="margin-top:44px">
+    <div class="mod-grid">
+      <div class="mod-card reveal d1"><div class="mod-inner"><div class="bar y"></div><h3>Paper Workflow</h3><p>A deterministic <span class="c-t">10-stage state machine</span>: deep research, writing, integrity checks, simulated peer review, revision, re-review, final check, finalization. Versioned artifacts with checkpoint gates between every stage.</p><div class="pills"><span class="pill">RESEARCH</span><span class="pill">WRITE</span><span class="pill">INTEGRITY</span><span class="pill">REVIEW</span><span class="pill">REVISE</span><span class="pill">FINALIZE</span></div></div></div>
+      <div class="mod-card reveal d2"><div class="mod-inner"><div class="bar t"></div><h3>Data Sandbox</h3><p>Pick a local folder, chat with Claude, edit files with <span class="c-t">syntax highlighting</span> (Python, R, JSON, Markdown — 25+ formats), run Python scripts, preview generated charts. Resizable three-pane workspace.</p><div class="pills"><span class="pill">CHAT</span><span class="pill">CODE RUNNER</span><span class="pill">25+ FORMATS</span><span class="pill">IMAGE PREVIEW</span></div></div></div>
+      <div class="mod-card reveal d3"><div class="mod-inner"><div class="bar c"></div><h3>Review Workbench</h3><p>Pre-submission <span class="c-m">audit</span> with configurable reviewers, difficulty, and editorial standards. <span class="c-m">Revision</span> with auto-generated manuscript and response letter. Audit→revision chains with automatic file output.</p><div class="pills"><span class="pill">AUDIT</span><span class="pill">REVISE</span><span class="pill">CHAIN</span><span class="pill">FILE OUTPUT</span><span class="pill">TODO LIST</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PIPELINE — Timeline ═══════ -->
+<section id="pipeline" style="background:var(--bg-warm);transition:background .5s var(--ease-out)">
+  <div class="container">
+    <div class="s-label reveal">Pipeline Architecture</div>
+    <h2 class="s-title reveal d1">A <em class="c-m">deterministic</em> state<br>machine. <em class="c-t">No black boxes</em>.</h2>
+    <div class="grad reveal d2" style="width:120px;margin-bottom:24px"></div>
+
+    <div class="frame-box reveal d3" style="margin-bottom:36px">
+      <div class="f-title">How it works</div>
+      <div class="f-body">Each stage spawns a <span class="c-m">Claude Code CLI headless</span> call. The stage prompt is assembled from the skill definition, research topic, and prior artifacts. The model writes outputs to a staging directory — the platform reads them back, hashes content, and versions them in the <span class="c-t">artifact ledger</span>. Checkpoints between stages let you confirm results before proceeding. Integrity failures <span class="c-m">auto-retry</span>.</div>
+    </div>
+
+    <div class="timeline reveal d3">
+      <div class="tl-item"><div class="tl-num">STAGE 01</div><div class="tl-title">Research</div><div class="tl-desc">Deep research with methodology blueprint, RQ brief, and devil's advocate review.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 02</div><div class="tl-title">Write</div><div class="tl-desc">Full paper draft generation from research synthesis and annotated bibliography.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 03</div><div class="tl-title">Integrity Check</div><div class="tl-desc">Automated DOI verification via Crossref. Failed citations trigger retry loop ≤3 rounds.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 04</div><div class="tl-title">Peer Review</div><div class="tl-desc">Simulated review with configurable reviewer count, difficulty, and editorial standards. Structured report output.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 05</div><div class="tl-title">Revise</div><div class="tl-desc">Revision based on reviewer feedback with response letter and revision roadmap.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 06–07</div><div class="tl-title">Re-Review &amp; Re-Revise</div><div class="tl-desc">Second review loop. Capped at 2 revision rounds total.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 08</div><div class="tl-title">Final Integrity</div><div class="tl-desc">Final citation and completeness check before finalization.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 09</div><div class="tl-title">Finalize</div><div class="tl-desc">Materialize final paper. Pandoc/tectonic for DOCX/PDF output when available.</div></div>
+      <div class="tl-item"><div class="tl-num">STAGE 10</div><div class="tl-title">Process Summary</div><div class="tl-desc">Executive summary of the entire pipeline run — tokens, costs, decisions, artifacts.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FEATURES ═══════ -->
+<section id="features">
+  <div class="container">
+    <div class="s-label reveal">Core Features</div>
+    <h2 class="s-title reveal d1">Built for <em class="c-m">researchers</em>,<br>not for <em class="c-t">engineers</em>.</h2>
+    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
+    <div class="feat-grid">
+      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>Checkpoint System</h3><p>Stage confirmation gates. Mandatory checkpoints cannot be skipped. Integrity failures auto-retry up to 3 rounds.</p></div>
+      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Artifact Ledger</h3><p>13 schemas &times; SHA-256 hashing &times; Material Passport. Downstream artifacts auto-flagged STALE on upstream edits.</p></div>
+      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-magenta)"></span>Model Routing</h3><p>Agent &gt; mode &gt; stage &gt; default. Passes --model and --effort directly to Claude Code CLI. Switch providers anytime.</p></div>
+      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>SSE Real-time Logs</h3><p>6 event types streamed live. 15-second heartbeat. Full replay on reconnect. Color-coded log viewer.</p></div>
+      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Budget Transparency</h3><p>Token and cost estimates at creation. Real-time actual vs. estimated. Hard cap protection.</p></div>
+      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-magenta)"></span>Data Interop</h3><p>Workflows mount sandbox data sources. Stage execution auto-injects sandbox file context. VSCode file sync.</p></div>
+      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>Custom Prompts</h3><p>Four independent system prompt slots: sandbox, project chat, research stage, and writing stage.</p></div>
+      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Python Env Detection</h3><p>Auto-scans PATH, conda environments, and common installs. One-click selection for code execution.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ COMPARE ═══════ -->
+<section id="compare" style="background:var(--bg-warm);transition:background .5s var(--ease-out)">
+  <div class="container">
+    <div class="s-label reveal">Why a Web Platform</div>
+    <h2 class="s-title reveal d1">The CLI is <em class="c-m">powerful</em>.<br>The web makes it <em class="c-t">manageable</em>.</h2>
+    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
+    <div class="reveal d3">
+    <table class="cmp-table">
+      <thead><tr><th>Capability</th><th>Raw CLI</th><th>This Platform</th></tr></thead>
+      <tbody>
+        <tr><td>Pipeline orchestration</td><td>Manual, one session at a time</td><td class="check">10-stage automatic state machine</td></tr>
+        <tr><td>Artifact versioning</td><td>Files in temp directories</td><td class="check">13 schemas &times; SHA-256 &times; Passport</td></tr>
+        <tr><td>Stage confirmation</td><td>None</td><td class="check">Checkpoint gates &times; mandatory</td></tr>
+        <tr><td>Real-time monitoring</td><td>Terminal scroll</td><td class="check">SSE event stream &times; log viewer</td></tr>
+        <tr><td>Budget awareness</td><td>Surprise at end of month</td><td class="check">Estimate + real-time reconciliation</td></tr>
+        <tr><td>Data sandbox</td><td>Separate chat sessions</td><td class="check">Integrated AI sandbox &times; code runner</td></tr>
+        <tr><td>Review workflow</td><td>Copy-paste between chats</td><td class="check">Audit &rarr; revise chain &times; auto output</td></tr>
+        <tr><td>Multi-project management</td><td>Scattered terminals</td><td class="check">Dashboard &times; import/export &times; mounting</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ TECH ═══════ -->
+<section>
+  <div class="container">
+    <div class="s-label reveal">Tech Stack</div>
+    <h2 class="s-title reveal d1"><em class="c-t">Local-first.</em> Zero external<br>services. <em class="c-t">Your keys</em>,<br>your machine.</h2>
+    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
+    <div class="tech-grid reveal d3">
+      <span class="tech-item">Python 3.12</span><span class="tech-item">FastAPI</span><span class="tech-item">SQLAlchemy 2.0</span>
+      <span class="tech-item">SQLite</span><span class="tech-item">React 19</span><span class="tech-item">TypeScript</span>
+      <span class="tech-item">Vite 8</span><span class="tech-item">CodeMirror 6</span><span class="tech-item">Claude Code CLI</span>
+      <span class="tech-item">SSE</span><span class="tech-item">pytest</span><span class="tech-item">conda</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ INSTALL ═══════ -->
+<section id="install">
+  <div class="container">
+    <div class="s-label reveal">Get Started</div>
+    <h2 class="s-title reveal d1"><em class="c-m">Three</em> commands.<br>That's it.</h2>
+    <div class="grad reveal d2" style="width:120px;margin-bottom:24px"></div>
+    <div class="reveal d3">
+    <p style="font-size:14px;color:var(--fg-muted);margin-bottom:20px">Prerequisites: Python 3.11+ &middot; Node.js 18+ &middot; Claude Code CLI (<code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">npm i -g @anthropic-ai/claude-code</code>)</p>
+    <div class="code-block">
+      <span class="c"># 1) Install Python dependencies</span><br>pip install -r backend/requirements.txt<br><br>
+      <span class="c"># 2) Install frontend dependencies</span><br>cd frontend && npm install<br><br>
+      <span class="c"># 3) Start both servers</span><br>cd backend && PYTHONUTF8=1 python -m uvicorn app.main:app --port 8000<br>cd frontend && npm run dev<br><br>
+      <span class="c"># Open &rarr;</span> http://localhost:5173
+    </div>
+    <p style="font-size:12px;color:var(--fg-subtle);margin-top:12px">Windows: prepend <code style="font-family:var(--font-mono)">PYTHONUTF8=1</code> to all Python commands.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CTA ═══════ -->
+<section class="cta">
+  <div class="reveal">
+  <p style="font-size:14px;color:var(--fg-muted);margin-bottom:24px">GPLv3 licensed &middot; Open source &middot; Free forever</p>
+  <a class="btn" href="https://github.com/KawasakiKusako/openAcademicPipeline">View on GitHub</a>
+  <a class="btn-ghost" href="https://github.com/KawasakiKusako/openAcademicPipeline#readme">Documentation</a>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="fbar"></div>
+  <p>Kawasaki Academic Pipeline v0.1.0</p>
+  <p style="font-family:var(--font-mono);font-size:12px">Built with FastAPI + React + Claude Code CLI</p>
+  <p style="margin-top:16px">&copy; 2026 Kawasaki Kusako. All rights reserved.</p>
+</footer>
+
+<script>
+(function(){
+var h=document.documentElement,b=document.getElementById('themeBtn');
+var s=localStorage.getItem('kp-theme');
+if(s)h.dataset.theme=s;else if(window.matchMedia('(prefers-color-scheme:dark)').matches)h.dataset.theme='dark';
+function u(){b.textContent=h.dataset.theme==='dark'?'◐':'☀'}u();
+window.toggleTheme=function(){h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('kp-theme',h.dataset.theme);u();document.querySelector('meta[name=theme-color]').content=h.dataset.theme==='dark'?'#0c0c0b':'#f9f8f5'};
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(e){if(!localStorage.getItem('kp-theme')){h.dataset.theme=e.matches?'dark':'light';u()}});
+})();
+(function(){
+var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -36px 0px'});
+document.querySelectorAll('.reveal').forEach(function(e){o.observe(e)});
+var g=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){var t=e.target;t.style.animation='none';t.offsetHeight;t.style.animation='gradIn .8s cubic-bezier(.2,.7,.2,1) both'}})},{threshold:.3});
+document.querySelectorAll('.grad').forEach(function(e){g.observe(e)});
+})();
+(function(){
+var o=document.querySelectorAll('.orb');if(!o.length)return;
+document.addEventListener('mousemove',function(e){var x=(e.clientX/window.innerWidth-.5)*24,y=(e.clientY/window.innerHeight-.5)*24;o[0].style.transform='translate('+x*.6+'px,'+y*.6+'px)';o[1].style.transform='translate('+(-x*.4)+'px,'+(-y*.4)+'px)';o[2].style.transform='translate(-50%,-50%) translate('+x*.3+'px,'+y*.3+'px)'});
+})();
+
+// ── 3D Tilt on module cards ──
+(function(){
+  var cards=document.querySelectorAll('.mod-card');
+  cards.forEach(function(card){
+    card.addEventListener('mousemove',function(e){
+      var r=card.getBoundingClientRect();
+      var x=(e.clientX-r.left)/r.width-.5;
+      var y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform='perspective(1200px) rotateY('+(x*8)+'deg) rotateX('+(-y*6)+'deg)';
+    });
+    card.addEventListener('mouseleave',function(){
+      card.style.transform='perspective(1200px) rotateY(0deg) rotateX(0deg)';
+    });
+  });
+})();
+</script>
+</body>
+</html>
