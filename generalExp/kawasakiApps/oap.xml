@@ -2,7 +2,9 @@
 <application>
     <meta>
         <name>Kawasaki Paper Pipeline</name>
-        <version>0.5.1</version>
+        <main>0</main>
+        <sub>5</sub>
+        <dev>1</dev)
         <type>beta</type>
     </meta>
 </application>
