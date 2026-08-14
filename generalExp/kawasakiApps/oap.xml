@@ -9,7 +9,29 @@
         <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe</updateSite>
     </meta>
     <info>
-        <note></note>
+        <note>null</note>
         <updateType>normal</updateType>
     </info>
+    <history>
+    </history>
+    <licensing>
+        <defaultLicense>GPL-3.0-only</defaultLicense>
+        <rules>
+            <rule>
+                <type>MIT</type>
+                <appliesTo>
+                    <versionRange>
+                            <EN>Currently, all versions are licensed under the MIT License.</EN>
+                            <ZH>目前所有版本的许可证均为 MIT 许可证。</ZH>
+                    </versionRange>
+                </appliesTo>
+                <note>[EN]Versions within this range are licensed under MIT. All other versions revert to GPLv3.</note>
+                <note>[ZH]此范围内的版本使用 MIT 许可证。所有其他版本恢复为 GPLv3。</note>
+            </rule>
+        </rules>
+    </licensing>
 </application>
+<copyright>
+    <EN>Copyright (c) 2026-2027 Kawasaki Kusako. All rights reserved.</EN>
+    <ZH>版权所有 (c) 2026-2027 Kawasaki Kusako。所有权利保留。</ZH>
+</copyright>
