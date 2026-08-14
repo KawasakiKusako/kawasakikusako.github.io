@@ -6,5 +6,10 @@
         <sub>7</sub>
         <dev>4</dev>
         <type>Stable Beta</type>
+        <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe</updateSite>
     </meta>
+    <info>
+        <note></note>
+        <updateType>normal</updateType>
+    </info>
 </application>
