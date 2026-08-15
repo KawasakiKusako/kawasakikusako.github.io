@@ -4,7 +4,7 @@
         <name>Kawasaki Paper Pipeline</name>
         <main>0</main>
         <sub>9</sub>
-        <dev>2</dev>
+        <dev>5</dev>
         <type>Stable Beta</type>
         <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.9.2_Stable_beta/open_Academic_Pipeline_v_0.9.2_beta_x64.exe</updateSite>
         <updatePack>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.9.2_Stable_beta/open_Academic_Pipeline_v_0.9.2_beta_x64.exe.blockmap</updatePack>
@@ -25,8 +25,8 @@
         <updateCheck>
             <lastVersion>
                 <main>0</main>
-                <sub>7</sub>
-                <dev>4</dev>
+                <sub>9</sub>
+                <dev>2</dev>
             </lastVersion>
         </updateCheck>
     </info>
