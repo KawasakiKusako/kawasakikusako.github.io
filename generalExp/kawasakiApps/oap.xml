@@ -7,10 +7,18 @@
         <dev>4</dev>
         <type>Stable Beta</type>
         <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe</updateSite>
+        <updatePack>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe.blockmap</updatePack>
+        <standbySite></standbySite>
+        <officalWebsite>https://github.com/KawasakiKusako/openAcademicPipeline</officalWebsite>
+        <officalDemosite>https://kawasakikusako.github.io/generalExp/oap</officalDemosite>
     </meta>
 
     <info>
         <note>null</note>
+        <updateInfo>
+            <up-info-rule>1. 跟新了会话的界面和操作逻辑，优化了安装和缓存存储，避免了C盘的使用</up-info-rule>
+            <up-info-rule>2. 修复了在某些情况下，无法正常使用的bug</up-info-rule>
+        </updateInfo>
         <updateType>normal</updateType>
     </info>
 
