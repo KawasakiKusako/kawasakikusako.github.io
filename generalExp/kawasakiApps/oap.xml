@@ -1,64 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-   <application>
-      <meta>
-         <name>Kawasaki Paper Pipeline</name>
-         <main>0</main>
-         <sub>7</sub>
-         <dev>4</dev>
-         <type>Stable Beta</type>
-         <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe</updateSite>
-         <updatePack>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe.blockmap</updatePack>
-         <standbySite></standbySite>
-         <officalWebsite>https://github.com/KawasakiKusako/openAcademicPipeline</officalWebsite>
-         <officalDemosite>https://kawasakikusako.github.io/generalExp/oap</officalDemosite>
-      </meta>
+<application>
+    <meta>
+        <name>Kawasaki Paper Pipeline</name>
+        <main>0</main>
+        <sub>7</sub>
+        <dev>4</dev>
+        <type>Stable Beta</type>
+        <updateSite>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe</updateSite>
+        <updatePack>https://github.com/KawasakiKusako/openAcademicPipeline/releases/download/v0.7.4_Stable_beta/open_Academic_Pipeline_v_0.7.4_beta_x64.exe.blockmap</updatePack>
+        <standbySite />
+        <!-- 修正拼写错误：offical -> official -->
+        <officialWebsite>https://github.com/KawasakiKusako/openAcademicPipeline</officialWebsite>
+        <officialDemosite>https://kawasakikusako.github.io/generalExp/oap</officialDemosite>
+    </meta>
 
-      <info>
-         <note>null</note>
-         <updateInfo>
-               <up-info-rule>1. 跟新了会话的界面和操作逻辑，优化了安装和缓存存储，避免了C盘的使用</up-info-rule>
-               <up-info-rule>2. 修复了在某些情况下，无法正常使用的bug</up-info-rule>
-         </updateInfo>
-         <updateType>normal</updateType>
-         <!-- 检查增量更新是否可用 -->
-         <updateCheck>
+    <info>
+        <note>null</note>
+        <updateInfo>
+            <!-- 统一为通用列表项命名并修正“更新”错别字 -->
+            <item>1. 更新了会话的界面和操作逻辑，优化了安装和缓存存储，避免了C盘的使用</item>
+            <item>2. 修复了在某些情况下，无法正常使用的bug</item>
+        </updateInfo>
+        <updateType>normal</updateType>
+        <!-- 检查增量更新是否可用 -->
+        <updateCheck>
             <lastVersion>
-               <main>0</main>
-               <sub>5</sub>
-               <dev>1</dev>
+                <main>0</main>
+                <sub>5</sub>
+                <dev>1</dev>
             </lastVersion>
-         </updateCheck>
-         
-      </info>
+        </updateCheck>
+    </info>
 
-      <history>
+    <history />
 
-      </history>
+    <licensing>
+        <defaultLicense>GPL-3.0-only</defaultLicense>
+        <rules>
+            <rule>
+                <type>MIT</type>
+                <appliesTo>
+                    <versionRange>*</versionRange>
+                </appliesTo>
+                <notice>
+                    <en>Currently, all versions are licensed under the MIT License.</en>
+                    <zh>目前所有版本的许可证均为 MIT 许可证。</zh>
+                </notice>
+                <notes>
+                    <note lang="en">Versions within this range are licensed under MIT. All other versions revert to GPLv3.</note>
+                    <note lang="zh">此范围内的版本使用 MIT 许可证。所有其他版本恢复为 GPLv3。</note>
+                </notes>
+            </rule>
+        </rules>
+    </licensing>
 
-      <licensing>
-         <defaultLicense>GPL-3.0-only</defaultLicense>
-         <rules>
-               <rule>
-                  <type>MIT</type>
-                  <appliesTo>
-
-                     <versionRange>*</versionRange>
-                  </appliesTo>
-
-                  <notice>
-                     <en>Currently, all versions are licensed under the MIT License.</en>
-                     <zh>目前所有版本的许可证均为 MIT 许可证。</zh>
-                  </notice>
-                  <notes>
-                     <note lang="en">Versions within this range are licensed under MIT. All other versions revert to GPLv3.</note>
-                     <note lang="zh">此范围内的版本使用 MIT 许可证。所有其他版本恢复为 GPLv3。</note>
-                  </notes>
-               </rule>
-         </rules>
-      </licensing>
-
-      <copyright>
-         <en>Copyright (c) 2026-2027 Kawasaki Kusako.</en>
-         <zh>版权所有 (c) 2026-2027 Kawasaki Kusako。</zh>
-      </copyright>
-   </application>
+    <copyright>
+        <en>Copyright (c) 2026-2027 Kawasaki Kusako.</en>
+        <zh>版权所有 (c) 2026-2027 Kawasaki Kusako。</zh>
+    </copyright>
+</application>
