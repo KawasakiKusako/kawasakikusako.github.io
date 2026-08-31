@@ -19,10 +19,8 @@
       --ink: #f0f1f4;
     }
     .msg.ai { background: #22252d !important; border-color: #2a2e37 !important; }
-    .paircard { background: #1c1f26 !important; }
-    input.cell { background: #22252d !important; border-color: #2a2e37 !important; color: var(--fg) !important; }
-    select, #text { background: #22252d !important; border-color: #2a2e37 !important; color: var(--fg) !important; }
-    .qcard { background: #1c1f26 !important; }
+    input.cell, select, #text, #searchInput, .chip, .proj, .attbtn, .attchip { background: #22252d !important; border-color: #2a2e37 !important; color: var(--fg) !important; }
+    .logo, .avatar { background: #22252d !important; }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -32,8 +30,7 @@
     display: flex; flex-direction: column;
     max-width: 560px; margin: 0 auto; padding: 14px 14px calc(env(safe-area-inset-bottom) + 10px);
   }
-  /* 顶栏 */
-  header { display: flex; align-items: center; gap: 10px; padding: 4px 2px 14px; }
+  header { display: flex; align-items: center; gap: 10px; padding: 4px 2px 12px; }
   .logo {
     width: 40px; height: 40px; border-radius: 12px; background: #fff;
     display: flex; align-items: center; justify-content: center;
@@ -54,15 +51,12 @@
   .dot.err { background: #e54d2e; }
   .dot.wait { background: #e8a13c; }
 
-  /* 卡片通用 */
   .card {
     background: var(--card); border: 1px solid var(--line); border-radius: 18px;
     padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.04);
   }
   .card h2 { font-size: 13px; margin-bottom: 10px; color: var(--fg); }
   .hint { font-size: 11px; color: var(--muted); line-height: 1.6; }
-
-  /* 分段配对码 */
   .cells { display: flex; gap: 8px; justify-content: center; margin: 6px 0 14px; }
   input.cell {
     width: 44px; height: 54px; text-align: center; font-size: 24px; font-weight: 700;
@@ -72,13 +66,33 @@
   input.cell:focus { border-color: var(--accent); }
   button {
     border: none; border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 600;
-    background: var(--ink); color: #fff; cursor: pointer; width: 100%;
-    transition: opacity .15s;
+    background: var(--ink); color: #fff; cursor: pointer; transition: opacity .15s;
   }
   button:disabled { opacity: .35; }
-  button.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); font-weight: 500; }
 
-  /* 聊天 */
+  .projbar { display: flex; gap: 8px; margin-bottom: 10px; }
+  .proj {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 12px; font-size: 13px; cursor: pointer; overflow: hidden;
+  }
+  .proj .pname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+  .newbtn {
+    flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+    background: var(--ink); color: #fff; border: none; border-radius: 12px;
+    padding: 10px 14px; font-size: 12px; cursor: pointer;
+  }
+
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 12px; font-size: 11px; color: var(--muted); cursor: pointer; max-width: 46vw;
+  }
+  .chip.active { border-color: var(--accent); color: var(--accent); background: rgba(79,124,255,.08); }
+  .chip b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22vw; }
+
   #chat { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 6px 2px; min-height: 200px; }
   .row { display: flex; gap: 8px; align-items: flex-end; }
   .row.me { justify-content: flex-end; }
@@ -98,27 +112,53 @@
   .typing::after { content: '●'; animation: blink 1s infinite; color: var(--accent); margin-left: 2px; }
   @keyframes blink { 50% { opacity: .2; } }
   .err { color: #e54d2e; }
+  .att { font-size: 10px; opacity: .8; margin-top: 4px; }
 
-  /* composer */
   #composerCard { padding: 12px; }
-  .tools { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-  select {
-    flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px;
-    font-size: 12px; background: var(--bg1); outline: none; color: var(--fg);
-  }
-  .tools button { width: auto; padding: 8px 12px; font-size: 12px; font-weight: 500; background: var(--bg1); color: var(--muted); border: 1px solid var(--line); }
-  .crow { display: flex; gap: 8px; }
+  .crow { display: flex; gap: 8px; align-items: flex-end; }
   #text {
     flex: 1; min-width: 0; border: 1.5px solid var(--line); border-radius: 14px;
     padding: 11px 14px; font-size: 14px; outline: none; background: var(--bg1); color: var(--fg);
+    max-height: 120px; resize: none; font-family: inherit;
   }
   #text:focus { border-color: var(--accent); }
   #sendBtn {
     width: 46px; height: 46px; border-radius: 14px; padding: 0; flex-shrink: 0;
     background: var(--accent); font-size: 18px;
   }
+  .attrow { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .attchip {
+    display: flex; align-items: center; gap: 5px; font-size: 10px;
+    background: var(--bg1); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px;
+  }
+  .attchip button { background: none; color: var(--muted); padding: 0; font-size: 11px; width: auto; }
+  .attbtn {
+    width: 40px; height: 46px; border-radius: 14px; padding: 0; flex-shrink: 0;
+    background: var(--bg1); color: var(--muted); border: 1.5px solid var(--line); font-size: 17px;
+  }
   .hidden { display: none !important; }
   .foot { text-align: center; font-size: 10px; color: var(--muted); padding: 8px 0 2px; }
+
+  .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 40; }
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+    background: var(--card); border-radius: 20px 20px 0 0;
+    max-height: 75vh; display: flex; flex-direction: column;
+    padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
+  }
+  .sheet .shead { display: flex; align-items: center; margin-bottom: 10px; }
+  .sheet .shead b { font-size: 14px; }
+  .sheet .shead button { width: auto; background: none; color: var(--muted); padding: 4px 8px; font-size: 16px; }
+  .sheet input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; background: var(--bg1); color: var(--fg); margin-bottom: 8px; }
+  .sheet .opts { overflow-y: auto; }
+  .sheet .opt {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 11px 10px; border-radius: 10px; background: none; color: var(--fg);
+    font-size: 13px; text-align: left; cursor: pointer; border: none; font-weight: 400;
+  }
+  .sheet .opt:hover { background: var(--bg1); }
+  .sheet .opt .od { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sheet .opt .check { color: var(--accent); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -131,10 +171,10 @@
     <div class="status"><span class="dot" id="stDot"></span><span id="stText">未连接</span></div>
   </header>
 
-  <div class="card paircard" id="pairCard">
+  <div class="card" id="pairCard">
     <h2>输入配对码</h2>
     <div class="hint" style="margin-bottom: 10px">桌面端「设置 → 远程控制」显示的 6 位数字（120 秒内有效）。</div>
-    <div class="cells" id="cells">
+    <div class="cells">
       <input class="cell" inputmode="numeric" maxlength="1" />
       <input class="cell" inputmode="numeric" maxlength="1" />
       <input class="cell" inputmode="numeric" maxlength="1" />
@@ -143,24 +183,49 @@
       <input class="cell" inputmode="numeric" maxlength="1" />
     </div>
     <button id="pairBtn">连接设备</button>
-    <div class="hint" style="margin-top: 10px" id="stText">连接后可对话、选模型，并用 exec: 前缀执行系统命令。</div>
+    <div class="hint" style="margin-top: 10px">连接后可查找项目、对话（全功能）与新建对话。</div>
   </div>
 
-  <div id="chat" class="hidden"></div>
+  <div id="mainUI" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0">
+    <div class="projbar">
+      <div class="proj" id="projBtn">
+        <span>📁</span>
+        <span class="pname" id="projName">选择项目</span>
+        <span style="color: var(--muted)">⌄</span>
+      </div>
+      <button class="newbtn" id="newSessionBtn">＋ 新对话</button>
+    </div>
+    <div class="chips">
+      <div class="chip" id="chipAgent">🤖 <b id="agentLabel">pi</b></div>
+      <div class="chip" id="chipModel">🧠 <b id="modelLabel">默认模型</b></div>
+      <div class="chip" id="chipThinking">💭 <b id="thinkingLabel">关闭</b></div>
+      <div class="chip active" id="chipPerm">🛡 <b id="permLabel">完全访问</b></div>
+      <div class="chip" id="chipSkill">⚡ <b id="skillLabel">技能</b></div>
+      <div class="chip" id="chipKb">📚 <b id="kbLabel">知识库</b></div>
+    </div>
 
-  <div class="card hidden" id="composerCard">
-    <div class="tools">
-      <select id="provider"><option value="">默认模型</option></select>
-      <button id="histBtn">历史</button>
+    <div id="chat"></div>
+
+    <div class="card hidden" id="composerCard" style="padding: 12px; margin-bottom: 0">
+      <div class="attrow hidden" id="attRow"></div>
+      <div class="crow">
+        <button class="attbtn" id="attBtn" title="附加文本文件">＋</button>
+        <input type="file" id="fileInput" multiple class="hidden" />
+        <textarea id="text" rows="1" placeholder="发消息，或 exec: 查看桌面文件"></textarea>
+        <button id="sendBtn">↑</button>
+      </div>
+      <div class="hint" style="margin-top: 6px">exec:dir ／ exec:ipconfig —— 任意命令在桌面端执行并回传结果</div>
     </div>
-    <div class="crow">
-      <input id="text" placeholder="发消息，或 exec: 查看桌面文件" />
-      <button id="sendBtn">↑</button>
-    </div>
-    <div class="hint" style="margin-top: 6px">exec:dir ／ exec:ipconfig —— 任意命令在桌面端执行并回传结果</div>
   </div>
 
-  <div class="foot">Open Agent Pipeline ·OAP @ Kawasaki Kusako</div>
+  <div class="foot">Open Agent Pipeline · WSS 加密连接</div>
+
+  <div class="sheet-mask hidden" id="sheetMask"></div>
+  <div class="sheet hidden" id="sheet">
+    <div class="shead"><b id="sheetTitle">选择</b><button id="sheetClose">✕</button></div>
+    <input id="searchInput" class="hidden" placeholder="搜索…" />
+    <div class="opts" id="sheetOpts"></div>
+  </div>
 
 <script>
 (function () {
@@ -169,22 +234,34 @@
   var ipv6 = params.get('addripv6') || '';
   var ws = null;
   var paired = false;
-  var pendingProviders = [];
   var chat = document.getElementById('chat');
   var stDot = document.getElementById('stDot');
   var stText = document.getElementById('stText');
 
-  document.getElementById('targetInfo') && (document.getElementById('targetInfo').textContent = '');
+  var state = {
+    projectId: null, projectName: '', sessionId: null,
+    agents: [], providers: [], projects: [], skills: [], kbSources: [],
+    agentId: 'pi-agent.core.agent', providerId: '', model: '',
+    thinking: 'off', permissionMode: 'bypassPermissions',
+    skill: '', knowledgeSources: [], attachments: [],
+  };
+  var THINKING = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'];
+  var PERMS = [
+    { id: 'default', label: '变更前确认' },
+    { id: 'acceptEdits', label: '自动编辑' },
+    { id: 'plan', label: '计划模式' },
+    { id: 'bypassPermissions', label: '完全访问' },
+  ];
+
   if (!ipv6) {
     var t = document.querySelector('.htexts .sub');
     if (t) t.textContent = '缺少 addripv6 参数 —— 请从桌面端二维码打开';
   }
-
   function setStatus(text, cls) {
     stText.textContent = text;
     stDot.className = 'dot' + (cls ? ' ' + cls : '');
   }
-  function addMsg(cls, text) {
+  function addMsg(cls, text, atts) {
     var wrap = document.createElement('div');
     wrap.className = 'row' + (cls === 'me' ? ' me' : '');
     if (cls === 'ai') {
@@ -196,6 +273,12 @@
     var div = document.createElement('div');
     div.className = 'msg ' + cls;
     div.textContent = text;
+    if (atts && atts.length) {
+      var a = document.createElement('div');
+      a.className = 'att';
+      a.textContent = '📎 ' + atts.map(function (x) { return x.name; }).join('、');
+      div.appendChild(a);
+    }
     wrap.appendChild(div);
     chat.appendChild(wrap);
     chat.scrollTop = chat.scrollHeight;
@@ -205,21 +288,13 @@
     if (!ipv6) return;
     var url = 'wss://[' + ipv6 + ']:11414';
     setStatus('连接中…', 'wait');
-    try {
-      ws = new WebSocket(url);
-    } catch (e) {
-      setStatus('连接失败：' + e.message, 'err');
-      return;
-    }
+    try { ws = new WebSocket(url); } catch (e) { setStatus('连接失败：' + e.message, 'err'); return; }
     ws.onopen = function () { setStatus('已连接，输入配对码', 'wait'); };
     ws.onerror = function () {
-      if (!paired) {
-        setStatus('连接失败——请先在手机浏览器打开并信任 https://[' + ipv6 + ']:11414 证书后重试', 'err');
-      }
+      if (!paired) setStatus('需要信任证书：先打开 https://[' + ipv6 + ']:11414 →「高级→继续前往」，再回本页重试', 'err');
     };
     ws.onclose = function () {
-      paired = false;
-      setStatus('连接已断开', 'err');
+      if (paired) { paired = false; setStatus('连接已断开', 'err'); }
     };
     ws.onmessage = function (ev) {
       var msg;
@@ -229,15 +304,29 @@
           paired = true;
           setStatus('已配对', 'on');
           document.getElementById('pairCard').classList.add('hidden');
-          document.getElementById('chat').classList.remove('hidden');
-          document.getElementById('composerCard').classList.remove('hidden');
-          pendingProviders = msg.providers || [];
-          renderProviders();
-          send({ action: 'chat.history' });
+          document.getElementById('mainUI').classList.remove('hidden');
+          send({ action: 'project.list' });
+          send({ action: 'agents.list' });
+          send({ action: 'chat.providers' });
+          send({ action: 'skills.list' });
         } else {
           setStatus(msg.error || '配对失败', 'err');
           shakeCells();
         }
+        return;
+      }
+      if (msg.action === 'project.list') { state.projects = msg.projects || []; return; }
+      if (msg.action === 'agents.list') { state.agents = (msg.agents || []).filter(function (a) { return a.available !== false; }); return; }
+      if (msg.action === 'chat.providers') { state.providers = msg.providers || []; return; }
+      if (msg.action === 'skills.list') { state.skills = (msg.skills || []).map(function (s) { return s.name; }); return; }
+      if (msg.action === 'session.new') {
+        state.sessionId = msg.sessionId;
+        chat.innerHTML = '';
+        addMsg('sys', '已开始新对话');
+        return;
+      }
+      if (msg.action === 'project.select') {
+        addMsg('sys', '已切换项目');
         return;
       }
       if (msg.action === 'chat.delta') streamDelta(msg.text);
@@ -246,9 +335,6 @@
       else if (msg.action === 'exec') {
         var out = (msg.ok ? '✓ 执行成功\n\n' : '✗ 失败\n\n') + (msg.stdout || '') + (msg.stderr || '');
         addMsg('ai', out.trim() || '(无输出)');
-      } else if (msg.action === 'chat.providers') {
-        pendingProviders = msg.providers || [];
-        renderProviders();
       }
     };
   }
@@ -276,26 +362,201 @@
     streamingEl = null;
   }
 
-  function renderProviders() {
-    var sel = document.getElementById('provider');
-    sel.innerHTML = '';
-    var def = document.createElement('option');
-    def.value = '';
-    def.textContent = '默认模型';
-    sel.appendChild(def);
-    pendingProviders.forEach(function (p) {
-      var o = document.createElement('option');
-      o.value = p.id;
-      o.textContent = p.id + (p.model ? ' · ' + p.model : '');
-      sel.appendChild(o);
-    });
-  }
-
   function send(obj) {
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
   }
 
-  // 分段配对码输入
+  // ===== 底部选择面板 =====
+  var sheet = document.getElementById('sheet');
+  var mask = document.getElementById('sheetMask');
+  var searchInput = document.getElementById('searchInput');
+  var optsEl = document.getElementById('sheetOpts');
+  function openSheet(title, opts, onPick, searchable) {
+    document.getElementById('sheetTitle').textContent = title;
+    optsEl.innerHTML = '';
+    searchInput.classList.toggle('hidden', !searchable);
+    searchInput.value = '';
+    var render = function (filter) {
+      optsEl.innerHTML = '';
+      opts.filter(function (o) { return !filter || o.label.toLowerCase().indexOf(filter.toLowerCase()) >= 0; })
+        .forEach(function (o) {
+          var b = document.createElement('button');
+          b.className = 'opt';
+          b.innerHTML = '<span class="od">' + o.label + '</span>' + (o.active ? '<span class="check">✓</span>' : '');
+          b.onclick = function () { closeSheet(); onPick(o); };
+          optsEl.appendChild(b);
+        });
+    };
+    render('');
+    searchInput.oninput = function () { render(searchInput.value); };
+    sheet.classList.remove('hidden');
+    mask.classList.remove('hidden');
+  }
+  function closeSheet() { sheet.classList.add('hidden'); mask.classList.add('hidden'); }
+  document.getElementById('sheetClose').onclick = closeSheet;
+  mask.onclick = closeSheet;
+
+  // ===== 工具 chips =====
+  document.getElementById('chipAgent').onclick = function () {
+    openSheet('选择 Agent', state.agents.map(function (a) {
+      return { id: a.id, label: a.name + '（' + a.id + '）', active: a.id === state.agentId };
+    }), function (o) {
+      state.agentId = o.id;
+      document.getElementById('agentLabel').textContent = o.label.split('（')[0];
+    }, true);
+  };
+  document.getElementById('chipModel').onclick = function () {
+    var opts = [];
+    state.providers.forEach(function (p) {
+      (p.models && p.models.length ? p.models : [p.model]).forEach(function (m) {
+        if (!m) return;
+        opts.push({ id: p.id + '::' + m, label: p.id + ' · ' + m, providerId: p.id, model: m,
+          active: state.providerId === p.id && state.model === m });
+      });
+    });
+    openSheet('选择模型', opts, function (o) {
+      state.providerId = o.providerId;
+      state.model = o.model;
+      document.getElementById('modelLabel').textContent = o.providerId + ' · ' + o.model;
+    }, true);
+  };
+  document.getElementById('chipThinking').onclick = function () {
+    openSheet('思考强度', THINKING.map(function (t) {
+      return { id: t, label: t === 'off' ? '关闭' : t, active: t === state.thinking };
+    }), function (o) {
+      state.thinking = o.id;
+      document.getElementById('thinkingLabel').textContent = o.label;
+    });
+  };
+  document.getElementById('chipPerm').onclick = function () {
+    openSheet('权限模式', PERMS.map(function (pm) {
+      return { id: pm.id, label: pm.label, active: pm.id === state.permissionMode };
+    }), function (o) {
+      state.permissionMode = o.id;
+      document.getElementById('permLabel').textContent = o.label;
+    });
+  };
+  document.getElementById('chipSkill').onclick = function () {
+    var opts = [{ id: '', label: '不启用技能', active: !state.skill }].concat(
+      (state.skills || []).map(function (s) {
+        return { id: s, label: '/' + s, active: state.skill === s };
+      })
+    );
+    openSheet('技能（强制注入）', opts, function (o) {
+      state.skill = o.id;
+      document.getElementById('skillLabel').textContent = o.id ? '/' + o.id : '技能';
+      document.getElementById('chipSkill').classList.toggle('active', !!o.id);
+    });
+  };
+  document.getElementById('chipKb').onclick = function () {
+    send({ action: 'knowledge.list' });
+    setTimeout(function () {
+      openSheet('知识库来源（点击多选）', (state.kbSources || []).map(function (s) {
+        return { id: s, label: s, active: state.knowledgeSources.indexOf(s) >= 0 };
+      }), function (o) {
+        var i = state.knowledgeSources.indexOf(o.id);
+        if (i >= 0) state.knowledgeSources.splice(i, 1);
+        else state.knowledgeSources.push(o.id);
+        document.getElementById('kbLabel').textContent =
+          state.knowledgeSources.length ? '知识库 · ' + state.knowledgeSources.length : '知识库';
+        document.getElementById('chipKb').classList.toggle('active', state.knowledgeSources.length > 0);
+      });
+    }, 400);
+  };
+
+  // ===== 项目查找/选择 + 新建对话 =====
+  document.getElementById('projBtn').onclick = function () {
+    openSheet('查找项目', (state.projects || []).map(function (p) {
+      return { id: p.id, label: p.name + (p.description ? ' · ' + p.description : ''), projectId: p.id,
+        active: p.id === state.projectId };
+    }), function (o) {
+      state.projectId = o.projectId;
+      state.projectName = o.label.split(' · ')[0];
+      state.sessionId = null;
+      document.getElementById('projName').textContent = state.projectName;
+      send({ action: 'project.select', projectId: o.projectId });
+    }, true);
+  };
+  document.getElementById('newSessionBtn').onclick = function () {
+    send({ action: 'session.new' });
+  };
+
+  // ===== 附件 =====
+  document.getElementById('attBtn').onclick = function () {
+    document.getElementById('fileInput').click();
+  };
+  document.getElementById('fileInput').onchange = function (e) {
+    var files = Array.prototype.slice.call(e.target.files || []);
+    var remaining = files.length;
+    if (!remaining) return;
+    files.forEach(function (f) {
+      f.text().then(function (content) {
+        state.attachments.push({ name: f.name, content: content });
+      }).catch(function () {
+        state.attachments.push({ name: f.name, content: '' });
+      }).finally(function () {
+        remaining--;
+        if (remaining === 0) { renderAtts(); e.target.value = ''; }
+      });
+    });
+  };
+  function renderAtts() {
+    var row = document.getElementById('attRow');
+    row.innerHTML = '';
+    row.classList.toggle('hidden', state.attachments.length === 0);
+    state.attachments.forEach(function (a, i) {
+      var chip = document.createElement('span');
+      chip.className = 'attchip';
+      chip.textContent = '📄 ' + a.name + ' ';
+      var x = document.createElement('button');
+      x.textContent = '✕';
+      x.onclick = function () { state.attachments.splice(i, 1); renderAtts(); };
+      chip.appendChild(x);
+      row.appendChild(chip);
+    });
+  }
+
+  // ===== 发送 =====
+  document.getElementById('sendBtn').onclick = function () {
+    var input = document.getElementById('text');
+    var text = input.value.trim();
+    if (!text && state.attachments.length === 0) return;
+    addMsg('me', text || '(附件)', state.attachments);
+    input.value = '';
+    input.style.height = 'auto';
+    var atts = state.attachments.slice();
+    state.attachments = [];
+    renderAtts();
+    if (text.indexOf('exec:') === 0) {
+      send({ action: 'exec:' + text.slice(5).trim() });
+    } else {
+      send({
+        action: 'chat.send',
+        text: text,
+        attachments: atts,
+        agentId: state.agentId,
+        providerId: state.providerId || undefined,
+        model: state.model || undefined,
+        thinking: state.thinking,
+        permissionMode: state.permissionMode,
+        skill: state.skill || undefined,
+        knowledgeSources: state.knowledgeSources.length ? state.knowledgeSources : undefined,
+      });
+    }
+  };
+  var textEl = document.getElementById('text');
+  textEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('sendBtn').click();
+    }
+  });
+  textEl.addEventListener('input', function () {
+    textEl.style.height = 'auto';
+    textEl.style.height = Math.min(textEl.scrollHeight, 120) + 'px';
+  });
+
+  // ===== 配对码 =====
   var cells = Array.prototype.slice.call(document.querySelectorAll('input.cell'));
   cells.forEach(function (cell, i) {
     cell.addEventListener('input', function () {
@@ -325,26 +586,6 @@
     setTimeout(function () { send({ type: 'pair', code: code }); }, 300);
   }
   document.getElementById('pairBtn').onclick = doPair;
-
-  document.getElementById('sendBtn').onclick = function () {
-    var input = document.getElementById('text');
-    var text = input.value.trim();
-    if (!text) return;
-    addMsg('me', text);
-    input.value = '';
-    if (text.indexOf('exec:') === 0) {
-      send({ action: 'exec:' + text.slice(5).trim() });
-    } else {
-      var sel = document.getElementById('provider');
-      send({ action: 'chat.send', text: text, providerId: sel.value || undefined });
-    }
-  };
-  document.getElementById('text').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') document.getElementById('sendBtn').click();
-  });
-  document.getElementById('histBtn').onclick = function () {
-    send({ action: 'chat.history' });
-  };
 
   if (ipv6) connect();
   else cells[0].focus();
