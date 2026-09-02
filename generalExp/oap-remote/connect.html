@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>OAP 远程连接</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --field: #f4f4f5;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --text: #18181b;
+      --sub: #52525b;
+      --muted: #a1a1aa;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --err: #dc2626;
+      --focus: #2563eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .wrap { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; }
+
+    /* 品牌区（与桌面端空态一致：黑圆角 logo + 黑字标题横排） */
+    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .brand .logo { width: 58px; height: 58px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.12); }
+    .brand h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+    .tagline { font-size: 13px; color: var(--sub); margin-bottom: 34px; }
+
+    .card {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 18px 18px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 8px 28px rgba(0, 0, 0, 0.05);
+    }
+    .hint { font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+    .cells { display: flex; gap: 8px; justify-content: center; margin: 14px 0 16px; }
+    .cell {
+      width: 44px; height: 54px;
+      text-align: center;
+      font-size: 22px; font-weight: 600;
+      color: var(--text);
+      background: var(--field);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      outline: none;
+      caret-color: var(--focus);
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .cell:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      transform: translateY(-1px);
+    }
+    .btn {
+      width: 100%;
+      padding: 11px;
+      border: 0;
+      border-radius: 10px;
+      background: #18181b;
+      color: #fff;
+      font-size: 13.5px; font-weight: 600; letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .btn:hover:not(:disabled) { opacity: 0.85; }
+    .btn:active:not(:disabled) { transform: translateY(0.5px); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .status {
+      margin-top: 13px;
+      font-size: 12px; color: var(--sub);
+      text-align: center; min-height: 20px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: 0 0 auto; }
+    .dot.wait { background: var(--warn); animation: pulse 1.2s ease-in-out infinite; }
+    .dot.on { background: var(--ok); }
+    .dot.err { background: var(--err); }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+    .status.err { color: var(--err); }
+    .status.on { color: var(--ok); }
+
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    .shake { animation: shake 0.3s; }
+
+    .foot {
+      margin-top: auto; padding-top: 26px;
+      font-size: 10.5px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .icon { width: 12px; height: 12px; vertical-align: -2px; }
+
+    .card.entering { border-color: rgba(22, 163, 74, 0.35); }
+    .success-row { display: flex; align-items: center; gap: 10px; padding: 8px 0 2px; }
+    .spinner {
+      width: 15px; height: 15px; border-radius: 50%;
+      border: 2px solid rgba(22, 163, 74, 0.2); border-top-color: var(--ok);
+      animation: spin 0.8s linear infinite; flex: 0 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ok-badge { color: var(--ok); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-shield" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5 15 3.5v5c0 4-3.4 6.3-6 7.5C6.4 14.8 3 12.5 3 8.5v-5L9 1.5z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="11" height="7.5" rx="2"/><path d="M6 8V5.5a3 3 0 0 1 6 0V8"/></symbol>
+  </svg>
+
+  <div class="wrap">
+    <div class="brand">
+      <img class="logo" src="asset/logo.svg" alt="OAP" />
+      <h1>Open Agent Pipeline</h1>
+    </div>
+    <div class="tagline">远程连接</div>
+
+    <div class="card" id="card">
+      <div class="hint">输入桌面端「设置 → 远程控制」显示的 6 位配对码：</div>
+      <div class="cells" id="cells">
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+        <input class="cell" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+      </div>
+      <button class="btn" id="pairBtn">验证并进入工作台</button>
+      <div class="status" id="status"><span class="dot" id="stDot"></span><span id="stText">等待验证</span></div>
+      <div class="hint" style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
+        首次使用：验证前若浏览器提示证书不受信任，请先点「高级 → 继续前往」信任本机证书。
+        配对码有效期以桌面端显示为准（可设 1~60 分钟）。
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <svg class="icon"><use href="#i-lock"/></svg>
+    Open Agent Pipeline · WSS 加密连接
+  </div>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var ipv6 = params.get('addripv6') || '';
+  var urlCode = params.get('code') || '';
+  var oapLocalServe = !ipv6 && location.protocol === 'https:' && location.port === '11414';
+
+  function gatewayBase() {
+    if (oapLocalServe) return 'https://' + location.host;
+    if (ipv6) return 'https://[' + ipv6 + ']:11414';
+    return '';
+  }
+
+  var statusEl = document.getElementById('status');
+  var cardEl = document.getElementById('card');
+  function setStatus(text, cls) {
+    statusEl.innerHTML = '<span class="dot ' + (cls || '') + '"></span><span>' + text + '</span>';
+    statusEl.className = 'status ' + (cls || '');
+  }
+  function shakeCells() {
+    var wrap = document.getElementById('cells');
+    wrap.classList.remove('shake');
+    void wrap.offsetWidth;
+    wrap.classList.add('shake');
+    var cells = document.querySelectorAll('input.cell');
+    for (var i = 0; i < cells.length; i++) cells[i].value = '';
+    cells[0].focus();
+  }
+
+  var ws = null;
+  function send(obj) { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
+
+  function enterApp() {
+    cardEl.classList.add('entering');
+    statusEl.innerHTML = '<span class="spinner"></span><span class="ok-badge">验证通过，正在进入工作台…</span>';
+    var gw = gatewayBase();
+    setTimeout(function () {
+      location.href = './app/index.html?gateway=' + encodeURIComponent(gw) + '&code=' + encodeURIComponent(currentCode());
+    }, 600);
+  }
+
+  function currentCode() {
+    var cells = document.querySelectorAll('input.cell');
+    var c = '';
+    for (var i = 0; i < cells.length; i++) c += cells[i].value;
+    if (!c && urlCode) c = urlCode;
+    return c;
+  }
+
+  function connect() {
+    var base = gatewayBase();
+    if (!base) {
+      setStatus('无法确定桌面端地址——请从桌面端二维码打开本页', 'err');
+      return;
+    }
+    var url = base.replace(/^https/, 'wss');
+    setStatus('连接中…', 'wait');
+    try { ws = new WebSocket(url); } catch (e) { setStatus('连接失败：' + e.message, 'err'); return; }
+    ws.onopen = function () {
+      setStatus('已连接，验证配对码…', 'wait');
+      var code = currentCode();
+      if (code) setTimeout(function () { send({ type: 'pair', code: code }); }, 300);
+    };
+    ws.onerror = function () {
+      setStatus('连接失败——首次使用请先在浏览器打开 ' + base + ' 信任证书后返回重试', 'err');
+    };
+    ws.onmessage = function (ev) {
+      var msg;
+      try { msg = JSON.parse(ev.data); } catch (e) { return; }
+      if (msg.type === 'pair') {
+        if (msg.ok) {
+          enterApp();
+        } else {
+          setStatus(msg.error || '配对失败', 'err');
+          shakeCells();
+        }
+      }
+    };
+  }
+
+  var cells = Array.prototype.slice.call(document.querySelectorAll('input.cell'));
+  cells.forEach(function (cell, i) {
+    cell.addEventListener('input', function () {
+      cell.value = (cell.value || '').replace(/\D/g, '').slice(0, 1);
+      if (cell.value && i < cells.length - 1) cells[i + 1].focus();
+      if (cells.every(function (c) { return c.value.length === 1; })) doPair();
+    });
+    cell.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && !cell.value && i > 0) cells[i - 1].focus();
+    });
+    cell.addEventListener('paste', function (e) {
+      var digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+      if (digits.length === 6) {
+        e.preventDefault();
+        for (var j = 0; j < 6; j++) cells[j].value = digits[j];
+        doPair();
+      }
+    });
+  });
+
+  function doPair() {
+    var code = currentCode();
+    var sixDigits = new RegExp('^[0-9]{6}$');
+    if (!sixDigits.test(code)) return;
+    if (!ws || ws.readyState !== WebSocket.OPEN) connect();
+    setTimeout(function () { send({ type: 'pair', code: code }); }, 300);
+  }
+  document.getElementById('pairBtn').onclick = doPair;
+
+  if (urlCode) connect();
+  else cells[0].focus();
+})();
+</script>
+</body>
+</html>
