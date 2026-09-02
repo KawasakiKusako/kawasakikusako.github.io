@@ -1,456 +1,1559 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f9f8f5">
-<title>Kawasaki Open Academic Pipeline — From idea to manuscript</title>
-<meta name="description" content="The open-source AI workbench for academic writing.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ============================================================
-   Kawasaki Academic Pipeline 
-   ============================================================ */
-:root{
-  --ease-out: cubic-bezier(.2,.7,.2,1);
-  --ease-glass: cubic-bezier(.3,1.2,.6,1);
-  --font-display: "DM Serif Display","Georgia",serif;
-  --font-body: "Inter",system-ui,sans-serif;
-  --font-mono: "JetBrains Mono",monospace;
-}
-:root,:root[data-theme="light"]{
-  --bg:#faf9f6;--bg-warm:#f5f2ec;--bg-hover:#eeebe3;
-  --fg:#111110;--fg-muted:#5c5b56;--fg-subtle:#9e9b94;
-  --border:#e2ded6;--border-strong:#cdc8be;
-  --accent-yellow:#ffea00;--accent-teal:#00c7bd;--accent-magenta:#ff1aac;
-  --nav-bg:rgba(250,249,246,.82);--nav-border:rgba(0,0,0,.04);
-  --code-bg:rgba(0,0,0,.025);--card-shadow:0 4px 20px rgba(0,0,0,.06);
-  --orb-opacity:.12;--glass-bg:rgba(255,255,255,.42);--glass-border:rgba(255,255,255,.6);
-  --dot-color:rgba(0,0,0,.035);--frame-tint:rgba(0,0,0,.018);
-}
-:root[data-theme="dark"]{
-  --bg:#0c0c0b;--bg-warm:#151413;--bg-hover:#1e1d1b;
-  --fg:#e6e4de;--fg-muted:#9d9a94;--fg-subtle:#615f5a;
-  --border:#2b2925;--border-strong:#3f3c35;
-  --accent-yellow:#fffa00;--accent-teal:#00c7bd;--accent-magenta:#ff1aac;
-  --nav-bg:rgba(12,12,11,.8);--nav-border:rgba(255,255,255,.04);
-  --code-bg:rgba(255,255,255,.04);--card-shadow:0 2px 20px rgba(0,0,0,.5);
-  --orb-opacity:.05;--glass-bg:rgba(30,30,30,.45);--glass-border:rgba(255,255,255,.08);
-  --dot-color:rgba(255,255,255,.02);--frame-tint:rgba(255,255,255,.015);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:var(--bg);color:var(--fg);
-  font:15.5px/1.75 var(--font-body);font-weight:400;
-  -webkit-font-smoothing:antialiased;
-  transition:background .5s var(--ease-out),color .5s var(--ease-out);
-  overflow-x:hidden;
-}
-/* subtle dot grid texture */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:radial-gradient(var(--dot-color) 1px,transparent 1px);
-  background-size:20px 20px;
-  transition:background-image .5s var(--ease-out);
-}
-::selection{background:var(--accent-yellow);color:#000}
-a{color:inherit;text-decoration:none}
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c7bed" />
+    <meta name="description" content="OAP 是一个把 Agent、Pipeline 与 Runtime 组织在一起的本地优先创作环境。" />
+    <link rel="icon" type="image/png" href="web_assets/oap_main_icon.png" />
+    <title>OAP · Open Agent Pipeline</title>
+    <style>
+      :root {
+        --paper: #f7f8fa;
+        --white: #ffffff;
+        --ink: #111820;
+        --muted: #66717d;
+        --line: #d8dee6;
+        --blue: #0c7bed;
+        --blue-deep: #075dbc;
+        --blue-soft: #e6f1ff;
+        --yellow: #f3c95f;
+        --teal: #15d8ba;
+        --black: #101419;
+        --radius-xl: 28px;
+        --radius-md: 12px;
+        --shadow: 0 24px 60px rgba(13, 35, 61, 0.15);
+        --sans: "Segoe UI Variable", "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      }
 
-/* ── color accents: yellow for decoration only, teal & magenta for text ── */
-.c-t{color:var(--accent-teal)}.c-m{color:var(--accent-magenta)}
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.55;
+        text-rendering: optimizeLegibility;
+      }
+      ::selection { color: var(--white); background: var(--blue); }
+      a { color: inherit; }
+      img { display: block; max-width: 100%; }
 
-/* ── Background orbs ── */
-.bg-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.bg-deco .orb{position:absolute;border-radius:50%;filter:blur(130px);opacity:var(--orb-opacity);transition:opacity .6s var(--ease-out)}
-.bg-deco .o1{width:600px;height:600px;background:var(--accent-magenta);top:-240px;right:-180px}
-.bg-deco .o2{width:480px;height:480px;background:var(--accent-yellow);bottom:-180px;left:-140px}
-.bg-deco .o3{width:360px;height:360px;background:var(--accent-teal);top:50%;left:50%;transform:translate(-50%,-50%)}
+      .page-shell { overflow: hidden; }
+      .site-header {
+        position: relative;
+        z-index: 10;
+        width: min(1240px, calc(100% - 56px));
+        min-height: 82px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+      }
+      .brand img {
+        width: 31px;
+        height: 31px;
+        border-radius: 8px;
+      }
+      .brand small {
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+      }
+      .site-nav {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 11px;
+      }
+      .site-nav a {
+        position: relative;
+        text-decoration: none;
+        transition: color 180ms ease;
+      }
+      .site-nav a::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -8px;
+        left: 0;
+        height: 2px;
+        background: var(--blue);
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 180ms ease;
+      }
+      .site-nav a:hover,
+      .site-nav a.is-active { color: var(--ink); }
+      .site-nav a:hover::after,
+      .site-nav a.is-active::after { transform: scaleX(1); transform-origin: left; }
 
-/* ── Nav ── */
-nav{
-  position:sticky;top:0;z-index:100;background:var(--nav-bg);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--nav-border);padding:0 32px;height:52px;
-  display:flex;align-items:center;justify-content:space-between;
-  transition:all .5s var(--ease-out);
-}
-.nav-brand{font-weight:600;font-size:14px;letter-spacing:-.01em;font-family:var(--font-body)}
-.nav-brand::before{content:'';display:inline-block;width:22px;height:5px;margin-right:8px;vertical-align:middle;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal))}
-.nav-links{display:flex;gap:2px}
-.nav-links a{color:var(--fg-muted);padding:6px 12px;font-size:13px;font-weight:500;border-radius:6px;transition:color .3s ease,background .25s ease}
-.nav-links a:hover{background:var(--bg-hover);color:var(--fg)}
-.theme-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:15px;color:var(--fg-muted);transition:all .25s ease;margin-left:8px;font-family:var(--font-body)}
-.theme-btn:hover{border-color:var(--border-strong);color:var(--fg)}
+      .hero {
+        width: min(1240px, calc(100% - 56px));
+        min-height: calc(100vh - 82px);
+        margin: 0 auto;
+        padding: 58px 0 82px;
+        display: grid;
+        grid-template-columns: minmax(300px, 0.83fr) minmax(480px, 1.17fr);
+        align-items: center;
+        gap: clamp(44px, 8vw, 116px);
+      }
+      .hero-copy { max-width: 560px; }
+      .hero-copy h1 {
+        margin: 0;
+        font-size: clamp(48px, 6.4vw, 88px);
+        font-weight: 800;
+        letter-spacing: -0.075em;
+        line-height: 0.99;
+      }
+      .hero-copy h1 span { color: var(--blue); }
+      .hero-copy .lead {
+        max-width: 490px;
+        margin: 32px 0 0;
+        color: #3d4853;
+        font-size: clamp(18px, 2vw, 22px);
+        line-height: 1.55;
+      }
+      .hero-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px 19px;
+        margin-top: 27px;
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 11px;
+      }
+      .hero-meta span { display: inline-flex; align-items: center; gap: 8px; }
+      .hero-meta span::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--yellow);
+      }
+      .hero-meta span:nth-child(2)::before { background: var(--teal); }
+      .hero-meta span:nth-child(3)::before { background: var(--blue); }
+      .cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+      .github-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 34px;
+        min-width: 206px;
+        margin-top: 40px;
+        padding: 14px 17px 14px 20px;
+        border: 1px solid var(--ink);
+        border-radius: 6px;
+        background: var(--ink);
+        color: var(--white);
+        font-family: var(--sans);
+        font-size: 12px;
+        text-decoration: none;
+        transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+      }
+      .github-cta span:last-child { font-size: 18px; line-height: 1; }
+      .github-cta:hover { background: var(--blue); border-color: var(--blue); transform: translateY(-3px); }
+      .github-cta:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
 
-/* ── Sections ── */
-section{padding:90px 32px;position:relative;z-index:1}
-.container{max-width:880px;margin:0 auto}
-.s-label{font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--fg-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
-.s-title{font-family:var(--font-display);font-size:clamp(30px,4.5vw,46px);font-weight:400;line-height:1.14;letter-spacing:-.025em;margin-bottom:20px}
-.s-title em{font-style:italic}
-.s-sub{font-size:15.5px;color:var(--fg-muted);line-height:1.8;max-width:620px;font-weight:400}
+      .signal-field {
+        position: relative;
+        min-height: min(66vw, 650px);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        background: var(--blue);
+        box-shadow: var(--shadow);
+        isolation: isolate;
+      }
+      .signal-field::before,
+      .signal-field::after {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        border-radius: 50%;
+      }
+      .signal-field::before { inset: 12% 8%; transform: rotate(-16deg); }
+      .signal-field::after { inset: 28% 18%; transform: rotate(26deg); }
+      .matrix {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        align-content: center;
+        padding: 7%;
+        overflow: hidden;
+        color: rgba(255, 255, 255, 0.29);
+        font-family: var(--sans);
+        font-size: clamp(10px, 1.25vw, 14px);
+        line-height: 1.7;
+        letter-spacing: 0.22em;
+        white-space: pre;
+        user-select: none;
+      }
+      .matrix-line { display: block; min-height: 1.7em; }
+      .matrix-line:nth-child(3n) { color: rgba(255, 255, 255, 0.2); }
+      .matrix-line:nth-child(4n) { color: rgba(255, 255, 255, 0.4); }
+      .matrix-line:nth-child(5n) { transform: translateX(4%); }
+      .matrix-line:nth-child(7n) { transform: translateX(-3%); }
+      .signal-crosshair {
+        position: absolute;
+        z-index: 1;
+        inset: 50% auto auto 50%;
+        width: min(74%, 430px);
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border: 1px solid rgba(255, 255, 255, 0.57);
+        border-radius: 50%;
+      }
+      .signal-crosshair::before,
+      .signal-crosshair::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.48);
+      }
+      .signal-crosshair::before { top: 50%; right: -9%; left: -9%; height: 1px; }
+      .signal-crosshair::after { top: -9%; bottom: -9%; left: 50%; width: 1px; }
+      .signal-orbit {
+        position: absolute;
+        z-index: 2;
+        inset: 50% auto auto 50%;
+        width: 67%;
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%) rotate(-21deg);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        border-radius: 50%;
+      }
+      .signal-orbit::before,
+      .signal-orbit::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--yellow);
+        box-shadow: 0 0 0 5px rgba(243, 201, 95, 0.2);
+      }
+      .signal-orbit::before { top: 4%; left: 19%; }
+      .signal-orbit::after { right: 4%; bottom: 23%; background: var(--teal); box-shadow: 0 0 0 5px rgba(21, 216, 186, 0.2); }
+      .brand-node {
+        position: absolute;
+        z-index: 3;
+        inset: 50% auto auto 50%;
+        display: grid;
+        place-items: center;
+        gap: 14px;
+        transform: translate(-50%, -50%);
+        color: var(--white);
+        text-align: center;
+      }
+      .brand-node img {
+        width: clamp(90px, 16vw, 148px);
+        height: clamp(90px, 16vw, 148px);
+        border: 7px solid rgba(255, 255, 255, 0.88);
+        border-radius: 24%;
+        box-shadow: 0 14px 34px rgba(4, 49, 111, 0.28);
+      }
+      .brand-node strong {
+        font-family: var(--sans);
+        font-size: clamp(16px, 2.1vw, 24px);
+        letter-spacing: 0.3em;
+        text-indent: 0.3em;
+      }
+      .node-label {
+        position: absolute;
+        z-index: 3;
+        color: rgba(255, 255, 255, 0.94);
+        font-family: var(--sans);
+        font-size: clamp(10px, 1vw, 12px);
+        letter-spacing: 0.08em;
+      }
+      .node-label.agent { top: 16%; left: 17%; }
+      .node-label.pipeline { top: 25%; right: 12%; }
+      .node-label.runtime { right: 17%; bottom: 15%; }
+      .field-index {
+        position: absolute;
+        right: 24px;
+        bottom: 19px;
+        z-index: 3;
+        color: rgba(255, 255, 255, 0.72);
+        font-family: var(--sans);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
 
-/* ── 3-color gradient ── */
-.grad{width:100%;height:2px;margin:20px 0 0;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta) 0 35%,var(--accent-yellow) 35% 82%,var(--accent-teal) 82% 100%);transform-origin:left}
+      .section {
+        width: min(1240px, calc(100% - 56px));
+        margin: 0 auto;
+        padding: 132px 0;
+        scroll-margin-top: 30px;
+      }
+      .section-heading {
+        display: grid;
+        grid-template-columns: minmax(190px, 0.72fr) minmax(0, 1.28fr);
+        align-items: end;
+        gap: 48px;
+        padding-bottom: 48px;
+        border-bottom: 1px solid var(--line);
+      }
+      .section-heading h2 {
+        max-width: 700px;
+        margin: 0;
+        font-size: clamp(34px, 4.5vw, 60px);
+        font-weight: 750;
+        letter-spacing: -0.065em;
+        line-height: 1.04;
+      }
+      .section-heading p {
+        max-width: 500px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+      .section-marker {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 18px;
+        color: var(--blue-deep);
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+      }
+      .section-marker::before { content: "//"; color: var(--yellow); font-weight: 700; }
 
-/* ── Reveal ── */
-.reveal{opacity:0;transform:translateY(32px);transition:opacity .75s var(--ease-out),transform .75s var(--ease-out)}
-.reveal.visible{opacity:1;transform:none}
-.reveal.d1{transition-delay:0s}.reveal.d2{transition-delay:.06s}.reveal.d3{transition-delay:.12s}.reveal.d4{transition-delay:.18s}
+      .system-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0;
+        border-top: 1px solid var(--line);
+      }
+      .system-item {
+        min-height: 326px;
+        padding: 30px 22px 28px 0;
+        border-bottom: 1px solid var(--line);
+        transition: transform 500ms cubic-bezier(0.2, 0.75, 0.2, 1), background-color 300ms ease;
+      }
+      .system-item + .system-item { padding-left: 22px; border-left: 1px solid var(--line); }
+      .system-item:last-child { padding-right: 0; }
+      .system-item .number {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 70px;
+        color: var(--muted);
+        font-family: var(--sans);
+        font-size: 11px;
+      }
+      .system-item .number i { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+      .system-item .number i { animation: status-pulse 2.8s ease-in-out infinite; }
+      .system-item:nth-child(2) .number i { background: var(--yellow); }
+      .system-item:nth-child(3) .number i { background: var(--teal); }
+      .system-item:nth-child(4) .number i { background: var(--yellow); }
+      .system-item:nth-child(5) .number i { background: var(--teal); }
+      .system-item:nth-child(2) .number i { animation-delay: 180ms; }
+      .system-item:nth-child(3) .number i { animation-delay: 360ms; }
+      .system-item:nth-child(4) .number i { animation-delay: 540ms; }
+      .system-item:nth-child(5) .number i { animation-delay: 720ms; }
+      @keyframes status-pulse {
+        0%, 100% { opacity: 0.62; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.2); }
+      }
+      .system-item h3 {
+        margin: 0 0 11px;
+        font-family: var(--sans);
+        font-size: clamp(22px, 2.4vw, 32px);
+        letter-spacing: -0.05em;
+      }
+      .system-item p { max-width: 220px; margin: 0; color: var(--muted); }
+      .system-item.reveal.is-visible:hover { transform: translateY(-6px); background: rgba(230, 241, 255, 0.42); }
 
-/* ── Hero ── */
-.hero{padding:120px 32px 60px;text-align:center}
-.hero .s-title{font-size:clamp(38px,7vw,68px);margin-bottom:28px;font-weight:400;line-height:1.1}
-.hero .s-title em{font-style:italic}
-.hero .grad{width:180px;margin:32px auto 0}
-.tag-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-.tag{padding:5px 15px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:10.5px;color:var(--fg-muted);letter-spacing:.05em;transition:all .25s var(--ease-glass)}
-.tag:hover{border-color:var(--border-strong);color:var(--fg);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+      .flow-band {
+        position: relative;
+        background: var(--blue);
+        color: var(--white);
+      }
+      .flow-band::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40%;
+        height: 100%;
+        background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 42px 42px;
+        pointer-events: none;
+        animation: flow-grid-shift 18s linear infinite;
+      }
+      @keyframes flow-grid-shift {
+        to { background-position: 42px 42px; }
+      }
+      .flow-inner {
+        position: relative;
+        width: min(1240px, calc(100% - 56px));
+        margin: 0 auto;
+        padding: 132px 0 136px;
+      }
+      .flow-inner .section-marker { color: rgba(255, 255, 255, 0.75); }
+      .flow-inner .section-marker::before { color: var(--yellow); }
+      .flow-inner h2 {
+        max-width: 800px;
+        margin: 0;
+        font-size: clamp(38px, 5vw, 66px);
+        font-weight: 750;
+        letter-spacing: -0.07em;
+        line-height: 1.02;
+      }
+      .flow-intro { max-width: 490px; margin: 26px 0 76px; color: rgba(255, 255, 255, 0.76); }
+      .flow-list {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.4);
+      }
+      .flow-step {
+        position: relative;
+        min-height: 225px;
+        padding: 27px 24px 0 0;
+      }
+      .flow-step + .flow-step { padding-left: 24px; border-left: 1px solid rgba(255, 255, 255, 0.4); }
+      .flow-step .step-line { display: flex; align-items: center; justify-content: space-between; color: rgba(255, 255, 255, 0.72); font-family: var(--sans); font-size: 11px; }
+      .flow-step .step-line b { color: var(--yellow); font-weight: 500; }
+      .flow-step h3 { margin: 70px 0 10px; font-size: 20px; font-weight: 650; transition: color 220ms ease, transform 220ms ease; }
+      .flow-step:hover h3 { color: var(--yellow); transform: translateX(5px); }
+      .flow-step p { margin: 0; color: rgba(255, 255, 255, 0.68); font-size: 14px; line-height: 1.6; }
 
-/* ══════════ DECORATIVE FRAMES ══════════ */
-.frame-box{
-  position:relative;padding:28px 32px;border-radius:16px;
-  background:var(--frame-tint);border:1px solid var(--border);
-  transition:all .35s var(--ease-glass);
-}
-.frame-box::after{
-  content:'';position:absolute;top:-1px;left:32px;right:32px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent-yellow),transparent);
-  opacity:0;transition:opacity .35s var(--ease-out);
-}
-.frame-box:hover::after{opacity:1}
-.frame-box .f-title{font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:8px}
-.frame-box .f-body{font-size:14px;color:var(--fg-muted);line-height:1.8}
+      .surfaces-section { padding-bottom: 144px; }
+      .surface-list { display: grid; gap: 0; }
+      .surface-row {
+        display: grid;
+        grid-template-columns: 115px minmax(180px, 0.65fr) minmax(240px, 1.35fr);
+        align-items: center;
+        gap: 42px;
+        min-height: 158px;
+        border-bottom: 1px solid var(--line);
+        transition: padding-left 380ms cubic-bezier(0.2, 0.75, 0.2, 1), background-color 280ms ease;
+      }
+      .surface-row:hover { padding-left: 12px; background: rgba(230, 241, 255, 0.42); }
+      .surface-row .surface-index { color: var(--blue); font-family: var(--sans); font-size: 12px; }
+      .surface-row h3 { margin: 0; font-family: var(--sans); font-size: clamp(23px, 3vw, 34px); letter-spacing: -0.05em; }
+      .surface-row p { max-width: 480px; margin: 0; color: var(--muted); }
+      .surface-mark { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+      .surface-mark i { display: block; width: 20px; height: 5px; background: var(--blue); animation: mark-breathe 2.6s ease-in-out infinite; }
+      .surface-mark i:nth-child(2) { width: 36px; background: var(--yellow); }
+      .surface-mark i:nth-child(3) { width: 10px; background: var(--teal); }
+      .surface-mark i:nth-child(2) { animation-delay: 160ms; }
+      .surface-mark i:nth-child(3) { animation-delay: 320ms; }
+      @keyframes mark-breathe {
+        0%, 100% { opacity: 0.55; transform: scaleX(0.72); transform-origin: left; }
+        50% { opacity: 1; transform: scaleX(1); transform-origin: right; }
+      }
 
-/* ── Glass Cards (modules) with 3D tilt ── */
-.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;perspective:1200px}
-.mod-card{
-  position:relative;padding:38px 28px 32px;border-radius:18px;
-  background:var(--glass-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border:1px solid var(--glass-border);overflow:hidden;
-  transition:box-shadow .4s var(--ease-glass),transform .15s ease-out;
-  transform-style:preserve-3d;
-}
-.mod-card::before{
-  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
-  background:linear-gradient(135deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal),var(--accent-magenta));
-  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s var(--ease-out);
-}
-.mod-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12)}
-.mod-card:hover::before{opacity:1}
-.mod-card .mod-inner{transform:translateZ(20px)}
-.mod-card .bar{height:2px;width:32px;margin-bottom:22px;border-radius:2px}
-.mod-card .bar.y{background:var(--accent-yellow)}.mod-card .bar.t{background:var(--accent-teal)}.mod-card .bar.c{background:var(--accent-magenta)}
-.mod-card h3{font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:14px}
-.mod-card p{font-size:13.5px;color:var(--fg-muted);line-height:1.85;margin-bottom:18px}
-.mod-card .pills{display:flex;flex-wrap:wrap;gap:4px}
-.mod-card .pill{padding:3px 10px;border-radius:12px;background:var(--glass-bg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:9.5px;color:var(--fg-muted);letter-spacing:.04em;transition:all .2s ease}
-.mod-card .pill:hover{border-color:var(--border-strong);color:var(--fg)}
+      .principles {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        background: var(--black);
+        color: var(--white);
+      }
+      .about-matrix {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.48;
+        pointer-events: none;
+      }
+      .principles-inner {
+        position: relative;
+        z-index: 1;
+        width: min(1240px, calc(100% - 56px));
+        margin: 0 auto;
+        padding: 130px 0 116px;
+      }
+      .principles-heading { display: flex; align-items: end; justify-content: space-between; gap: 44px; padding-bottom: 66px; }
+      .principles-heading-copy { display: grid; gap: 28px; }
+      .principles-logo {
+        width: clamp(52px, 6vw, 78px);
+        height: auto;
+        filter: brightness(0) invert(1) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.36));
+      }
+      .principles-heading h2 { max-width: 680px; margin: 0; font-size: clamp(36px, 5vw, 65px); font-weight: 750; letter-spacing: -0.075em; line-height: 1.02; }
+      .principles-heading p { max-width: 310px; margin: 0; color: #9ba6b1; }
+      .principle-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #343d47; }
+      .principle { min-height: 224px; padding: 26px 26px 0 0; }
+      .principle + .principle { padding-left: 26px; border-left: 1px solid #343d47; }
+      .principle .principle-index { color: var(--yellow); font-family: var(--sans); font-size: 11px; }
+      .principle h3 { margin: 68px 0 9px; font-size: 21px; font-weight: 650; }
+      .principle p { max-width: 275px; margin: 0; color: #9ba6b1; font-size: 14px; }
 
-/* ══════════ PIPELINE — timeline style ══════════ */
-.timeline{position:relative;padding-left:32px}
-.timeline::before{
-  content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;
-  background:linear-gradient(180deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal));
-  border-radius:1px;opacity:.5;
-}
-.tl-item{position:relative;padding:0 0 28px 32px}
-.tl-item:last-child{padding-bottom:0}
-.tl-item::before{
-  content:'';position:absolute;left:-28px;top:5px;width:12px;height:12px;
-  border-radius:50%;border:2px solid var(--accent-yellow);background:var(--bg);
-  transition:all .3s ease;
-}
-.tl-item:hover::before{background:var(--accent-yellow);box-shadow:0 0 12px rgba(255,250,0,.25)}
-.tl-item .tl-num{font-family:var(--font-mono);font-size:10px;color:var(--accent-teal);letter-spacing:.08em;margin-bottom:2px}
-.tl-item .tl-title{font-family:var(--font-display);font-size:18px;font-weight:400;margin-bottom:4px}
-.tl-item .tl-desc{font-size:13px;color:var(--fg-muted);line-height:1.7}
+      .site-footer {
+        width: 100%;
+        min-height: 100px;
+        margin: 0;
+        background: var(--black);
+        color: #9ba6b1;
+      }
+      .site-footer-inner {
+        width: min(1240px, calc(100% - 56px));
+        min-height: 100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        font-family: var(--sans);
+        font-size: 10px;
+      }
+      .footer-logo {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+        filter: brightness(0) invert(1) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+      }
+      .site-footer span:last-child { color: #9ba6b1; }
 
-/* ══════════ STAT CARDS (section divider) ══════════ */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:14px;overflow:hidden;border:1px solid var(--border);perspective:800px}
-.stat-cell{
-  text-align:center;padding:28px 16px;background:var(--bg);
-  transition:transform .5s var(--ease-glass);transform-style:preserve-3d;
-  position:relative;min-height:100px;
-}
-.stat-cell:hover{transform:rotateY(180deg)}
-.stat-cell .front,.stat-cell .back{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:20px 12px;
-}
-.stat-cell .back{transform:rotateY(180deg);background:var(--bg-warm)}
-.stat-cell .n{font-family:var(--font-display);font-size:32px;font-weight:400;color:var(--fg)}
-.stat-cell .l{font-family:var(--font-mono);font-size:10px;color:var(--fg-muted);letter-spacing:.06em;margin-top:6px;text-transform:uppercase}
-.stat-cell .b-text{font-size:12.5px;color:var(--fg-muted);line-height:1.6}
+      .reveal { opacity: 0; transform: translateY(22px); transition: opacity 700ms ease, transform 700ms ease; }
+      .reveal.is-visible { opacity: 1; transform: translateY(0); }
+      .hero .reveal { opacity: 1; transform: none; }
+      .intro-details.reveal { transition-delay: 100ms; }
+      .principle { transition: transform 450ms cubic-bezier(0.2, 0.75, 0.2, 1), border-color 250ms ease; }
+      .principle.reveal.is-visible:hover { transform: translateY(-6px); border-color: var(--yellow); }
+      .system-item:nth-child(2), .flow-step:nth-child(2), .surface-row:nth-child(2), .principle:nth-child(2) { transition-delay: 80ms; }
+      .system-item:nth-child(3), .flow-step:nth-child(3), .surface-row:nth-child(3), .principle:nth-child(3) { transition-delay: 160ms; }
+      .system-item:nth-child(4), .flow-step:nth-child(4) { transition-delay: 240ms; }
+      .system-item:nth-child(5) { transition-delay: 320ms; }
+      .hero-scroll-cue::after { animation: scroll-cue-line 1.8s ease-in-out infinite; }
+      @keyframes scroll-cue-line {
+        0%, 100% { transform: scaleX(0.65); transform-origin: left; opacity: 0.45; }
+        50% { transform: scaleX(1); transform-origin: right; opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        .reveal { opacity: 1; transform: none; }
+      }
 
-/* ── Features ── */
-.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.feat-card{
-  padding:30px 28px;border-radius:16px;
-  background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid var(--glass-border);
-  transition:all .3s var(--ease-glass);
-}
-.feat-card:hover{transform:translateY(-2px);box-shadow:var(--card-shadow);border-color:var(--border-strong)}
-.feat-card h3{font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:8px}
-.feat-card h3 .accent-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:8px;vertical-align:middle;position:relative;top:-1px}
-.feat-card p{font-size:13.5px;color:var(--fg-muted);line-height:1.75}
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 38px; gap: 52px; }
+        .hero-copy { max-width: 700px; }
+        .signal-field { min-height: min(86vw, 620px); }
+        .section, .flow-inner, .principles-inner { padding-top: 96px; padding-bottom: 96px; }
+        .section-heading { grid-template-columns: 1fr; gap: 25px; }
+        .system-item { min-height: 250px; }
+        .system-item .number { margin-bottom: 52px; }
+        .system-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .principles-heading { align-items: start; flex-direction: column; }
+      }
+      @media (max-width: 640px) {
+        .site-header, .hero, .section, .flow-inner, .principles-inner { width: min(100% - 36px, 520px); }
+        .site-header { min-height: 68px; }
+        .brand small, .site-nav a:nth-child(3) { display: none; }
+        .site-nav { gap: 16px; font-size: 10px; }
+        .hero { padding-top: 31px; padding-bottom: 18px; gap: 38px; }
+        .hero-copy h1 { font-size: clamp(48px, 14vw, 72px); }
+        .hero-copy .lead { margin-top: 24px; font-size: 17px; }
+        .github-cta { margin-top: 30px; }
+        .signal-field { min-height: min(74vw, 300px); max-height: 300px; border-radius: 20px; }
+        .matrix { padding: 4%; font-size: 8px; letter-spacing: 0.12em; }
+        .signal-crosshair { width: 82%; }
+        .signal-orbit { width: 74%; }
+        .brand-node img { width: 94px; height: 94px; border-width: 5px; border-radius: 22%; }
+        .brand-node strong { font-size: 16px; }
+        .node-label.agent { top: 12%; left: 8%; }
+        .node-label.pipeline { top: 22%; right: 5%; }
+        .node-label.runtime { right: 8%; bottom: 12%; }
+        .section, .flow-inner, .principles-inner { padding-top: 36px; padding-bottom: 80px; }
+        .section-heading { padding-bottom: 33px; }
+        .section-heading h2, .flow-inner h2, .principles-heading h2 { font-size: clamp(35px, 11vw, 54px); }
+        .system-grid, .flow-list, .principle-grid { grid-template-columns: 1fr; }
+        .system-item, .system-item + .system-item { min-height: 0; padding: 25px 0 34px; border-left: 0; }
+        .system-item .number { margin-bottom: 40px; }
+        .flow-intro { margin-bottom: 48px; }
+        .flow-step, .flow-step + .flow-step { min-height: 0; padding: 25px 0 32px; border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.4); }
+        .flow-step:last-child { border-bottom: 0; }
+        .flow-step h3 { margin-top: 43px; }
+        .surface-row { grid-template-columns: 48px 1fr; gap: 14px 20px; min-height: 0; padding: 25px 0 27px; }
+        .surface-row .surface-index { grid-row: span 2; align-self: start; padding-top: 3px; }
+        .surface-row p { grid-column: 2; }
+        .principle, .principle + .principle { min-height: 0; padding: 25px 0 32px; border-left: 0; border-bottom: 1px solid #343d47; }
+        .principle:last-child { border-bottom: 0; }
+        .principle h3 { margin-top: 42px; }
+        .site-footer { min-height: 84px; padding: 0 18px; }
+        .site-footer-inner { width: min(100%, 520px); min-height: 84px; align-items: start; flex-direction: column; justify-content: center; gap: 8px; }
+      }
+    </style>
+    <style id="codex-style-overrides">
+      :root {
+        --paper: #ffffff;
+        --white: #ffffff;
+        --ink: #111111;
+        --muted: #64676d;
+        --line: #d8dadd;
+        --blue: #086bff;
+        --blue-deep: #0055d4;
+        --blue-soft: #eef4ff;
+        --yellow: #ffbd3b;
+        --teal: #16c7b2;
+        --black: #0d0e10;
+        --codex-red: #ff5a46;
+        --shadow: 0 24px 70px rgba(10, 16, 28, 0.18);
+      }
 
-/* ── Compare ── */
-.cmp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-.cmp-table th{text-align:left;padding:14px 20px;font-family:var(--font-display);font-size:16px;font-weight:400;border-bottom:2px solid var(--border);background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.cmp-table th:first-child{border-radius:12px 0 0 0}.cmp-table th:last-child{border-radius:0 12px 0 0}
-.cmp-table td{padding:12px 20px;border-bottom:1px solid var(--border);color:var(--fg-muted);transition:background .25s ease}
-.cmp-table tr:last-child td:first-child{border-radius:0 0 0 12px}.cmp-table tr:last-child td:last-child{border-radius:0 0 12px 0}
-.cmp-table tr:hover td{background:var(--bg-warm)}
-.cmp-table .check{color:var(--accent-teal);font-weight:600}
+      body {
+        background: var(--paper);
+        color: var(--ink);
+      }
 
-/* ── Tech ── */
-.tech-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.tech-item{padding:6px 16px;border-radius:20px;background:var(--glass-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:11.5px;color:var(--fg-muted);letter-spacing:.03em;transition:all .25s var(--ease-glass)}
-.tech-item:hover{border-color:var(--border-strong);color:var(--fg);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+      .site-header {
+        top: 12px;
+        width: min(1320px, calc(100% - 48px));
+        min-height: 70px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
 
-/* ── Code block ── */
-.code-block{border-radius:14px;overflow:hidden;background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);padding:28px 32px;font-family:var(--font-mono);font-size:13px;line-height:1.9}
-.code-block .c{color:var(--fg-subtle)}
+      .brand img {
+        width: 34px;
+        height: 34px;
+        filter: brightness(0) invert(1);
+      }
 
-/* ── CTA ── */
-.cta{text-align:center;padding:60px 32px 110px}
-.cta .btn{display:inline-flex;align-items:center;gap:8px;padding:15px 40px;border-radius:14px;font-weight:600;font-size:15px;text-decoration:none;background:var(--fg);color:var(--bg);transition:transform .35s var(--ease-glass),box-shadow .35s ease}
-.cta .btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
-.cta .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:14px 38px;margin-left:10px;border-radius:14px;font-weight:600;font-size:15px;text-decoration:none;background:var(--glass-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--fg);transition:all .3s var(--ease-glass)}
-.cta .btn-ghost:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+      .site-nav {
+        gap: 28px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
 
-/* ── Footer ── */
-footer{text-align:center;padding:48px 32px;border-top:1px solid var(--border);color:var(--fg-muted);font-size:13px;line-height:1.9;position:relative;z-index:1;transition:border-color .5s var(--ease-out)}
-footer .fbar{display:inline-block;width:48px;height:2px;margin-bottom:16px;border-radius:2px;background:linear-gradient(90deg,var(--accent-magenta),var(--accent-yellow),var(--accent-teal))}
-footer a{color:var(--fg);text-decoration:underline;text-underline-offset:4px}
+      .hero {
+        background: var(--blue);
+      }
 
-@media(max-width:768px){
-  nav{padding:0 16px}.nav-links{display:none}
-  section{padding:56px 16px}
-  .feat-grid,.mod-grid,.stat-row{grid-template-columns:1fr 1fr}
-  .hero{padding:80px 16px 40px}
-  .timeline{padding-left:20px}.tl-item{padding-left:24px}.tl-item::before{left:-24px}
-}
-</style>
-</head>
-<body>
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.16;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: linear-gradient(to bottom, transparent, black 18%, black 80%, transparent);
+        animation: codex-grid-drift 18s linear infinite;
+      }
 
-<div class="bg-deco"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+      #signal-canvas { z-index: 0; }
 
-<!-- ═══════ NAV ═══════ -->
-<nav>
-  <div class="nav-brand">Kawasaki Academic Pipeline</div>
-  <div style="display:flex;align-items:center">
-    <div class="nav-links">
-      <a href="#modules">Workbenches</a><a href="#pipeline">Pipeline</a>
-      <a href="#features">Features</a><a href="#compare">Compare</a>
-      <a href="#install">Install</a>
-      <a href="https://github.com/KawasakiKusako/openAcademicPipeline">GitHub</a>
+      .brand-node.intro-mark,
+      .hero-scroll-cue { z-index: 4; }
+
+      .intro-section {
+        min-height: 68vh;
+        padding-top: 146px;
+        padding-bottom: 146px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .intro-copy h1,
+      .section-heading h2,
+      .flow-inner h2,
+      .principles-heading h2,
+      .system-item h3,
+      .surface-row h3 {
+        letter-spacing: 0;
+      }
+
+      body,
+      .brand,
+      .brand small,
+      .site-nav,
+      .hero-copy h1,
+      .hero-meta,
+      .node-label,
+      .field-index,
+      .section-marker,
+      .flow-step .step-line,
+      .surface-row .surface-index,
+      .principle .principle-index,
+      .hero-scroll-cue,
+      .site-footer-inner {
+        letter-spacing: 0;
+      }
+
+      .intro-copy h1 {
+        max-width: 680px;
+        font-size: clamp(50px, 7vw, 94px);
+        line-height: 0.98;
+      }
+
+      .intro-copy h1 span { color: var(--codex-red); }
+
+      .section-marker {
+        gap: 12px;
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .section-marker::before {
+        content: "";
+        width: 22px;
+        height: 2px;
+        background: var(--codex-red);
+      }
+
+      .section-heading {
+        padding-bottom: 42px;
+        border-bottom: 2px solid var(--ink);
+      }
+
+      .section-heading h2,
+      .flow-inner h2,
+      .principles-heading h2 {
+        font-weight: 780;
+      }
+
+      .system-grid { border-top: 0; }
+
+      .system-item {
+        position: relative;
+        min-height: 340px;
+        transition: transform 500ms cubic-bezier(0.2, 0.75, 0.2, 1), background-color 300ms ease, box-shadow 300ms ease;
+      }
+
+      .system-item.reveal.is-visible:hover {
+        background: var(--blue-soft);
+        box-shadow: inset 0 3px 0 var(--codex-red);
+      }
+
+      .system-item .number i { width: 8px; height: 8px; }
+
+      .flow-band {
+        background: var(--black);
+      }
+
+      .flow-band::before {
+        top: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        opacity: 0.5;
+        background-image: linear-gradient(90deg, transparent 49.5%, rgba(255, 255, 255, 0.08) 50%, transparent 50.5%), linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 180px 72px;
+        animation: codex-grid-drift 22s linear infinite;
+      }
+
+      .flow-band::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 9%;
+        bottom: 0;
+        width: 26vw;
+        max-width: 360px;
+        pointer-events: none;
+        border-left: 1px solid rgba(255, 255, 255, 0.16);
+        border-right: 1px solid rgba(255, 255, 255, 0.16);
+        transform: skewX(-18deg);
+        opacity: 0.7;
+      }
+
+      .flow-inner .section-marker { color: rgba(255, 255, 255, 0.72); }
+      .flow-step h3 { letter-spacing: 0; }
+      .flow-step:hover h3 { color: var(--codex-red); }
+
+      .github-cta {
+        border-radius: 0;
+        font-weight: 700;
+        transition: background 220ms ease, border-color 220ms ease, color 220ms ease, transform 220ms ease;
+      }
+
+      .intro-details .github-cta {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--white);
+      }
+
+      .intro-details .github-cta:hover {
+        background: var(--codex-red);
+        border-color: var(--codex-red);
+        color: var(--white);
+      }
+
+      .surface-row {
+        min-height: 178px;
+        transition: padding-left 380ms cubic-bezier(0.2, 0.75, 0.2, 1), background-color 280ms ease, box-shadow 280ms ease;
+      }
+
+      .surface-row:hover {
+        background: var(--blue-soft);
+        box-shadow: inset 3px 0 0 var(--codex-red);
+      }
+
+      .surface-row .surface-index { color: var(--codex-red); }
+
+      .surface-mark i:nth-child(2) { background: var(--codex-red); }
+
+      .principles-heading h2 { max-width: 760px; }
+      .principles-logo { width: clamp(56px, 6vw, 82px); }
+      .principle-grid { border-top: 2px solid #343941; }
+      .principle h3 { letter-spacing: 0; }
+
+      .site-footer { border-top: 1px solid #2d3239; }
+
+      .reveal {
+        clip-path: none;
+        opacity: 0;
+        transform: translateY(26px);
+        transition: opacity 720ms ease, transform 720ms cubic-bezier(0.2, 0.75, 0.2, 1);
+      }
+
+      .reveal.is-visible {
+        clip-path: none;
+      }
+
+      @keyframes codex-grid-drift {
+        from { background-position: 0 0, 0 0; }
+        to { background-position: 72px 72px, 72px 72px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero::before { animation: none; }
+      }
+
+      @media (max-width: 640px) {
+        .site-header { width: calc(100% - 36px); min-height: 62px; }
+        .site-nav { gap: 15px; }
+        .intro-section { min-height: 72vh; padding-top: 84px; padding-bottom: 84px; }
+        .intro-copy h1 { font-size: clamp(48px, 14vw, 74px); }
+        .section-heading { padding-bottom: 30px; }
+        .system-item { min-height: 0; }
+        .flow-band::after { right: 14%; width: 32vw; }
+        .surface-row { min-height: 0; }
+      }
+    </style>
+    <style>
+      .site-header {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--white);
+      }
+      .brand img { filter: brightness(0) invert(1); border-radius: 0; }
+      .brand small { color: rgba(255, 255, 255, 0.72); }
+      .site-nav { color: rgba(255, 255, 255, 0.72); }
+      .site-nav a::after { background: rgba(255, 255, 255, 0.9); }
+      .site-nav a:hover,
+      .site-nav a.is-active { color: var(--white); }
+
+      .hero {
+        position: relative;
+        width: 100%;
+        min-height: 100svh;
+        margin: 0;
+        padding: 0;
+        display: block;
+        overflow: hidden;
+        background: var(--blue);
+        color: var(--white);
+        isolation: isolate;
+      }
+      .hero .hero-copy {
+        position: absolute;
+        left: max(28px, calc((100% - 1240px) / 2));
+        bottom: clamp(40px, 7vh, 88px);
+        z-index: 5;
+        max-width: 560px;
+      }
+      .hero .hero-copy h1,
+      .hero .hero-copy h1 span { color: var(--white); }
+      .hero .hero-copy .lead { color: rgba(255, 255, 255, 0.78); }
+      .hero .hero-meta { color: rgba(255, 255, 255, 0.72); }
+      .hero .github-cta {
+        border-color: var(--white);
+        background: var(--white);
+        color: var(--ink);
+      }
+      .hero .github-cta:hover { background: var(--yellow); border-color: var(--yellow); }
+
+      .signal-field {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        min-height: 100%;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+      .signal-field::before,
+      .signal-field::after,
+      .matrix,
+      .signal-crosshair,
+      .signal-orbit,
+      .node-label,
+      .field-index { display: none; }
+      #signal-canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: crosshair; }
+      .brand-node.intro-mark {
+        inset: 46% auto auto 50%;
+        width: min(82vw, 620px);
+        height: min(34vw, 250px);
+        gap: 0;
+        pointer-events: none;
+      }
+      .intro-mark .logo-symbol {
+        position: absolute;
+        width: clamp(168px, 24vw, 286px);
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        filter: brightness(0) invert(1) drop-shadow(0 18px 30px rgba(4, 49, 111, 0.34));
+        opacity: 0;
+        transform: scale(1.55);
+        animation: oap-symbol-intro 1.35s cubic-bezier(0.2, 0.76, 0.25, 1) 80ms forwards;
+      }
+      .logo-banner-clip {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(76vw, 570px);
+        overflow: hidden;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        clip-path: inset(0 100% 0 0);
+        animation: oap-banner-intro 1.2s cubic-bezier(0.2, 0.72, 0.2, 1) 1.04s forwards;
+      }
+      .intro-mark .logo-banner {
+        width: 100%;
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        filter: brightness(0) invert(1) drop-shadow(0 8px 16px rgba(4, 49, 111, 0.22));
+      }
+      @keyframes oap-symbol-intro {
+        0% { opacity: 1; transform: scale(1.55); }
+        62% { opacity: 1; transform: scale(1.55); }
+        100% { opacity: 0; transform: scale(0.32); }
+      }
+      @keyframes oap-banner-intro {
+        0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+        12% { opacity: 1; }
+        100% { opacity: 1; clip-path: inset(0 0 0 0); }
+      }
+      .hero-scroll-cue { opacity: 0; animation: hero-cue-intro 600ms ease 2.25s forwards; }
+      @keyframes hero-cue-intro {
+        to { opacity: 1; }
+      }
+      .intro-section {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+        align-items: end;
+        gap: clamp(45px, 10vw, 150px);
+        min-height: 62vh;
+        padding-top: 118px;
+        padding-bottom: 118px;
+      }
+      .intro-copy h1 {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(48px, 6.4vw, 88px);
+        font-weight: 800;
+        letter-spacing: -0.075em;
+        line-height: 0.99;
+      }
+      .intro-copy h1 span { color: var(--blue); }
+      .intro-details .lead {
+        max-width: 520px;
+        margin: 0;
+        color: #3d4853;
+        font-size: clamp(18px, 2vw, 22px);
+        line-height: 1.55;
+      }
+      .intro-details .hero-meta { margin-top: 27px; }
+      .intro-details .github-cta { margin-top: 36px; }
+      .hero-scroll-cue {
+        position: absolute;
+        right: 50%;
+        bottom: 42px;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: rgba(255, 255, 255, 0.68);
+        font-family: var(--sans);
+        font-size: 10px;
+        letter-spacing: 0.09em;
+        transform: translateX(50%);
+      }
+      .hero-scroll-cue::after { content: ""; width: 42px; height: 1px; background: rgba(255, 255, 255, 0.64); }
+      @media (max-width: 900px) {
+        .hero { min-height: 100svh; padding: 0; }
+        .hero .hero-copy { right: 28px; bottom: 42px; left: 28px; max-width: 650px; }
+        .hero .hero-copy .lead { max-width: 520px; }
+        .intro-section { grid-template-columns: 1fr; align-items: start; min-height: auto; gap: 28px; }
+        .signal-field { min-height: 100%; }
+      }
+      @media (max-width: 640px) {
+        .site-header { min-height: 68px; }
+        .hero { min-height: 100svh; padding: 0; }
+        .hero .hero-copy { right: 18px; bottom: 34px; left: 18px; }
+        .hero .hero-copy h1 { font-size: clamp(46px, 13vw, 72px); }
+        .hero .hero-copy .lead { margin-top: 21px; font-size: 16px; }
+        .hero-meta { margin-top: 18px; gap: 9px 14px; font-size: 10px; }
+        .hero .github-cta { margin-top: 24px; }
+        .intro-section { gap: 24px; padding-top: 70px; padding-bottom: 70px; }
+        .intro-copy h1 { font-size: clamp(46px, 13vw, 72px); }
+        .intro-details .lead { font-size: 17px; }
+        .intro-details .hero-meta { margin-top: 18px; }
+        .intro-details .github-cta { margin-top: 28px; }
+        .brand-node.intro-mark { inset: 42% auto auto 50%; width: 92vw; height: 190px; }
+        .intro-mark .logo-symbol { width: clamp(125px, 39vw, 180px); }
+        .logo-banner-clip { width: min(88vw, 420px); }
+        .node-label.agent { top: 22%; left: 10%; }
+        .node-label.pipeline { top: 29%; right: 8%; }
+        .node-label.runtime { right: 10%; bottom: 38%; }
+        .field-index { right: 18px; bottom: 18px; }
+        .hero-scroll-cue { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="#top" aria-label="回到 OAP 首页">
+          <img src="web_assets/oap_gray.svg" alt="OAP 产品图标" />
+        </a>
+        <nav class="site-nav" aria-label="页面导航">
+          <a href="#system">SYSTEM</a>
+          <a href="#flow">FLOW</a>
+          <a href="#surfaces">SURFACES</a>
+        </nav>
+      </header>
+
+      <main id="top">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="signal-field reveal" aria-label="OAP 字符动画系统图谱">
+            <canvas id="signal-canvas" aria-hidden="true"></canvas>
+            <div class="signal-crosshair" aria-hidden="true"></div>
+            <div class="signal-orbit" aria-hidden="true"></div>
+            <span class="node-label agent">AGENT</span>
+            <span class="node-label pipeline">PIPELINE</span>
+            <span class="node-label runtime">RUNTIME</span>
+            <div class="brand-node intro-mark">
+              <img class="logo-symbol" src="web_assets/oap_gray.svg" alt="OAP 产品图标" />
+              <div class="logo-banner-clip">
+                <img class="logo-banner" src="web_assets/oap_banner.svg" alt="Open Agent Pipeline" />
+              </div>
+            </div>
+            <span class="field-index">SYS / 00.10</span>
+          </div>
+          <div class="hero-scroll-cue" aria-hidden="true">SCROLL TO EXPLORE</div>
+        </section>
+
+        <section class="section intro-section" aria-labelledby="hero-title">
+          <div class="intro-copy reveal">
+            <div class="section-marker">OPEN AGENT PIPELINE</div>
+            <h1 id="hero-title">让 AI<br /><span>真正开始工作。</span></h1>
+          </div>
+          <div class="intro-details reveal">
+            <p class="lead">OAP（Open Agent Pipeline）v0.22 是一个把 Agent、Pipeline 与 Runtime 组织在一起的本地优先创作环境：多 Agent 流式对话、可视化 Pipeline（loop/分支/子图）、记忆与知识库、技能系统、桌面与浏览器操控、远程控制——让想法可以被编排、执行，也可以被看见。</p>
+            <div class="hero-meta" aria-label="OAP 产品特征">
+              <span>Local-first</span>
+              <span>Agent × Pipeline</span>
+              <span>Memory & Knowledge</span>
+              <span>Remote-ready</span>
+            </div>
+            <div class="cta-row">
+              <a class="github-cta" href="https://github.com/KawasakiKusako/open-agent-pipeline" target="_blank" rel="noreferrer">
+                <span>进入仓库</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a class="github-cta" href="https://kawasakikusako.github.io/generalExp/oap-remote/connect.html" target="_blank" rel="noreferrer">
+                <span>在线使用</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="system" aria-labelledby="system-title">
+          <div class="section-heading reveal">
+            <div>
+              <div class="section-marker">CORE SYSTEM / FIVE LAYERS</div>
+              <h2 id="system-title">Core 到 Runtime，每一层都可替换。</h2>
+            </div>
+            <p>OAP 把一次工作的边界、能力、连接、流程与执行环境拆成五层。它们彼此协作，也都可以独立替换。</p>
+          </div>
+          <div class="system-grid">
+            <article class="system-item reveal">
+              <div class="number"><span>01 / DEFINE</span><i aria-hidden="true"></i></div>
+              <h3>Core</h3>
+              <p>定义上下文、边界与工作单元，让系统知道每次执行从哪里开始。</p>
+            </article>
+            <article class="system-item reveal">
+              <div class="number"><span>02 / EXTEND</span><i aria-hidden="true"></i></div>
+              <h3>Skill</h3>
+              <p>把可复用的能力装进 Agent，让知识、工具与方法可以持续扩展。</p>
+            </article>
+            <article class="system-item reveal">
+              <div class="number"><span>03 / CONNECT</span><i aria-hidden="true"></i></div>
+              <h3>Provider</h3>
+              <p>连接模型与外部服务，在不同 Provider 之间保持清晰、可替换的接口。</p>
+            </article>
+            <article class="system-item reveal">
+              <div class="number"><span>04 / COMPOSE</span><i aria-hidden="true"></i></div>
+              <h3>Pipeline</h3>
+              <p>把节点、依赖与数据流组织成顺序、并行或条件执行的工作路径。</p>
+            </article>
+            <article class="system-item reveal">
+              <div class="number"><span>05 / EXECUTE</span><i aria-hidden="true"></i></div>
+              <h3>Runtime</h3>
+              <p>接入文件、网络与数据库，让计划在受控环境里真正产生结果。</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="flow-band" id="flow" aria-labelledby="flow-title">
+          <div class="flow-inner">
+            <div class="section-marker reveal">THE WORKING LOOP</div>
+            <h2 id="flow-title" class="reveal">从意图，到结果。</h2>
+            <p class="flow-intro reveal">每一次执行都保留清晰的结构：先理解，再组合；先审核，再行动。复杂任务因此变得可以掌握。</p>
+            <div class="flow-list">
+              <article class="flow-step reveal">
+                <div class="step-line"><b>01</b><span>INTENT</span></div>
+                <h3>描述目标</h3>
+                <p>从自然语言开始，让 Agent 理解你真正想完成的工作。</p>
+              </article>
+              <article class="flow-step reveal">
+                <div class="step-line"><b>02</b><span>STRUCTURE</span></div>
+                <h3>编排流程</h3>
+                <p>把模型、工具与技能组合成可读、可复用的 Pipeline。</p>
+              </article>
+              <article class="flow-step reveal">
+                <div class="step-line"><b>03</b><span>APPROVAL</span></div>
+                <h3>审核行动</h3>
+                <p>在真正执行前看见权限、步骤与数据流，保留最终决定权。</p>
+              </article>
+              <article class="flow-step reveal">
+                <div class="step-line"><b>04</b><span>OUTPUT</span></div>
+                <h3>得到结果</h3>
+                <p>在 Runtime 中执行并追踪产出，让每一步都有迹可循。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section surfaces-section" id="surfaces" aria-labelledby="surfaces-title">
+          <div class="section-heading reveal">
+            <div>
+              <div class="section-marker">THREE SURFACES</div>
+              <h2 id="surfaces-title">同一个系统，三种进入方式。</h2>
+            </div>
+            <p>从对话到工作流，再到文件与代码，OAP 把不同的工作方式放在同一条连续的路径上。</p>
+          </div>
+          <div class="surface-list">
+            <article class="surface-row reveal">
+              <span class="surface-index">A / 01</span>
+              <div>
+                <h3>Conversation</h3>
+                <div class="surface-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+              </div>
+              <p>用自然语言提出目标，与 Agent 一起探索问题、生成计划，并在需要时重新规划。</p>
+            </article>
+            <article class="surface-row reveal">
+              <span class="surface-index">P / 02</span>
+              <div>
+                <h3>Pipeline</h3>
+                <div class="surface-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+              </div>
+              <p>用结构化的方式查看节点、依赖与数据传递，让复杂的执行逻辑变得清楚。</p>
+            </article>
+            <article class="surface-row reveal">
+              <span class="surface-index">W / 03</span>
+              <div>
+                <h3>Workbench</h3>
+                <div class="surface-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+              </div>
+              <p>回到文件、代码与输出本身，在一个面向创作的工作台里完成最后一公里。</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="principles" aria-labelledby="principles-title">
+          <canvas class="about-matrix" id="about-canvas" aria-hidden="true"></canvas>
+          <div class="principles-inner">
+            <div class="principles-heading reveal">
+              <div class="principles-heading-copy">
+                <img class="principles-logo" src="web_assets/oap_gray.svg" alt="OAP 产品图标" />
+                <h2 id="principles-title">为可控的创造力而设计。</h2>
+              </div>
+              <p>系统的边界很明确：让 AI 更有能力，也让人始终知道它正在做什么。</p>
+            </div>
+            <div class="principle-grid">
+              <article class="principle reveal">
+                <span class="principle-index">01 / LOCAL</span>
+                <h3>本地优先</h3>
+                <p>数据、凭据与执行环境优先留在自己的设备与工作区中。</p>
+              </article>
+              <article class="principle reveal">
+                <span class="principle-index">02 / PLUGINS</span>
+                <h3>一切皆可插拔</h3>
+                <p>Provider、Skill、Runtime 与工具都可以成为可替换的组件。</p>
+              </article>
+              <article class="principle reveal">
+                <span class="principle-index">03 / CONTROL</span>
+                <h3>行动可审查</h3>
+                <p>计划、权限、执行与结果都保持可见，让自动化不再是黑箱。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="site-footer-inner">
+          <img class="footer-logo" src="web_assets/oap_gray.svg" alt="OAP 产品图标" />
+          <span>Open Agent Pipeline · local-first creation environment</span>
+          <span>github.com/kawasakikusako/open-agent-pipeline</span>
+        </div>
+      </footer>
     </div>
-    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">☀</button>
-  </div>
-</nav>
 
-<!-- ═══════ HERO ═══════ -->
-<section class="hero">
-  <div class="container">
-    <h1 class="s-title reveal d2">From <em class="c-t">idea</em> to <em class="c-m">manuscript</em>.<br>Research pipeline, <em class="c-t">AI sandbox</em>,<br>peer review — in one place.</h1>
-    <p class="s-sub reveal d3" style="margin:0 auto">The open-source AI workbench for academic writing. Runs on Claude Code CLI, with <span class="c-t">your keys</span>. Research, write, review, revise — all in a <span class="c-m">visual web platform</span>, not a terminal.</p>
-    <div class="grad reveal d4"></div>
-    <div class="tag-row reveal d4">
-      <span class="tag">10-stage pipeline</span><span class="tag">AI sandbox</span><span class="tag">peer review</span><span class="tag">model-agnostic</span><span class="tag">local-first</span>
-    </div>
-  </div>
-</section>
+    <script>
+      const canvas = document.querySelector('#signal-canvas')
+      const context = canvas.getContext('2d')
+      const aboutCanvas = document.querySelector('#about-canvas')
+      const aboutContext = aboutCanvas.getContext('2d')
+      const baseCanvas = document.createElement('canvas')
+      const baseContext = baseCanvas.getContext('2d')
+      const glyphs = ['O', 'O', 'O', 'O', '0', '0', '#', '◆', '·', '○', '[]', '01', '/', '\\', '*']
+      const glyphFontFamily = '"Cascadia Mono", "SFMono-Regular", Consolas, monospace'
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const fieldColumns = 72
+      const fieldRows = 48
+      const tau = Math.PI * 2
+      let width = 0
+      let height = 0
+      let deviceScale = 1
+      let points = []
+      let dynamicPoints = []
+      let animationFrame = 0
+      let lastFrame = -Infinity
+      let pointerX = 0.5
+      let pointerY = 0.5
+      let pointerEnergy = 0
+      let pointerActive = false
+      let rippleX = 0.5
+      let rippleY = 0.5
+      let rippleStarted = -Infinity
+      let fieldGrid = new Float32Array(0)
+      let aboutWidth = 0
+      let aboutHeight = 0
+      let aboutScale = 1
+      let aboutPoints = []
+      let aboutDynamicPoints = []
+      let aboutAnimationFrame = 0
+      let aboutLastFrame = -Infinity
 
-<!-- ═══════ STAT ROW ═══════ -->
-<section style="padding-top:0">
-  <div class="container">
-    <div class="stat-row reveal">
-      <div class="stat-cell"><div class="front"><div class="n" style="color:var(--accent-yellow)">10</div><div class="l">Pipeline Stages</div></div><div class="back"><div class="b-text">Deterministic state machine from research to final manuscript</div></div></div>
-      <div class="stat-cell"><div class="front"><div class="n c-t">11</div><div class="l">Data Tables</div></div><div class="back"><div class="b-text">SQLite with SQLAlchemy 2.0 async, auto-migration on startup</div></div></div>
-      <div class="stat-cell"><div class="front"><div class="n c-m">50+</div><div class="l">API Endpoints</div></div><div class="back"><div class="b-text">REST + SSE streaming, full CRUD for projects, sandbox, fixup</div></div></div>
-      <div class="stat-cell"><div class="front"><div class="n">22</div><div class="l">Tests</div></div><div class="back"><div class="b-text">pytest suite covering full state machine, e2e pipeline, revision loops</div></div></div>
-    </div>
-  </div>
-</section>
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
-<!-- ═══════ MODULES ═══════ -->
-<section id="modules">
-  <div class="container">
-    <div class="s-label reveal">Three Workbenches</div>
-    <h2 class="s-title reveal d1">Every stage of academic<br>production, <em class="c-t">from exploration</em><br>to submission.</h2>
-    <div class="grad reveal d2" style="width:120px"></div>
-  </div>
-  <div class="container" style="margin-top:44px">
-    <div class="mod-grid">
-      <div class="mod-card reveal d1"><div class="mod-inner"><div class="bar y"></div><h3>Paper Workflow</h3><p>A deterministic <span class="c-t">10-stage state machine</span>: deep research, writing, integrity checks, simulated peer review, revision, re-review, final check, finalization. Versioned artifacts with checkpoint gates between every stage.</p><div class="pills"><span class="pill">RESEARCH</span><span class="pill">WRITE</span><span class="pill">INTEGRITY</span><span class="pill">REVIEW</span><span class="pill">REVISE</span><span class="pill">FINALIZE</span></div></div></div>
-      <div class="mod-card reveal d2"><div class="mod-inner"><div class="bar t"></div><h3>Data Sandbox</h3><p>Pick a local folder, chat with Claude, edit files with <span class="c-t">syntax highlighting</span> (Python, R, JSON, Markdown — 25+ formats), run Python scripts, preview generated charts. Resizable three-pane workspace.</p><div class="pills"><span class="pill">CHAT</span><span class="pill">CODE RUNNER</span><span class="pill">25+ FORMATS</span><span class="pill">IMAGE PREVIEW</span></div></div></div>
-      <div class="mod-card reveal d3"><div class="mod-inner"><div class="bar c"></div><h3>Review Workbench</h3><p>Pre-submission <span class="c-m">audit</span> with configurable reviewers, difficulty, and editorial standards. <span class="c-m">Revision</span> with auto-generated manuscript and response letter. Audit→revision chains with automatic file output.</p><div class="pills"><span class="pill">AUDIT</span><span class="pill">REVISE</span><span class="pill">CHAIN</span><span class="pill">FILE OUTPUT</span><span class="pill">TODO LIST</span></div></div></div>
-    </div>
-  </div>
-</section>
+      function hash2d(x, y, offset = 0) {
+        const value = Math.sin(x * 127.1 + y * 311.7 + offset * 74.3) * 43758.5453123
+        return value - Math.floor(value)
+      }
 
-<!-- ═══════ PIPELINE — Timeline ═══════ -->
-<section id="pipeline" style="background:var(--bg-warm);transition:background .5s var(--ease-out)">
-  <div class="container">
-    <div class="s-label reveal">Pipeline Architecture</div>
-    <h2 class="s-title reveal d1">A <em class="c-m">deterministic</em> state<br>machine. <em class="c-t">No black boxes</em>.</h2>
-    <div class="grad reveal d2" style="width:120px;margin-bottom:24px"></div>
+      function smoothstep(value) {
+        return value * value * (3 - 2 * value)
+      }
 
-    <div class="frame-box reveal d3" style="margin-bottom:36px">
-      <div class="f-title">How it works</div>
-      <div class="f-body">Each stage spawns a <span class="c-m">Claude Code CLI headless</span> call. The stage prompt is assembled from the skill definition, research topic, and prior artifacts. The model writes outputs to a staging directory — the platform reads them back, hashes content, and versions them in the <span class="c-t">artifact ledger</span>. Checkpoints between stages let you confirm results before proceeding. Integrity failures <span class="c-m">auto-retry</span>.</div>
-    </div>
+      function buildFieldGrid() {
+        fieldGrid = new Float32Array(fieldColumns * fieldRows)
+        for (let row = 0; row < fieldRows; row += 1) {
+          for (let column = 0; column < fieldColumns; column += 1) {
+            const broad = hash2d(column, row, 1)
+            const secondary = hash2d(column, row, 7)
+            fieldGrid[row * fieldColumns + column] = broad * 0.72 + secondary * 0.28
+          }
+        }
+      }
 
-    <div class="timeline reveal d3">
-      <div class="tl-item"><div class="tl-num">STAGE 01</div><div class="tl-title">Research</div><div class="tl-desc">Deep research with methodology blueprint, RQ brief, and devil's advocate review.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 02</div><div class="tl-title">Write</div><div class="tl-desc">Full paper draft generation from research synthesis and annotated bibliography.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 03</div><div class="tl-title">Integrity Check</div><div class="tl-desc">Automated DOI verification via Crossref. Failed citations trigger retry loop ≤3 rounds.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 04</div><div class="tl-title">Peer Review</div><div class="tl-desc">Simulated review with configurable reviewer count, difficulty, and editorial standards. Structured report output.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 05</div><div class="tl-title">Revise</div><div class="tl-desc">Revision based on reviewer feedback with response letter and revision roadmap.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 06–07</div><div class="tl-title">Re-Review &amp; Re-Revise</div><div class="tl-desc">Second review loop. Capped at 2 revision rounds total.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 08</div><div class="tl-title">Final Integrity</div><div class="tl-desc">Final citation and completeness check before finalization.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 09</div><div class="tl-title">Finalize</div><div class="tl-desc">Materialize final paper. Pandoc/tectonic for DOCX/PDF output when available.</div></div>
-      <div class="tl-item"><div class="tl-num">STAGE 10</div><div class="tl-title">Process Summary</div><div class="tl-desc">Executive summary of the entire pipeline run — tokens, costs, decisions, artifacts.</div></div>
-    </div>
-  </div>
-</section>
+      function sampleField(x, y, offsetX = 0, offsetY = 0) {
+        const wrappedX = ((x + offsetX) % 1 + 1) % 1
+        const wrappedY = ((y + offsetY) % 1 + 1) % 1
+        const gridX = wrappedX * fieldColumns
+        const gridY = wrappedY * fieldRows
+        const left = Math.floor(gridX) % fieldColumns
+        const top = Math.floor(gridY) % fieldRows
+        const right = (left + 1) % fieldColumns
+        const bottom = (top + 1) % fieldRows
+        const mixX = smoothstep(gridX - Math.floor(gridX))
+        const mixY = smoothstep(gridY - Math.floor(gridY))
+        const topValue = fieldGrid[top * fieldColumns + left] * (1 - mixX) + fieldGrid[top * fieldColumns + right] * mixX
+        const bottomValue = fieldGrid[bottom * fieldColumns + left] * (1 - mixX) + fieldGrid[bottom * fieldColumns + right] * mixX
+        return topValue * (1 - mixY) + bottomValue * mixY
+      }
 
-<!-- ═══════ FEATURES ═══════ -->
-<section id="features">
-  <div class="container">
-    <div class="s-label reveal">Core Features</div>
-    <h2 class="s-title reveal d1">Built for <em class="c-m">researchers</em>,<br>not for <em class="c-t">engineers</em>.</h2>
-    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
-    <div class="feat-grid">
-      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>Checkpoint System</h3><p>Stage confirmation gates. Mandatory checkpoints cannot be skipped. Integrity failures auto-retry up to 3 rounds.</p></div>
-      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Artifact Ledger</h3><p>13 schemas &times; SHA-256 hashing &times; Material Passport. Downstream artifacts auto-flagged STALE on upstream edits.</p></div>
-      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-magenta)"></span>Model Routing</h3><p>Agent &gt; mode &gt; stage &gt; default. Passes --model and --effort directly to Claude Code CLI. Switch providers anytime.</p></div>
-      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>SSE Real-time Logs</h3><p>6 event types streamed live. 15-second heartbeat. Full replay on reconnect. Color-coded log viewer.</p></div>
-      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Budget Transparency</h3><p>Token and cost estimates at creation. Real-time actual vs. estimated. Hard cap protection.</p></div>
-      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-magenta)"></span>Data Interop</h3><p>Workflows mount sandbox data sources. Stage execution auto-injects sandbox file context. VSCode file sync.</p></div>
-      <div class="feat-card reveal d1"><h3><span class="accent-dot" style="background:var(--accent-yellow)"></span>Custom Prompts</h3><p>Four independent system prompt slots: sandbox, project chat, research stage, and writing stage.</p></div>
-      <div class="feat-card reveal d2"><h3><span class="accent-dot" style="background:var(--accent-teal)"></span>Python Env Detection</h3><p>Auto-scans PATH, conda environments, and common installs. One-click selection for code execution.</p></div>
-    </div>
-  </div>
-</section>
+      function getOrganicValues(x, y, seconds, point) {
+        const driftX = seconds * 0.018
+        const driftY = -seconds * 0.014
+        const warp = sampleField(x * 0.16 + y * 0.09, y * 0.14 - x * 0.06, driftX, driftY)
+        const warpedX = x + (warp - 0.5) * 0.18
+        const warpedY = y + (sampleField(x * 0.12 - y * 0.07, y * 0.18 + x * 0.08, -driftY, driftX) - 0.5) * 0.16
+        const cloud = sampleField(warpedX * 0.14, warpedY * 0.11, driftX * 0.9, driftY * 0.75)
+        const eddies = sampleField(warpedX * 0.34 + warpedY * 0.11, warpedY * 0.28 - warpedX * 0.09, -seconds * 0.035, seconds * 0.026)
+        const detail = sampleField(warpedX * 0.78 - warpedY * 0.18, warpedY * 0.64 + warpedX * 0.2, seconds * 0.055, -seconds * 0.042)
+        const contour = Math.sin(
+          (warpedX * 1.65 + warpedY * 1.05 + cloud * 1.85 + eddies * 0.82) * tau + seconds * 0.38,
+        )
+        const fold = Math.sin(
+          (warpedY * 1.92 - warpedX * 0.92 + cloud * 1.4 + detail * 0.75) * tau - seconds * 0.27,
+        )
+        const cloudBand = smoothstep(clamp((cloud - 0.28) * 2.2, 0, 1))
+        const eddyBand = smoothstep(clamp((eddies - 0.34) * 2.5, 0, 1))
+        const contourBand = smoothstep(clamp((contour + 0.45) * 0.72, 0, 1))
+        const foldBand = smoothstep(clamp((fold + 0.36) * 0.7, 0, 1))
+        const mass = clamp(cloudBand * 0.52 + eddyBand * 0.2 + contourBand * 0.16 + foldBand * 0.12, 0, 1)
+        const ridge = Math.pow(clamp((contour + 1) / 2, 0, 1), 2.5) * (0.45 + cloud * 0.55)
+        const texture = (detail - 0.5) * 0.16 + (point.grain - 0.5) * 0.12
+        return { mass, ridge, texture }
+      }
 
-<!-- ═══════ COMPARE ═══════ -->
-<section id="compare" style="background:var(--bg-warm);transition:background .5s var(--ease-out)">
-  <div class="container">
-    <div class="s-label reveal">Why a Web Platform</div>
-    <h2 class="s-title reveal d1">The CLI is <em class="c-m">powerful</em>.<br>The web makes it <em class="c-t">manageable</em>.</h2>
-    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
-    <div class="reveal d3">
-    <table class="cmp-table">
-      <thead><tr><th>Capability</th><th>Raw CLI</th><th>This Platform</th></tr></thead>
-      <tbody>
-        <tr><td>Pipeline orchestration</td><td>Manual, one session at a time</td><td class="check">10-stage automatic state machine</td></tr>
-        <tr><td>Artifact versioning</td><td>Files in temp directories</td><td class="check">13 schemas &times; SHA-256 &times; Passport</td></tr>
-        <tr><td>Stage confirmation</td><td>None</td><td class="check">Checkpoint gates &times; mandatory</td></tr>
-        <tr><td>Real-time monitoring</td><td>Terminal scroll</td><td class="check">SSE event stream &times; log viewer</td></tr>
-        <tr><td>Budget awareness</td><td>Surprise at end of month</td><td class="check">Estimate + real-time reconciliation</td></tr>
-        <tr><td>Data sandbox</td><td>Separate chat sessions</td><td class="check">Integrated AI sandbox &times; code runner</td></tr>
-        <tr><td>Review workflow</td><td>Copy-paste between chats</td><td class="check">Audit &rarr; revise chain &times; auto output</td></tr>
-        <tr><td>Multi-project management</td><td>Scattered terminals</td><td class="check">Dashboard &times; import/export &times; mounting</td></tr>
-      </tbody>
-    </table>
-    </div>
-  </div>
-</section>
+      function setupContext(target, targetCanvas, fontSize) {
+        targetCanvas.width = Math.round(width * deviceScale)
+        targetCanvas.height = Math.round(height * deviceScale)
+        target.setTransform(deviceScale, 0, 0, deviceScale, 0, 0)
+        target.textAlign = 'center'
+        target.textBaseline = 'middle'
+        target.font = `${fontSize}px ${glyphFontFamily}`
+      }
 
-<!-- ═══════ TECH ═══════ -->
-<section>
-  <div class="container">
-    <div class="s-label reveal">Tech Stack</div>
-    <h2 class="s-title reveal d1"><em class="c-t">Local-first.</em> Zero external<br>services. <em class="c-t">Your keys</em>,<br>your machine.</h2>
-    <div class="grad reveal d2" style="width:120px;margin-bottom:32px"></div>
-    <div class="tech-grid reveal d3">
-      <span class="tech-item">Python 3.12</span><span class="tech-item">FastAPI</span><span class="tech-item">SQLAlchemy 2.0</span>
-      <span class="tech-item">SQLite</span><span class="tech-item">React 19</span><span class="tech-item">TypeScript</span>
-      <span class="tech-item">Vite 8</span><span class="tech-item">CodeMirror 6</span><span class="tech-item">Claude Code CLI</span>
-      <span class="tech-item">SSE</span><span class="tech-item">pytest</span><span class="tech-item">conda</span>
-    </div>
-  </div>
-</section>
+      function drawBaseGrid() {
+        baseContext.clearRect(0, 0, width, height)
+        points.forEach((point) => {
+          const alpha = 0.018 + (point.seed % 5) * 0.005
+          baseContext.fillStyle = `rgba(194, 233, 255, ${alpha})`
+          baseContext.fillText(glyphs[point.baseGlyph], point.x, point.y)
+        })
+      }
 
-<!-- ═══════ INSTALL ═══════ -->
-<section id="install">
-  <div class="container">
-    <div class="s-label reveal">Get Started</div>
-    <h2 class="s-title reveal d1"><em class="c-m">Three</em> commands.<br>That's it.</h2>
-    <div class="grad reveal d2" style="width:120px;margin-bottom:24px"></div>
-    <div class="reveal d3">
-    <p style="font-size:14px;color:var(--fg-muted);margin-bottom:20px">Prerequisites: Python 3.11+ &middot; Node.js 18+ &middot; Claude Code CLI (<code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:2px 8px;border-radius:6px;border:1px solid var(--border)">npm i -g @anthropic-ai/claude-code</code>)</p>
-    <div class="code-block">
-      <span class="c"># 1) Install Python dependencies</span><br>pip install -r backend/requirements.txt<br><br>
-      <span class="c"># 2) Install frontend dependencies</span><br>cd frontend && npm install<br><br>
-      <span class="c"># 3) Start both servers</span><br>cd backend && PYTHONUTF8=1 python -m uvicorn app.main:app --port 8000<br>cd frontend && npm run dev<br><br>
-      <span class="c"># Open &rarr;</span> http://localhost:5173
-    </div>
-    <p style="font-size:12px;color:var(--fg-subtle);margin-top:12px">Windows: prepend <code style="font-family:var(--font-mono)">PYTHONUTF8=1</code> to all Python commands.</p>
-    </div>
-  </div>
-</section>
+      function resizeCanvas() {
+        const bounds = canvas.getBoundingClientRect()
+        width = bounds.width
+        height = bounds.height
+        deviceScale = Math.min(window.devicePixelRatio || 1, 2)
+        const gap = clamp(Math.min(width / 128, height / 104), 6.5, 10.5)
+        const fontSize = clamp(gap * 0.86, 6, 9.5)
+        const columns = Math.ceil(width / gap) + 1
+        const rows = Math.ceil(height / gap) + 1
+        points = []
+        dynamicPoints = []
+        setupContext(context, canvas, fontSize)
+        setupContext(baseContext, baseCanvas, fontSize)
 
-<!-- ═══════ CTA ═══════ -->
-<section class="cta">
-  <div class="reveal">
-  <p style="font-size:14px;color:var(--fg-muted);margin-bottom:24px">GPLv3 licensed &middot; Open source &middot; Free forever</p>
-  <a class="btn" href="https://github.com/KawasakiKusako/openAcademicPipeline">View on GitHub</a>
-  <a class="btn-ghost" href="https://github.com/KawasakiKusako/openAcademicPipeline#readme">Documentation</a>
-  </div>
-</section>
+        for (let row = 0; row < rows; row += 1) {
+          for (let column = 0; column < columns; column += 1) {
+            const x = column * gap
+            const y = row * gap
+            const point = {
+              x,
+              y,
+              seed: (row * 19 + column * 7) % 101,
+              phase: hash2d(column, row, 13) * tau,
+              grain: hash2d(column, row, 23),
+              glyphRate: 0.65 + hash2d(column, row, 31) * 0.8,
+              baseGlyph: Math.floor(hash2d(column, row, 41) * glyphs.length),
+            }
+            points.push(point)
+            if ((row + column) % 2 === 0) dynamicPoints.push(point)
+          }
+        }
+        buildFieldGrid()
+        drawBaseGrid()
+        renderSignal(0)
+      }
 
-<!-- ═══════ FOOTER ═══════ -->
-<footer>
-  <div class="fbar"></div>
-  <p>Kawasaki Academic Pipeline v0.1.0</p>
-  <p style="font-family:var(--font-mono);font-size:12px">Built with FastAPI + React + Claude Code CLI</p>
-  <p style="margin-top:16px">&copy; 2026 Kawasaki Kusako. All rights reserved.</p>
-</footer>
+      function updatePointer(event) {
+        const bounds = canvas.getBoundingClientRect()
+        pointerX = clamp((event.clientX - bounds.left) / bounds.width, 0, 1)
+        pointerY = clamp((event.clientY - bounds.top) / bounds.height, 0, 1)
+        pointerActive = true
+        pointerEnergy = 1
+      }
 
-<script>
-(function(){
-var h=document.documentElement,b=document.getElementById('themeBtn');
-var s=localStorage.getItem('kp-theme');
-if(s)h.dataset.theme=s;else if(window.matchMedia('(prefers-color-scheme:dark)').matches)h.dataset.theme='dark';
-function u(){b.textContent=h.dataset.theme==='dark'?'◐':'☀'}u();
-window.toggleTheme=function(){h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('kp-theme',h.dataset.theme);u();document.querySelector('meta[name=theme-color]').content=h.dataset.theme==='dark'?'#0c0c0b':'#f9f8f5'};
-window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(e){if(!localStorage.getItem('kp-theme')){h.dataset.theme=e.matches?'dark':'light';u()}});
-})();
-(function(){
-var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -36px 0px'});
-document.querySelectorAll('.reveal').forEach(function(e){o.observe(e)});
-var g=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){var t=e.target;t.style.animation='none';t.offsetHeight;t.style.animation='gradIn .8s cubic-bezier(.2,.7,.2,1) both'}})},{threshold:.3});
-document.querySelectorAll('.grad').forEach(function(e){g.observe(e)});
-})();
-(function(){
-var o=document.querySelectorAll('.orb');if(!o.length)return;
-document.addEventListener('mousemove',function(e){var x=(e.clientX/window.innerWidth-.5)*24,y=(e.clientY/window.innerHeight-.5)*24;o[0].style.transform='translate('+x*.6+'px,'+y*.6+'px)';o[1].style.transform='translate('+(-x*.4)+'px,'+(-y*.4)+'px)';o[2].style.transform='translate(-50%,-50%) translate('+x*.3+'px,'+y*.3+'px)'});
-})();
+      function triggerRipple(event) {
+        updatePointer(event)
+        rippleX = pointerX
+        rippleY = pointerY
+        rippleStarted = performance.now()
+      }
 
-// ── 3D Tilt on module cards ──
-(function(){
-  var cards=document.querySelectorAll('.mod-card');
-  cards.forEach(function(card){
-    card.addEventListener('mousemove',function(e){
-      var r=card.getBoundingClientRect();
-      var x=(e.clientX-r.left)/r.width-.5;
-      var y=(e.clientY-r.top)/r.height-.5;
-      card.style.transform='perspective(1200px) rotateY('+(x*8)+'deg) rotateX('+(-y*6)+'deg)';
-    });
-    card.addEventListener('mouseleave',function(){
-      card.style.transform='perspective(1200px) rotateY(0deg) rotateX(0deg)';
-    });
-  });
-})();
-</script>
-</body>
+      function renderSignal(timestamp = 0) {
+        if (!reducedMotion && timestamp - lastFrame < 32) {
+          animationFrame = requestAnimationFrame(renderSignal)
+          return
+        }
+        lastFrame = timestamp
+        const seconds = timestamp / 1000
+        if (pointerActive) {
+          pointerEnergy = Math.max(pointerEnergy * 0.96, 0.24)
+        } else {
+          pointerEnergy *= 0.9
+        }
+        context.clearRect(0, 0, width, height)
+        context.drawImage(baseCanvas, 0, 0, width, height)
+
+        dynamicPoints.forEach((point) => {
+          const pointX = point.x / width
+          const pointY = point.y / height
+          const organic = getOrganicValues(pointX, pointY, seconds, point)
+          const pointerDistance = Math.hypot(pointX - pointerX, pointY - pointerY)
+          const pointerWave = pointerEnergy * clamp(1 - pointerDistance * 2.8, 0, 1)
+            * ((Math.sin(seconds * 7.2 - pointerDistance * 38 + point.phase) + 1) / 2)
+          const rippleAge = (timestamp - rippleStarted) / 1000
+          const rippleDistance = Math.hypot(pointX - rippleX, pointY - rippleY)
+          const rippleWave = rippleAge > 0 && rippleAge < 2.2
+            ? clamp(1 - rippleAge / 2.2, 0, 1)
+              * clamp(1 - Math.abs(rippleDistance - rippleAge * 0.42) * 8, 0, 1)
+            : 0
+          const massContrast = smoothstep(clamp((organic.mass - 0.34) * 2.15, 0, 1))
+          const intensity = clamp(0.018 + massContrast * 0.62 + Math.pow(organic.ridge, 1.15) * 0.78 + organic.texture * 0.35 + pointerWave * 0.42 + rippleWave * 0.72, 0, 1)
+          const glyphIndex = point.baseGlyph + Math.floor(seconds * point.glyphRate + organic.ridge * 2 + pointerWave * 3 + rippleWave * 4)
+          const glyph = glyphs[(glyphIndex + glyphs.length) % glyphs.length]
+          const alpha = clamp(0.025 + intensity * 0.72, 0.025, 0.9)
+          const color = point.seed % 43 === 0
+            ? `rgba(243, 201, 95, ${clamp(alpha + 0.1, 0, 0.78)})`
+            : point.seed % 31 === 0
+              ? `rgba(21, 216, 186, ${clamp(alpha + 0.07, 0, 0.74)})`
+              : `rgba(255, 255, 255, ${alpha})`
+          context.fillStyle = color
+          context.fillText(glyph, point.x, point.y)
+        })
+
+        if (!reducedMotion) animationFrame = requestAnimationFrame(renderSignal)
+      }
+
+      function resizeAboutCanvas() {
+        const bounds = aboutCanvas.getBoundingClientRect()
+        aboutWidth = bounds.width
+        aboutHeight = bounds.height
+        aboutScale = Math.min(window.devicePixelRatio || 1, 2)
+        const gap = clamp(Math.min(aboutWidth / 112, aboutHeight / 90), 6.5, 12)
+        const fontSize = clamp(gap * 0.86, 6, 10)
+        const columns = Math.ceil(aboutWidth / gap) + 1
+        const rows = Math.ceil(aboutHeight / gap) + 1
+        aboutCanvas.width = Math.round(aboutWidth * aboutScale)
+        aboutCanvas.height = Math.round(aboutHeight * aboutScale)
+        aboutContext.setTransform(aboutScale, 0, 0, aboutScale, 0, 0)
+        aboutContext.textAlign = 'center'
+        aboutContext.textBaseline = 'middle'
+        aboutContext.font = `${fontSize}px ${glyphFontFamily}`
+        aboutPoints = []
+        aboutDynamicPoints = []
+
+        for (let row = 0; row < rows; row += 1) {
+          for (let column = 0; column < columns; column += 1) {
+            const point = {
+              x: column * gap,
+              y: row * gap,
+              seed: (row * 23 + column * 11) % 101,
+              phase: hash2d(column, row, 53) * tau,
+              grain: hash2d(column, row, 61),
+              glyphRate: 0.4 + hash2d(column, row, 71) * 0.5,
+              baseGlyph: Math.floor(hash2d(column, row, 79) * glyphs.length),
+            }
+            aboutPoints.push(point)
+            if ((row + column) % 2 === 0) aboutDynamicPoints.push(point)
+          }
+        }
+        renderAbout(0)
+      }
+
+      function renderAbout(timestamp = 0) {
+        if (!reducedMotion && timestamp - aboutLastFrame < 48) {
+          aboutAnimationFrame = requestAnimationFrame(renderAbout)
+          return
+        }
+        aboutLastFrame = timestamp
+        const seconds = timestamp / 1000
+        aboutContext.clearRect(0, 0, aboutWidth, aboutHeight)
+        aboutPoints.forEach((point) => {
+          aboutContext.fillStyle = `rgba(255, 255, 255, ${0.035 + (point.seed % 4) * 0.012})`
+          aboutContext.fillText(glyphs[point.baseGlyph], point.x, point.y)
+        })
+        aboutDynamicPoints.forEach((point) => {
+          const pointX = point.x / aboutWidth
+          const pointY = point.y / aboutHeight
+          const organic = getOrganicValues(pointX, pointY, seconds * 0.72, point)
+          const wave = clamp(organic.mass * 0.42 + organic.ridge * 0.58 + organic.texture, 0, 1)
+          const intensity = 0.035 + wave * 0.32
+          const color = point.seed % 23 === 0
+            ? `rgba(12, 123, 237, ${intensity + 0.12})`
+            : point.seed % 31 === 0
+              ? `rgba(243, 201, 95, ${intensity + 0.08})`
+              : `rgba(255, 255, 255, ${intensity})`
+          aboutContext.fillStyle = color
+          aboutContext.fillText(glyphs[(point.baseGlyph + Math.floor(seconds * point.glyphRate + wave * 3)) % glyphs.length], point.x, point.y)
+        })
+        if (!reducedMotion) aboutAnimationFrame = requestAnimationFrame(renderAbout)
+      }
+
+      resizeCanvas()
+      resizeAboutCanvas()
+      if (!reducedMotion) animationFrame = requestAnimationFrame(renderSignal)
+      if (!reducedMotion) aboutAnimationFrame = requestAnimationFrame(renderAbout)
+      window.addEventListener('resize', resizeCanvas)
+      window.addEventListener('resize', resizeAboutCanvas)
+      canvas.addEventListener('pointermove', updatePointer)
+      canvas.addEventListener('pointerdown', triggerRipple)
+      canvas.addEventListener('pointerleave', () => {
+        pointerActive = false
+      })
+      if (reducedMotion) cancelAnimationFrame(animationFrame)
+      if (reducedMotion) cancelAnimationFrame(aboutAnimationFrame)
+
+      const revealItems = document.querySelectorAll('.reveal')
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            revealObserver.unobserve(entry.target)
+          }
+        })
+      }, { threshold: 0.12 })
+      revealItems.forEach((item) => revealObserver.observe(item))
+
+      const sectionLinks = [...document.querySelectorAll('.site-nav a')]
+      const sections = sectionLinks.map((link) => document.querySelector(link.getAttribute('href')))
+      const activeObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          sectionLinks.forEach((link) => link.classList.toggle('is-active', link.getAttribute('href') === '#' + entry.target.id))
+        })
+      }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 })
+      sections.forEach((section) => activeObserver.observe(section))
+      sectionLinks.forEach((link) => {
+        link.addEventListener('click', () => {
+          sectionLinks.forEach((item) => item.classList.toggle('is-active', item === link))
+        })
+      })
+    </script>
+  </body>
 </html>
